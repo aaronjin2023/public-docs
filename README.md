@@ -6,6 +6,12 @@
 
 仓库：https://github.com/aaronjin2023/public-docs
 
+## 已公开资料
+
+- [OpenEC 功能介绍](https://docs.myakuraku.com/projects/openec/)：含 3D 滚动场景和定价交互的完整 HTML 导览。[下载 HTML](projects/openec/index.html)。
+
+介绍页按提供的原始文件完整发布；Google Fonts 和 Three.js 使用其原有外部 CDN，离线下载后这些资源仍需网络连接。首页预览图取自该介绍页的实际 3D 场景。
+
 ## 上传资料
 
 直接在 GitHub 网页选择 **Add file → Upload files**，或通过 Git 推送到 `main`。GitHub Pages 从 `main` 分支根目录发布，提交后会自动更新网站，无需安装构建工具。

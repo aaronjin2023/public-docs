@@ -1,0 +1,1052 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>OpenEC 功能介绍</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Sans+JP:wght@500;700&display=swap">
+<style>
+/* 布局：全屏 three.js 舞台固定在底层，十个章节依次滚过；每章一块说明面板贴左或贴右，3D 物件让到另一侧 */
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --sunk:#F3F1EC; --glass:rgba(255,255,255,.8); --tint:rgba(250,249,246,.75);
+  --ink:#111827; --ink-2:#4B5160; --ink-3:#8C909B; --line:#ECEAE4; --line-2:#DEDBD3;
+  --or:#F2681D; --or-hi:#FF8A3D; --or-deep:#B9470A; --or-soft:#FFF0E6; --or-ink:#9A3505; --on-or:#FFFFFF;
+  --violet:#6D5BD0; --aizome:#4A3AA8; --paper:#E9E3D8;
+  --ok:#15885A; --ok-soft:#E3F5EC; --warn:#B26A00; --warn-soft:#FFF3DB; --bad:#C8372D; --bad-soft:#FDE8E6;
+  --font-display:"Plus Jakarta Sans","Noto Sans SC",sans-serif;
+  --font-body:"Noto Sans SC",-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",sans-serif;
+  --font-jp:"Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --out:cubic-bezier(.16,1,.3,1); --spring:cubic-bezier(.34,1.56,.64,1);
+  --t-xs:12px; --t-s:14px; --t-m:16px; --t-l:clamp(20px,2vw,24px); --t-xl:clamp(30px,3.6vw,46px); --t-xxl:clamp(42px,7vw,96px);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:var(--t-m);line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;background:radial-gradient(120% 90% at 70% 20%,#FFF6EF 0%,var(--bg) 60%)}
+#labels{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.lbl{position:absolute;left:0;top:0;white-space:nowrap;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--ink);background:rgba(255,255,255,.9);border:1px solid var(--line-2);border-radius:999px;padding:3px 10px 3px 8px;display:flex;align-items:center;gap:7px;will-change:transform,opacity;transform-origin:0 50%}
+.lbl::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--or);box-shadow:0 0 10px var(--or)}
+.lbl.bad::before{background:var(--bad);box-shadow:0 0 10px var(--bad)}
+.lbl.mute{color:var(--ink-2)} .lbl.mute::before{background:var(--ink-3);box-shadow:none}
+.lbl.on{border-color:var(--or);color:var(--or-ink)}
+.lbl small{color:var(--ink-3);font-size:10.5px;letter-spacing:.04em}
+.lbl.big{font-size:12.5px;padding:6px 14px 6px 10px}
+.lbl.stack{border-radius:12px;align-items:flex-start;padding:5px 10px 5px 8px}
+.lbl.stack::before{margin-top:5px}
+.lbl.stack span{display:flex;flex-direction:column;gap:1px}
+.lbl.flip{transform-origin:100% 50%}
+
+/* 顶栏与章节导航 */
+.top{position:fixed;z-index:5;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:14px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));pointer-events:none}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:800;font-size:18px;pointer-events:auto}
+.brand i{width:26px;height:26px;border-radius:8px;background:var(--or);position:relative;display:block;box-shadow:0 8px 20px -6px rgba(242,104,29,.6)}
+.brand i::after{content:"";position:absolute;left:5px;top:4px;bottom:4px;width:5px;border-radius:2px;background:var(--on-or);opacity:.85}
+.brand span{color:var(--ink-3);font-family:var(--font-mono);font-weight:400;font-size:12px;letter-spacing:.06em}
+.hint{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;display:flex;gap:6px;align-items:center}
+.hint kbd{font-family:inherit;border:1px solid var(--line-2);border-radius:5px;padding:0 6px;color:var(--ink-2);background:var(--surface)}
+.progress{position:fixed;z-index:6;left:0;top:0;height:2px;width:100%;transform-origin:0 0;transform:scaleX(0);background:linear-gradient(90deg,var(--or-deep),var(--or-hi))}
+.rail{position:fixed;z-index:5;right:max(18px,env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px}
+.rail a{display:flex;align-items:center;justify-content:flex-end;gap:10px;text-decoration:none;color:var(--ink-3);font-size:12.5px;padding:4px 0;outline-offset:4px}
+.rail a span{opacity:0;transform:translateX(6px);transition:opacity .3s var(--out),transform .3s var(--out)}
+.rail a b{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--ink-3);transition:all .35s var(--spring)}
+.rail:hover a span,.rail a:focus-visible span,.rail a.on span{opacity:1;transform:none}
+.rail a.on{color:var(--ink)} .rail a.on b{background:var(--or);border-color:var(--or);transform:scale(1.35);box-shadow:0 0 12px var(--or)}
+.rail a:focus-visible{outline:2px solid var(--or);border-radius:6px}
+
+/* 章节 */
+main{position:relative;z-index:2}
+.ch{min-height:100vh;display:flex;align-items:center;padding-block:110px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{width:100%;max-width:1320px;margin:0 auto;display:flex;padding-inline:clamp(0px,3vw,48px)}
+.ch[data-side="right"] .wrap{justify-content:flex-end}
+.panel{max-width:540px;min-width:0;background:var(--glass);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);border:1px solid var(--line-2);border-radius:20px;padding:30px 32px;box-shadow:0 1px 2px rgba(17,24,39,.05),0 30px 70px -36px rgba(17,24,39,.28)}
+.ch[data-side="right"] .panel{margin-right:clamp(0px,4vw,60px)}
+.eyebrow{font-family:var(--font-mono);font-size:var(--t-xs);letter-spacing:.14em;color:var(--or);display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.eyebrow::before{content:"";width:22px;height:1.5px;background:var(--or)}
+h2{font-size:var(--t-xl);line-height:1.22;font-weight:900;margin:0 0 16px;text-wrap:balance}
+h2 em{font-style:normal;color:var(--or)}
+h2 > span, h2 > em{display:inline-block}
+.lede{color:var(--ink-2);margin:0 0 18px;max-width:34em}
+.panel p{margin:0 0 14px}
+.list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.list li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline;color:var(--ink-2);font-size:var(--t-s)}
+.list li b{color:var(--ink);font-weight:700}
+.list li::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--or);transform:translateY(-1px)}
+.list.bad li::before{background:var(--bad)}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chip{font-size:12.5px;border:1px solid var(--line-2);border-radius:999px;padding:4px 12px;color:var(--ink-2);background:var(--tint)}
+.chip b{color:var(--ink);font-family:var(--font-display);font-weight:700;margin-right:4px}
+.chip.or{border-color:rgba(242,104,29,.55);color:var(--or-ink);background:var(--or-soft)}
+.chip.ok{border-color:rgba(60,203,138,.45);color:var(--ok);background:var(--ok-soft)}
+.chip.warn{border-color:rgba(242,179,71,.45);color:var(--warn);background:var(--warn-soft)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:6px 0 16px}
+.cell{border:1px solid var(--line-2);border-radius:14px;padding:12px 14px;background:var(--tint);min-width:0}
+.cell .k{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);letter-spacing:.08em}
+.cell .v{font-family:var(--font-display);font-weight:800;font-size:28px;line-height:1.2;font-variant-numeric:tabular-nums}
+.cell .v small{font-size:13px;color:var(--ink-3);font-weight:600;margin-left:3px}
+.cell.bad .v{color:var(--bad)} .cell.or .v{color:var(--or)}
+.note{font-size:12.5px;color:var(--ink-3);margin:12px 0 0}
+
+/* 开场 */
+.hero .wrap{flex-direction:column;justify-content:center}
+.hero .eyebrow{margin-bottom:22px}
+.hero h1{font-size:var(--t-xxl);line-height:1.08;font-weight:900;margin:0 0 26px;max-width:9.6em;text-wrap:balance}
+.hero h1 .w{display:inline-block;animation:wIn 1.1s var(--out) both}
+.hero h1 .or{color:var(--or)}
+.hero h1 .jp{font-family:var(--font-jp)}
+.hero .lede{font-size:clamp(16px,1.4vw,19px);max-width:30em;animation:wIn 1.1s .5s var(--out) both}
+.hero .chips{animation:wIn 1.1s .7s var(--out) both}
+.cue{margin-top:44px;display:flex;align-items:center;gap:12px;color:var(--ink-3);font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;animation:wIn 1.1s .9s var(--out) both}
+.cue i{width:22px;height:34px;border:1.5px solid var(--ink-3);border-radius:12px;position:relative}
+.cue i::after{content:"";position:absolute;left:50%;top:7px;width:3px;height:7px;border-radius:2px;background:var(--or);transform:translateX(-50%);animation:cue 1.8s var(--out) infinite}
+@keyframes cue{0%{transform:translate(-50%,0);opacity:1}80%{transform:translate(-50%,11px);opacity:0}100%{opacity:0}}
+@keyframes wIn{from{opacity:0;transform:translateY(28px);filter:blur(8px)}}
+
+/* 定价计算 */
+.calc{display:grid;gap:14px;margin-top:4px}
+.calc label{display:flex;justify-content:space-between;align-items:baseline;font-size:var(--t-s);color:var(--ink-2)}
+.calc label output{font-family:var(--font-display);font-weight:800;font-size:22px;color:var(--ink)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:6px;background:linear-gradient(90deg,var(--or) var(--p,40%),var(--line-2) var(--p,40%))}
+input[type=range]::-moz-range-track{height:6px;border-radius:6px;background:var(--line-2)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:6px;background:var(--or)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--ink);border:4px solid var(--or);margin-top:-8px;box-shadow:0 0 0 6px rgba(242,104,29,.18);transition:transform .2s var(--spring)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--ink);border:4px solid var(--or)}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.2)}
+input[type=range]:focus-visible{outline:2px solid var(--or);outline-offset:4px;border-radius:8px}
+.rows{display:grid;gap:6px;font-size:var(--t-s)}
+.rows div{display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:center;color:var(--ink-2)}
+.rows i{width:12px;height:12px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(17,24,39,.14)}
+.rows .mono{color:var(--ink)}
+.rows .total i{box-shadow:none}
+.rows .total{border-top:1px solid var(--line-2);padding-top:8px;margin-top:4px;color:var(--ink);font-weight:700}
+.rows .total .mono{font-family:var(--font-display);font-weight:800;font-size:26px;color:var(--or)}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;padding:3px;background:var(--tint)}
+.seg button{border:0;background:transparent;color:var(--ink-2);font:inherit;font-size:13px;padding:4px 14px;border-radius:999px;cursor:pointer;transition:background .25s,color .25s}
+.seg button[aria-pressed="true"]{background:var(--or);color:var(--on-or);font-weight:700}
+.seg button:focus-visible{outline:2px solid var(--or);outline-offset:2px}
+
+/* 核对 */
+.verdict{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 16px}
+.verdict span{font-family:var(--font-jp);font-weight:700;border-radius:10px;padding:6px 14px;border:1.5px solid}
+.v-ok{color:var(--ok);border-color:var(--ok);background:var(--ok-soft)}
+.v-bad{color:var(--bad);border-color:var(--bad);background:var(--bad-soft)}
+.v-unk{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
+
+/* 数字 */
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:4px 0 16px}
+.stat{border:1px solid var(--line-2);border-radius:14px;padding:12px 14px;background:var(--tint);min-width:0}
+.stat .v{font-family:var(--font-display);font-weight:800;font-size:clamp(26px,3vw,36px);line-height:1.1;font-variant-numeric:tabular-nums}
+.stat .k{font-size:12.5px;color:var(--ink-3)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:12.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:10px;height:10px;border-radius:2px;box-shadow:inset 0 0 0 1px rgba(17,24,39,.14)}
+.bar{display:flex;height:10px;border-radius:6px;overflow:hidden;margin:8px 0 10px;gap:2px}
+.bar i{display:block;height:100%}
+
+/* 做法 */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:9px 10px;border-radius:12px;counter-increment:s;color:var(--ink-2);font-size:var(--t-s);transition:background .35s,color .35s}
+.steps li::before{content:counter(s);font-family:var(--font-mono);font-size:12px;width:26px;height:26px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;color:var(--ink-3);transition:all .35s var(--spring)}
+.steps li b{color:var(--ink);display:block;font-size:var(--t-m)}
+.steps li.on{background:var(--or-soft);color:var(--ink-2)}
+.steps li.on::before{background:var(--or);border-color:var(--or);color:var(--on-or);transform:scale(1.1)}
+
+/* 下一站 */
+.next{display:grid;gap:10px;margin:4px 0 16px}
+.next div{display:grid;grid-template-columns:56px 1fr;gap:12px;border:1px solid var(--line-2);border-radius:14px;padding:12px 14px;background:var(--tint)}
+.next div b{white-space:nowrap;font-family:var(--font-display);font-weight:800;font-size:22px;color:var(--or)}
+.next div p{margin:0;font-size:var(--t-s);color:var(--ink-2)}
+.next div p strong{color:var(--ink);display:block;font-size:var(--t-m)}
+.risks{border-top:1px solid var(--line-2);padding-top:14px}
+.risks h3{font-size:var(--t-s);margin:0 0 8px;color:var(--warn);font-weight:700}
+.panel .end{font-family:var(--font-display);font-weight:800;color:var(--ink-3);font-size:12px;letter-spacing:.16em;margin:22px 0 0}
+
+/* 进场：从可见状态出发，只做位移与模糊 */
+.panel.in{animation:pIn .9s var(--out) both}
+.panel.in > *{animation:pIn .9s var(--out) both}
+.panel.in > *:nth-child(2){animation-delay:.06s} .panel.in > *:nth-child(3){animation-delay:.12s} .panel.in > *:nth-child(4){animation-delay:.18s} .panel.in > *:nth-child(5){animation-delay:.24s} .panel.in > *:nth-child(n+6){animation-delay:.3s}
+@keyframes pIn{from{opacity:.25;transform:translateY(22px);filter:blur(6px)}}
+
+@media (max-width:899px){
+  .rail{display:none} .hint{display:none}
+  .ch{align-items:flex-end;padding-block:64vh 40px}
+  .lbl small{display:none}
+  .lbl.mute{display:none}
+  .hero{align-items:flex-end;padding-block:50vh 40px}
+  .hero .wrap{justify-content:flex-start;background:var(--glass);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--line-2);border-radius:20px;padding:24px 20px}
+  .ch[data-side="right"] .panel{margin-right:0}
+  .panel{padding:22px 20px;max-width:none;width:100%}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:420px){ .split{grid-template-columns:1fr} }
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}
+}
+</style>
+
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="labels" aria-hidden="true"></div>
+<div class="progress" id="progress"></div>
+<header class="top">
+  <div class="brand"><i></i>OpenEC<span>功能介绍 · 2026-10-25</span></div>
+  <div class="hint"><kbd>←</kbd><kbd>→</kbd> 切换章节</div>
+</header>
+<nav class="rail" id="rail" aria-label="章节"></nav>
+
+<main>
+<section class="ch hero" id="intro" data-ch="0" data-name="开场">
+  <div class="wrap">
+    <p class="eyebrow">OPENEC · 功能介绍 · 2026-10-25</p>
+    <h1><span class="w">一张</span><span class="w jp or" style="animation-delay:.08s">日版 CD</span><span class="w" style="animation-delay:.16s">，</span><br><span class="w" style="animation-delay:.24s">从东京</span><span class="w" style="animation-delay:.32s">卖到美国</span></h1>
+    <p class="lede">OpenEC 是 eBay 美国站的代发运营台。店里的刊登在这里集中管理；每条刊登对应到 Amazon 日本站的一条具体卖家报价，再按定价规则算出售价。下面按使用顺序介绍现在能用的功能，最后讲接下来要做的。</p>
+    <div class="chips">
+      <span class="chip or"><b>147</b>条刊登已在系统里</span>
+      <span class="chip ok">商品 · 核对 · 选报价 已可用</span>
+      <span class="chip warn">定价 验收中</span>
+      <span class="chip">下一步：写回 eBay</span>
+    </div>
+    <div class="cue"><i></i>向下滚动，或按 → 进入下一章</div>
+  </div>
+</section>
+
+<section class="ch" id="map" data-ch="1" data-side="right" data-name="全流程">
+  <div class="wrap"><div class="panel">
+    <p class="eyebrow">全流程</p>
+    <h2><span>一条刊登，</span><em>从找货到每日维护</em><span>要经过七站</span></h2>
+    <p class="lede">图中轨道上的实心橙环是已经能用的功能，灰环是接下来要做的。CD 沿着轨道走，就是一条刊登在系统里的一生。</p>
+    <ul class="list">
+      <li><span><b>同步刊登</b>：把 eBay 店里的刊登读进来，统一管理。</span></li>
+      <li><span><b>核对身份</b>：确认每条刊登对应 Amazon 日本站的哪个商品（ASIN）。</span></li>
+      <li><span><b>选报价</b>：选定从哪个卖家的哪条报价进货。</span></li>
+      <li><span><b>定价</b>：按规则算出目标售价，算不出就写明原因。</span></li>
+      <li><span><b>写回 eBay、每日维护、选品上架</b>：接下来要做的三件事。</span></li>
+    </ul>
+    <div class="chips" style="margin-top:16px"><span class="chip ok">已可用</span><span class="chip warn">验收中</span><span class="chip">后续</span></div>
+  </div></div>
+</section>
+
+<section class="ch" id="workspace" data-ch="2" data-side="left" data-name="工作台">
+  <div class="wrap"><div class="panel">
+    <p class="eyebrow">工作台 · 已可用</p>
+    <h2><span>登录先看工作台，</span><em>今天的待办一眼可见</em></h2>
+    <p class="lede">用原来的账号和原样的登录页登录。工作台上全是真实数字，每个数字都能点进去直接处理。</p>
+    <ul class="list">
+      <li><span><b>店铺状态</b>：侧栏店铺卡显示 eBay 是否已连接。</span></li>
+      <li><span><b>同步状况</b>：在售刊登数和环形图（已同步 / 不同步 / 未找到 / 失败），点哪一段就跳到商品页的对应筛选。</span></li>
+      <li><span><b>待办</b>：待核对、待选报价、定价拦下的条数，点了直接去处理。</span></li>
+      <li><span><b>数据隔离</b>：每个客户只看得到自己店里的数据；平台管理员只做客户和用户管理，不碰经营数据。</span></li>
+    </ul>
+    <p class="note">环形图的比例只是示意，以系统里的真实数字为准。</p>
+  </div></div>
+</section>
+
+<section class="ch" id="products" data-ch="3" data-side="right" data-name="商品">
+  <div class="wrap"><div class="panel">
+    <p class="eyebrow">商品 · 已可用</p>
+    <h2><span>店里全部刊登，</span><em>在一张表里查、筛、批量处理</em></h2>
+    <p class="lede">图中每一块砖是一条刊登，颜色是类别。现在系统里有 147 条：CD 93、自动铅笔 22、美甲工具 19、DVD / 蓝光 10、其他 3。</p>
+    <ul class="list">
+      <li><span><b>状态标签页</b>：全部 / 待核对 / 待选报价 / 已绑定 / 已结束，各带条数。</span></li>
+      <li><span><b>搜索与筛选</b>：按 Item ID、标题搜索；按多级类别树、标签（同时包含 / 任一）、包装、生效规则、同步状态筛选。刷新页面后筛选和页码都不丢。</span></li>
+      <li><span><b>批量操作</b>：不限于当前页，可“选择全部符合筛选的 N 条”，批量加减标签、登入规则。</span></li>
+      <li><span><b>商品详情</b>：右侧滑出，左边是 eBay 原样详情（图组、变体、描述），右边是售价与同步状态、登入的规则、包装。</span></li>
+      <li><span><b>立即同步</b>：后台读取 eBay，进度可见，结束时报告新增 / 更新 / 失败。读不完整时不改任何数据，也从不删除刊登。</span></li>
+    </ul>
+  </div></div>
+</section>
+
+<section class="ch" id="review" data-ch="4" data-side="left" data-name="核对">
+  <div class="wrap"><div class="panel">
+    <p class="eyebrow">核对 · 已可用</p>
+    <h2><span>左边 eBay，右边 Amazon，</span><em>一条一条确认是不是同一个商品</em></h2>
+    <p class="lede">逐条核对页：左边是刊登，右边是 Amazon 候选，条码和型号一致或不一致都有明显标记。系统和 AI 只给提示，确认按钮由人来按。</p>
+    <div class="verdict" lang="zh"><span class="v-ok">像</span><span class="v-bad">不像</span><span class="v-unk">无法判断</span></div>
+    <ul class="list">
+      <li><span><b>让 AI 看看</b>：AI 比对两边的封面图和条码，给出判断和理由，结果显示在右下角浮窗。</span></li>
+      <li><span><b>详细比对</b>：标题、品牌、型号、条码、版本、成色、图片逐行对照，一致的标绿，不一致的标黄。</span></li>
+      <li><span><b>四种处理</b>：确认、改 ASIN、暂不绑定、排除错误候选，都在居中弹窗里完成。用 ← / → 切换刊登。</span></li>
+      <li><span><b>找候选</b>：没有建议的刊登，按条码、再按关键词去 Amazon 找。查询 Amazon 有每日额度，会先显示要用多少，不够就停下并说明原因。</span></li>
+    </ul>
+  </div></div>
+</section>
+
+<section class="ch" id="offers" data-ch="5" data-side="right" data-name="选报价">
+  <div class="wrap"><div class="panel">
+    <p class="eyebrow">选报价 · 已可用</p>
+    <h2><span>从哪个卖家进货，</span><em>由人来定</em></h2>
+    <p class="lede">确认了对应哪个 ASIN 之后，再选进货的报价。图中每根柱子是一个卖家的报价，高度是价格加运费的合计。</p>
+    <ul class="list">
+      <li><span><b>刷新报价</b>：读取这个 ASIN 当前全部卖家的报价，按合计从低到高排列。</span></li>
+      <li><span><b>不预选</b>：最便宜的不一定是最合适的，系统从不自动选。</span></li>
+      <li><span><b>未知就是未知</b>：价格或运费读不到时显示“未知”，不当成 0，也不当成缺货。</span></li>
+      <li><span><b>绑定</b>：绑定到具体的卖家、成色和配送方式（FBA / FBM）。之后可以换，也可以取消；商品表的“来源”列显示卖家和合计。</span></li>
+    </ul>
+    <p class="note">柱子上的价格和卖家是示例。</p>
+  </div></div>
+</section>
+
+<section class="ch" id="rules" data-ch="6" data-side="left" data-name="定价规则">
+  <div class="wrap"><div class="panel">
+    <p class="eyebrow">定价规则 · 验收中</p>
+    <h2><span>刊登先登入规则，</span><em>再由优先级最高的那条定价</em></h2>
+    <p class="lede">图中五层板是五个优先级。CD 从上往下落，停在它登入的、优先级最高的那一层，由那一层的规则定价。</p>
+    <ul class="list">
+      <li><span><b>筛选只圈候选</b>：规则按店铺、类别、包装、标签圈出符合条件的刊登；刊登要明确“登入”才归这条规则管。</span></li>
+      <li><span><b>优先级</b>：最高 / 高 / 普通 / 低。一条刊登可以登入多条规则，生效的是已启用规则里优先级最高的那条。</span></li>
+      <li><span><b>自由定价兜底</b>：每个客户有一条内置的自由定价，优先级最低，不调价。新同步进来的刊登默认在它下面。</span></li>
+      <li><span><b>预览分三组</b>：生效 / 不生效 / 未绑定。算不出价的逐条写原因，并给处理按钮：去核对、去选报价、设置包装、刷新汇率……</span></li>
+      <li><span><b>即改即算</b>：改参数时预览马上按新参数重算，不保存就不生效。</span></li>
+    </ul>
+  </div></div>
+</section>
+
+<section class="ch" id="pricing" data-ch="7" data-side="right" data-name="定价计算">
+  <div class="wrap"><div class="panel">
+    <p class="eyebrow">定价计算 · 验收中</p>
+    <h2><span>照着现有的 Excel 定价表，</span><em>每个数都能在页面上改</em></h2>
+    <p class="lede">美国以外的买家走日本邮政，按实重计费；美国买家走橙联，按实重和体积重（长×宽×高÷8000）取大，另收美国运费，关税由卖家承担。运费表、包装、费用参数、汇率都在定价页里改。</p>
+    <div class="calc">
+      <label for="jpy">Amazon JP 进货价<output id="jpyOut" class="mono">¥2,480</output></label>
+      <input type="range" id="jpy" min="500" max="6000" step="10" value="2480">
+      <div class="rows" id="rows"></div>
+    </div>
+    <p class="note">售价按区间维护：成本上涨、利润跌破下限时，一次涨回目标；高于目标只提示降价空间；差额太小不改。汇率每天从欧洲央行参考汇率取一次，波动超过缓冲才换。上面的计算用的是简化演示参数（汇率 150、运费 $14、eBay 费率 14.9%、利润目标为进货价加运费的 100%、尾数 .99）。</p>
+  </div></div>
+</section>
+
+<section class="ch" id="maintenance" data-ch="8" data-side="left" data-name="写回与维护">
+  <div class="wrap"><div class="panel">
+    <p class="eyebrow">下一步 · 写回 eBay 与每日维护</p>
+    <h2><span>算出的价格，</span><em>每天自动写回 eBay</em></h2>
+    <p class="lede">定价验收通过后开做。到时候生效规则算出的目标售价就是 eBay 上的售价，由后台每天同步一次。</p>
+    <ul class="list">
+      <li><span><b>开通改价权限</b>：店铺重新授权一次，允许系统修改 eBay 上的价格和库存。</span></li>
+      <li><span><b>先试点</b>：只对指定的不超过 3 个商品手动改价、改库存，改完再从 eBay 查一遍，确认真的改对了。</span></li>
+      <li><span><b>每日维护</b>：试点稳定后，系统每天自动跑一次：先刷新太旧的报价，再按规则算价并写入 eBay。不会按过期的报价改价。</span></li>
+      <li><span><b>缺货处理</b>：货源确认缺货时，把 eBay 库存归零。</span></li>
+      <li><span><b>失败可见</b>：没改成功或改完对不上的条目记为失败，出现在工作台待办里。</span></li>
+    </ul>
+  </div></div>
+</section>
+
+<section class="ch" id="next" data-ch="9" data-side="right" data-name="再往后">
+  <div class="wrap"><div class="panel">
+    <p class="eyebrow">再往后</p>
+    <h2><span>选品上架，</span><em>然后正式上线</em></h2>
+    <div class="next">
+      <div><b>选品</b><p><strong>从找货到上架一条线</strong>按策略在 Amazon 日本站找货 → 挑进候选 → AI 写好英文刊登草稿 → 人工修改并审批 → 上架到 eBay → 自动纳入管理和维护。AI 只出草稿，不会自己上架。</p></div>
+      <div><b>上线</b><p><strong>正式上线</strong>部署到云服务器长期运行，大家用网址直接登录使用。</p></div>
+      <div><b>排队</b><p><strong>其他计划</strong>邀请同事加入的页面；显示同类商品在 eBay 上的在售价格，作为定价参考；刊登规模到 10 万条时，货源价格改为分层跟踪，只刷新变了价的商品。</p></div>
+    </div>
+    <div class="risks">
+      <h3>待确认</h3>
+      <ul class="list">
+        <li><span><b>定价参数</b>：“日版 CD”规则里的美国运费档、变动提醒线等是占位值，核算后再定。</span></li>
+        <li><span><b>写权限</b>：写回 eBay 前需要店铺负责人重新授权一次，第一次真实写入只放 3 个商品。</span></li>
+      </ul>
+    </div>
+    <p class="end">OPENEC · 2026-10-25</p>
+  </div></div>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js"></script>
+<script>
+(() => {
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sections = [...document.querySelectorAll('section[data-ch]')];
+const N = sections.length;
+
+/* ---------- 章节导航、键盘、进度 ---------- */
+const rail = document.getElementById('rail');
+sections.forEach((s, i) => {
+  const a = document.createElement('a');
+  a.href = '#' + s.id; a.innerHTML = `<span>${s.dataset.name}</span><b></b>`;
+  a.setAttribute('aria-label', s.dataset.name);
+  rail.appendChild(a);
+});
+const railLinks = [...rail.children];
+let centers = [];
+function measure() {
+  centers = sections.map(s => s.offsetTop + s.offsetHeight / 2 - innerHeight / 2);
+  centers[0] = 0;
+  centers[N - 1] = Math.min(centers[N - 1], document.documentElement.scrollHeight - innerHeight);
+}
+function chapterF() {
+  const y = scrollY;
+  if (y <= centers[0]) return 0;
+  for (let i = 0; i < N - 1; i++) if (y < centers[i + 1]) return i + (y - centers[i]) / (centers[i + 1] - centers[i]);
+  return N - 1;
+}
+function go(i) { i = Math.max(0, Math.min(N - 1, i)); scrollTo({ top: centers[i], behavior: reduce ? 'auto' : 'smooth' }); }
+addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('input,button,textarea')) return;
+  const cur = Math.round(chapterF());
+  if (['ArrowRight', 'ArrowDown', 'PageDown'].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+  else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+  else if (e.key === 'Home') { e.preventDefault(); go(0); }
+  else if (e.key === 'End') { e.preventDefault(); go(N - 1); }
+});
+const io = new IntersectionObserver(es => es.forEach(en => {
+  if (!en.isIntersecting) return;
+  const p = en.target.querySelector('.panel');
+  if (p && !p.classList.contains('in')) p.classList.add('in');
+  en.target.querySelectorAll('[data-count]').forEach(countUp);
+}), { threshold: .35 });
+sections.forEach(s => io.observe(s));
+function countUp(el) {
+  if (el.dataset.done || reduce) return; el.dataset.done = 1;
+  const to = +el.dataset.count, t0 = performance.now();
+  const step = t => { const k = Math.min(1, (t - t0) / 1400); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 4))); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+
+/* ---------- 定价计算（演示参数） ---------- */
+const P = { fx: 150, ship: 14, fixed: .30, fee: .149 };
+const jpyIn = document.getElementById('jpy'), jpyOut = document.getElementById('jpyOut'), rowsEl = document.getElementById('rows');
+const SLABS = [
+  { k: 'cost', n: '进货价（÷ 汇率）', c: '#E9E3D8' },
+  { k: 'ship', n: '国际运费', c: '#6D5BD0' },
+  { k: 'fixed', n: '固定费', c: '#757A86' },
+  { k: 'fee', n: 'eBay 费用', c: '#3A4050' },
+  { k: 'profit', n: '净利润', c: '#F2681D' },
+];
+function price(jpy) {
+  const cost = jpy / P.fx, ship = P.ship, target = cost + ship;
+  const raw = (cost + ship + P.fixed + target) / (1 - P.fee);
+  let p = Math.ceil(raw) - 0.01; if (p < raw) p += 1;
+  const fee = p * P.fee;
+  return { cost, ship, fixed: P.fixed, fee, profit: p - fee - cost - ship - P.fixed, total: p };
+}
+let pricing = price(+jpyIn.value);
+function renderPrice() {
+  const v = +jpyIn.value; pricing = price(v);
+  jpyOut.textContent = '¥' + v.toLocaleString('en-US');
+  jpyIn.style.setProperty('--p', ((v - jpyIn.min) / (jpyIn.max - jpyIn.min) * 100) + '%');
+  rowsEl.innerHTML = SLABS.map(s => `<div><i style="background:${s.c}"></i><span>${s.n}</span><span class="mono">$${pricing[s.k].toFixed(2)}</span></div>`).join('')
+    + `<div class="total"><i></i><span>目标售价</span><span class="mono">$${pricing.total.toFixed(2)}</span></div>`;
+}
+jpyIn.addEventListener('input', renderPrice); renderPrice();
+
+/* ---------- three.js 舞台 ---------- */
+const canvas = document.getElementById('gl');
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' }); }
+catch (e) { measure(); addEventListener('scroll', updateChrome, { passive: true }); updateChrome(); return; }
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.NoToneMapping;
+
+const BG = 0xFFFFFF;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(BG);
+scene.fog = new THREE.Fog(BG, 18, 60);
+const camera = new THREE.PerspectiveCamera(38, 1, .1, 400);
+
+// 环境光照：自建一个"摄影棚"场景烘成 PMREM，橙色与紫色灯片让光盘的彩虹膜有东西可反射
+(function env() {
+  const pm = new THREE.PMREMGenerator(renderer);
+  const s = new THREE.Scene();
+  const room = new THREE.Mesh(new THREE.SphereGeometry(20, 32, 16), new THREE.MeshBasicMaterial({ color: 0x8a8680, side: THREE.BackSide }));
+  s.add(room);
+  const panel = (c, i, x, y, z, w, h) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(i), side: THREE.DoubleSide })); m.position.set(x, y, z); m.lookAt(0, 0, 0); s.add(m); };
+  panel(0xffffff, 2.4, 0, 12, 4, 14, 4);
+  panel(0xf2681d, 4.5, -14, 2, 6, 6, 12);
+  panel(0x6d5bd0, 3.0, 14, 3, -4, 5, 10);
+  panel(0xffd9b8, 2.0, 4, -2, 15, 10, 3);
+  panel(0x4a3aa8, 2.5, -6, -6, -14, 12, 5);
+  scene.environment = pm.fromScene(s, .04).texture;
+  pm.dispose();
+})();
+const key = new THREE.DirectionalLight(0xfff1e6, 2.2); key.position.set(4, 8, 6); scene.add(key);
+const rim = new THREE.DirectionalLight(0xf2681d, 1.2); rim.position.set(-6, 2, -6); scene.add(rim);
+
+// 地面网格：一张大平面，着色器里画两级网格并按离相机的距离淡出
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(1400, 160), new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false,
+  uniforms: { uCam: { value: new THREE.Vector3() }, uCol: { value: new THREE.Color(0xb9b3a8) }, uAcc: { value: new THREE.Color(0xf2681d) } },
+  vertexShader: 'varying vec3 vW; void main(){ vec4 w = modelMatrix*vec4(position,1.); vW = w.xyz; gl_Position = projectionMatrix*viewMatrix*w; }',
+  fragmentShader: `uniform vec3 uCam; uniform vec3 uCol; uniform vec3 uAcc; varying vec3 vW;
+    float grid(vec2 p, float s){ vec2 q = p/s; vec2 g = abs(fract(q-.5)-.5)/fwidth(q); return 1.-min(min(g.x,g.y),1.); }
+    void main(){ float d = length(vW.xz-uCam.xz); float fade = smoothstep(34.,4.,d);
+      float l = grid(vW.xz,1.)*.4 + grid(vW.xz,6.)*.8;
+      vec3 c = mix(uCol, uAcc, smoothstep(9.,0.,d)*.35);
+      gl_FragColor = vec4(c, l*fade*.42); }`,
+}));
+ground.rotation.x = -Math.PI / 2; ground.position.set(330, -3.2, 0); scene.add(ground);
+
+/* ---------- 素材：封面、侧标（帯）、光盘 ---------- */
+const SKINS = [['#F2681D', '#111827'], ['#111827', '#F2681D'], ['#2E2A4F', '#FFC49A'], ['#7A2E12', '#F4E9DC'], ['#1E5B4F', '#F2681D'], ['#E9E3D8', '#111827'], ['#4A3AA8', '#FF8A3D'], ['#B9470A', '#FFF0E6']];
+const LIGHT = ['#E9E3D8', '#F4E9DC', '#FFF0E6', '#FFC49A'];
+const COVERS = [
+  { ini: 'OE', t: 'OPENEC SESSIONS', code: 'OECD-24101', obi: '初回限定盤 帯付き' },
+  { ini: 'NK', t: 'NIGHT KYOTO', code: 'TOCT-24931', obi: '日本盤 高音質CD' },
+  { ini: 'SH', t: 'SHIBUYA HOURS', code: 'VICL-63117', obi: '帯付き 解説・歌詞' },
+  { ini: 'AI', t: 'AIZOME BLUE', code: 'SICX-30042', obi: '紙ジャケット仕様' },
+  { ini: 'TK', t: 'TOKYO KAIDAN', code: 'UPCH-20588', obi: '完全生産限定盤' },
+  { ini: 'MS', t: 'MIDNIGHT SIGNAL', code: 'COCP-41290', obi: '日本盤 帯付き' },
+  { ini: 'OR', t: 'ORANGE ROOM', code: 'WPCR-18855', obi: '初回盤 ボーナス曲' },
+  { ini: 'HK', t: 'HAKONE LINE', code: 'KICS-93610', obi: 'リマスター 帯付き' },
+];
+const texCache = {};
+function canvasTex(w, h, draw) { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; }
+function coverTex(i) {
+  const k = 'c' + i % 8; if (texCache[k]) return texCache[k];
+  const [bg, ac] = SKINS[i % 8], cv = COVERS[i % 8], light = LIGHT.includes(bg), fg = light ? '#111827' : '#F4F1EC';
+  return texCache[k] = canvasTex(512, 448, (g, w, h) => {
+    g.fillStyle = bg; g.fillRect(0, 0, w, h);
+    g.save(); g.translate(w * .64, h * .44);
+    for (let r = 30; r < 360; r += 22) { g.beginPath(); g.arc(0, 0, r, 0, Math.PI * 2); g.strokeStyle = ac; g.globalAlpha = .1 + (r % 44 ? 0 : .12); g.lineWidth = 2; g.stroke(); }
+    g.globalAlpha = 1; g.beginPath(); g.arc(0, 0, 70, 0, Math.PI * 2); g.fillStyle = ac; g.fill(); g.restore();
+    g.fillStyle = fg; g.font = '800 132px "Plus Jakarta Sans", sans-serif'; g.textBaseline = 'alphabetic';
+    g.fillText(cv.ini, 150, 300);
+    g.font = '700 22px "Plus Jakarta Sans", sans-serif'; g.fillText(cv.t, 150, 372);
+    g.font = '500 15px "JetBrains Mono", monospace'; g.globalAlpha = .7; g.fillText(cv.code + '  ·  STEREO', 150, 402); g.globalAlpha = 1;
+  });
+}
+function obiTex(i) {
+  const k = 'o' + i % 8; if (texCache[k]) return texCache[k];
+  const [bg, ac] = SKINS[i % 8], cv = COVERS[i % 8], fg = LIGHT.includes(ac) ? '#111827' : '#F4F1EC';
+  return texCache[k] = canvasTex(96, 448, (g, w, h) => {
+    g.fillStyle = ac; g.fillRect(0, 0, w, h);
+    g.fillStyle = bg; g.fillRect(0, 0, w, 54); g.fillRect(0, h - 40, w, 40);
+    g.fillStyle = LIGHT.includes(bg) ? '#111827' : '#F4F1EC'; g.font = '700 16px "Plus Jakarta Sans", sans-serif'; g.textAlign = 'center'; g.fillText('OBI', w / 2, 34);
+    g.font = '500 11px "JetBrains Mono", monospace'; g.fillText('¥2,750', w / 2, h - 16);
+    g.fillStyle = fg; g.font = '700 30px "Noto Sans JP", sans-serif';
+    [...cv.obi].forEach((ch, j) => { if (ch === ' ') return; g.fillText(ch, w / 2, 98 + j * 36); });
+  });
+}
+const discLabelTex = canvasTex(512, 512, (g, w) => {
+  const c = w / 2;
+  g.clearRect(0, 0, w, w);
+  g.beginPath(); g.arc(c, c, 244, 0, Math.PI * 2); g.arc(c, c, 96, 0, Math.PI * 2, true); g.fillStyle = '#F2681D'; g.fill('evenodd');
+  g.beginPath(); g.arc(c, c, 244, 0, Math.PI * 2); g.arc(c, c, 228, 0, Math.PI * 2, true); g.fillStyle = '#111827'; g.fill('evenodd');
+  g.fillStyle = '#160A03'; g.font = '800 46px "Plus Jakarta Sans", sans-serif'; g.textAlign = 'center'; g.fillText('OpenEC', c, c - 128);
+  g.font = '700 26px "Noto Sans JP", sans-serif'; g.fillText('日本盤', c, c + 160);
+  g.font = '500 15px "JetBrains Mono", monospace';
+  const s = 'MADE IN JAPAN · SHIPS TO USA · COMPACT DISC DIGITAL AUDIO · ';
+  [...s].forEach((ch, j) => { const a = j / s.length * Math.PI * 2; g.save(); g.translate(c + Math.cos(a) * 210, c + Math.sin(a) * 210); g.rotate(a + Math.PI / 2); g.fillText(ch, 0, 0); g.restore(); });
+});
+
+const M = {
+  tray: new THREE.MeshStandardMaterial({ color: 0x15161a, roughness: .55, metalness: .1 }),
+  glass: new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: .04, metalness: 0, clearcoat: 1, clearcoatRoughness: .03, transparent: true, opacity: .14, depthWrite: false, envMapIntensity: 1.6 }),
+  heroGlass: new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: .03, metalness: 0, transmission: 1, thickness: .12, ior: 1.49, clearcoat: 1, clearcoatRoughness: .02, envMapIntensity: 1.4 }),
+  disc: new THREE.MeshPhysicalMaterial({ color: 0xd9dbe2, metalness: 1, roughness: .16, iridescence: 1, iridescenceIOR: 1.9, iridescenceThicknessRange: [180, 820], side: THREE.DoubleSide, envMapIntensity: 1.5 }),
+  label: new THREE.MeshStandardMaterial({ map: null, transparent: true, roughness: .5, metalness: .05, side: THREE.FrontSide }),
+  dark: new THREE.MeshPhysicalMaterial({ color: 0x1a1d24, roughness: .32, metalness: .55, clearcoat: .6 }),
+  or: new THREE.MeshStandardMaterial({ color: 0xf2681d, emissive: 0xe05a12, emissiveIntensity: .6, roughness: .35, metalness: .2 }),
+  orLine: new THREE.LineBasicMaterial({ color: 0xf2681d, transparent: true, opacity: .9 }),
+  mute: new THREE.MeshStandardMaterial({ color: 0xf3f1ec, roughness: .6, metalness: .2, transparent: true }),
+};
+function fadeable(mat) { const m = mat.clone(); m.transparent = true; return m; }
+
+// 一盒 CD：142 × 125 × 10 mm，1 单位 = 100 mm；侧标（帯）包在盒子左侧外面
+const CW = 1.42, CH = 1.25, CD = .1;
+const caseGeo = { shell: new THREE.BoxGeometry(CW, CH, CD), tray: new THREE.BoxGeometry(CW - .03, CH - .03, CD * .55), cover: new THREE.PlaneGeometry(CW - .05, CH - .04), obi: new THREE.BoxGeometry(.29, CH + .012, CD + .016) };
+function makeCase(i, hero = false) {
+  const g = new THREE.Group();
+  const tray = new THREE.Mesh(caseGeo.tray, M.tray); tray.position.z = -.012; g.add(tray);
+  const cover = new THREE.Mesh(caseGeo.cover, new THREE.MeshStandardMaterial({ map: coverTex(i), roughness: .45 })); cover.position.z = CD / 2 - .014; g.add(cover);
+  const back = new THREE.Mesh(caseGeo.cover, M.tray); back.rotation.y = Math.PI; back.position.z = -CD / 2 + .01; g.add(back);
+  const shell = new THREE.Mesh(caseGeo.shell, hero ? M.heroGlass : M.glass); g.add(shell);
+  const oc = SKINS[i % 8][1], obiSide = new THREE.MeshStandardMaterial({ color: oc, roughness: .5 });
+  const obiFront = new THREE.MeshStandardMaterial({ map: obiTex(i), roughness: .5 });
+  const obi = new THREE.Mesh(caseGeo.obi, [obiSide, obiSide, obiSide, obiSide, obiFront, obiSide]);
+  obi.position.x = -CW / 2 + .135; g.add(obi);
+  return g;
+}
+const discGeo = { ring: new THREE.RingGeometry(.075, .6, 128, 1), label: new THREE.RingGeometry(.19, .5, 128, 1) };
+function makeDisc() {
+  const g = new THREE.Group();
+  const d = new THREE.Mesh(discGeo.ring, M.disc); g.add(d);
+  const lm = M.label.clone(); lm.map = discLabelTex;
+  const l = new THREE.Mesh(discGeo.label, lm); l.position.z = .003;
+  // RingGeometry 的 UV 按外径铺满，换成按标签外径 0.5 重算，让贴图对上
+  const uv = l.geometry.attributes.uv, pos = l.geometry.attributes.position;
+  l.geometry = l.geometry.clone(); const uv2 = l.geometry.attributes.uv;
+  for (let k = 0; k < pos.count; k++) uv2.setXY(k, pos.getX(k) / 1.0 + .5, pos.getY(k) / 1.0 + .5);
+  uv2.needsUpdate = true;
+  g.add(l);
+  return g;
+}
+
+// 流动的虚线管：贴图偏移制造"数据在走"的感觉
+const dashTex = canvasTex(128, 8, (g, w, h) => { const gr = g.createLinearGradient(0, 0, w, 0); gr.addColorStop(0, 'rgba(242,104,29,0)'); gr.addColorStop(.7, 'rgba(242,104,29,1)'); gr.addColorStop(1, 'rgba(185,71,10,1)'); g.fillStyle = gr; g.fillRect(0, 0, w * .55, h); });
+dashTex.wrapS = THREE.RepeatWrapping;
+const flowMats = [];
+function flowTube(curve, r = .035, rep = 6, color = 0xffffff, speed = .6) {
+  const t = dashTex.clone(); t.needsUpdate = true; t.repeat.set(rep, 1);
+  const m = new THREE.MeshBasicMaterial({ map: t, color, transparent: true, depthWrite: false });
+  flowMats.push({ m, speed }); return new THREE.Mesh(new THREE.TubeGeometry(curve, 120, r, 8, false), m);
+}
+function baseTube(curve, r, mat) { return new THREE.Mesh(new THREE.TubeGeometry(curve, 120, r, 8, false), mat); }
+function edges(geo, mat = M.orLine) { return new THREE.LineSegments(new THREE.EdgesGeometry(geo), mat); }
+
+/* ---------- 标注：3D 位置投影成 HTML 胶囊 ---------- */
+const labelsEl = document.getElementById('labels');
+const labels = [];
+function label(ch, obj, html, cls = '', off = [0, 0, 0]) {
+  const el = document.createElement('div'); el.className = 'lbl ' + cls; el.innerHTML = html; labelsEl.appendChild(el);
+  const L = { ch: [].concat(ch), obj, el, off: new THREE.Vector3(...off), vis: 1, flip: cls.includes('flip') }; labels.push(L); return L;
+}
+
+/* ---------- 章节场景 ---------- */
+const SP = 64;
+const groups = [];
+function chapterGroup(x, z = 0) { const g = new THREE.Group(); g.position.set(x, 0, z); scene.add(g); return g; }
+const shadowTex = canvasTex(128, 128, (g, w) => { const gr = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); gr.addColorStop(0, 'rgba(17,24,39,1)'); gr.addColorStop(1, 'rgba(17,24,39,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, w); });
+// 软阴影：地面上一块径向渐变贴片，比开 shadowMap 便宜
+function softShadow(G, w, d, x = 0, z = 0, o = .09) { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, opacity: o, depthWrite: false })); m.rotation.x = -Math.PI / 2; m.position.set(x, -3.15, z); G.add(m); return m; }
+const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const sstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+
+function build() {
+  const rnd = (a => () => (a = (a * 9301 + 49297) % 233280) / 233280)(7);
+
+  /* 0 开场：主角 CD，光盘滑出旋转，周围一圈盒子缓缓绕行，背后是唱片纹 */
+  const G0 = chapterGroup(0);
+  const hero = new THREE.Group(); G0.add(hero);
+  const hc = makeCase(0); hc.scale.setScalar(2.4); hero.add(hc);
+  const disc = makeDisc(); disc.scale.setScalar(2.4); hero.add(disc);
+  const orbit = new THREE.Group(); G0.add(orbit);
+  const orbitCases = [];
+  for (let i = 0; i < 9; i++) { const c = makeCase(i + 1); orbit.add(c); orbitCases.push(c); }
+  const grooves = new THREE.Group(); G0.add(grooves);
+  for (let i = 0; i < 9; i++) {
+    const m = new THREE.Mesh(new THREE.TorusGeometry(4.4 + i * .42, i % 3 ? .006 : .014, 6, 200), new THREE.MeshBasicMaterial({ color: i % 3 ? 0xd6d1c7 : 0xf2681d, transparent: true, opacity: i % 3 ? .8 : .55 }));
+    grooves.add(m);
+  }
+  grooves.position.z = -3.5;
+  const halo = new THREE.Mesh(new THREE.CircleGeometry(4.2, 96), new THREE.MeshBasicMaterial({ color: 0xf2681d, transparent: true, opacity: .05, depthWrite: false })); halo.position.z = -3.6; G0.add(halo);
+  softShadow(G0, 7, 4, .8, 0);
+  label(0, hc, '142 × 125 × 10 mm <small>日版 CD 盒</small>', 'mute', [-1.6, -1.65, 0]);
+  label(0, hc, '帯 OBI <small>日版的辨识点</small>', 'flip', [-.6, .56, .06]);
+  groups.push({
+    g: G0, cam: [1.4, .9, 13], look: [-3.3, .1, 0],
+    update(t) {
+      const mx = mouse.x * .25, my = mouse.y * .18;
+      hero.rotation.y += ((-.42 + mx) - hero.rotation.y) * .06; hero.rotation.x += ((.08 - my) - hero.rotation.x) * .06;
+      hero.position.y = Math.sin(t * .8) * .12;
+      const out = .35 + .65 * ease(Math.min(1, Math.max(0, (t - .4) / 1.6)));
+      disc.position.set(out * 1.85, .05 + Math.sin(t * 1.1) * .05, .06 - out * .25);
+      disc.rotation.set(0, -.35 * out, 0);
+      disc.children.forEach(c => c.rotation.z = -t * 1.6);
+      orbit.rotation.y = t * .12;
+      orbitCases.forEach((c, i) => {
+        const a = i / 9 * Math.PI * 2;
+        c.position.set(Math.cos(a) * 2.5 + 1.7, Math.sin(a * 2 + t * .5) * .6 + Math.sin(a) * .9 - .3, Math.sin(a) * 2.4 - 2.2);
+        c.rotation.set(Math.sin(t * .4 + i) * .2, -a + Math.PI / 2 + t * .2, Math.cos(t * .3 + i) * .15);
+      });
+      grooves.rotation.z = t * .05; grooves.children.forEach((m, i) => m.scale.setScalar(1 + Math.sin(t * .9 - i * .5) * .01));
+    }
+  });
+
+  /* 1 全流程：一条轨道串起七站，已可用的站是实心橙环，后续的是灰环加外圈脉冲 */
+  const G1 = chapterGroup(SP); G1.scale.setScalar(.3);
+  const track = new THREE.CatmullRomCurve3([[-9, -1.2, 2], [-6, .2, -1], [-3, .9, 1.2], [0, .2, -.8], [3, 1.1, 1], [6, .4, -1.2], [9, 1.6, .6]].map(p => new THREE.Vector3(...p)));
+  G1.add(baseTube(track, .05, new THREE.MeshStandardMaterial({ color: 0x23262e, roughness: .4, metalness: .6 })));
+  G1.add(flowTube(new THREE.CatmullRomCurve3(track.getSpacedPoints(120).slice(20, 81)), .07, 10, 0xffffff, .9));
+  const stations = [['选品上架', '后续', 0], ['同步刊登', '已可用', 1], ['核对身份', '已可用', 1], ['选报价', '已可用', 1], ['定价', '验收中', 1], ['写回 eBay', '下一步', 0], ['每日维护', '下一步', 0]];
+  const stationRings = [];
+  stations.forEach((s, i) => {
+    const u = i / 6, p = track.getPointAt(u), tan = track.getTangentAt(u);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(.95, s[2] ? .045 : .03, 12, 96), s[2] ? M.or : new THREE.MeshBasicMaterial({ color: 0xa9a59c, transparent: true, opacity: .9 }));
+    ring.position.copy(p); ring.lookAt(p.clone().add(tan)); G1.add(ring); stationRings.push(ring);
+    if (!s[2]) { const ghost = new THREE.Mesh(new THREE.TorusGeometry(1.25, .01, 6, 96), new THREE.MeshBasicMaterial({ color: 0xf2681d, transparent: true, opacity: .35 })); ghost.position.copy(p); ghost.lookAt(p.clone().add(tan)); G1.add(ghost); ring.userData.ghost = ghost; }
+    const an = new THREE.Object3D(); an.position.copy(p); G1.add(an);
+    label([1], an, `<span>${s[0]}<small>${s[1]}</small></span>`, 'stack ' + (s[2] ? '' : 'mute'), [-.6, i % 2 ? -1.5 : 2.6, 0]);
+  });
+  const riders = [];
+  for (let i = 0; i < 7; i++) { const c = makeCase(i); c.scale.setScalar(.55); G1.add(c); riders.push(c); }
+  groups.push({
+    g: G1, cam: [-1, 2.2, 15], look: [3.4, .2, 0],
+    update(t) {
+      const sp = reduce ? .004 : .024;
+      riders.forEach((c, i) => {
+        const u = (t * sp + i / 7) % 1;
+        const p = track.getPointAt(u), tan = track.getTangentAt(u);
+        c.position.copy(p).add(new THREE.Vector3(0, .62, 0));
+        c.rotation.set(-.15, .25 + Math.sin(t + i) * .15, Math.atan2(tan.y, tan.x) * .6);
+        c.scale.setScalar(Math.max(.001, .55 * sstep(0, .04, u) * (1 - sstep(.96, 1, u))));
+      });
+      stationRings.forEach((r, i) => { r.rotation.z = t * (.3 + i * .05); if (r.userData.ghost) { const k = (t * .5 + i * .3) % 1; r.userData.ghost.scale.setScalar(1 + k * .6); r.userData.ghost.material.opacity = .4 * (1 - k); } });
+    }
+  });
+
+  /* 2 工作台：同步状况环形图，一段段轮流弹出；右边三张待办卡 */
+  const G2 = chapterGroup(SP * 2);
+  const donut = new THREE.Group(); donut.position.set(-2.9, .3, 0); donut.scale.setScalar(.72); G2.add(donut);
+  const SEG = [['已同步', .8, 0xf2681d], ['不同步', .08, 0xcfcac0], ['未找到', .06, 0x6d5bd0], ['失败', .06, 0xb9470a]];
+  let a0 = Math.PI / 2; const segs = [];
+  SEG.forEach(([n, f, c], i) => {
+    const arc = f * Math.PI * 2 - .05;
+    const m = new THREE.Mesh(new THREE.TorusGeometry(2.1, .42, 24, 120, arc), new THREE.MeshStandardMaterial({ color: c, roughness: .45, metalness: 0, emissive: c, emissiveIntensity: .2 }));
+    m.rotation.z = a0; donut.add(m);
+    const mid = a0 + arc / 2; m.userData.dir = new THREE.Vector3(Math.cos(mid), Math.sin(mid), 0);
+    // the big segment's midpoint faces the text card, so its label sits lower right instead
+    const la = i === 0 ? -Math.PI / 3 : mid;
+    const anchor = new THREE.Object3D(); anchor.position.set(Math.cos(la), Math.sin(la), 0).multiplyScalar(2.95); donut.add(anchor);
+    m.userData.lbl = label([2], anchor, n, Math.cos(la) < -.2 ? 'flip mute' : 'mute', [0, 0, 0]);
+    segs.push(m); a0 += f * Math.PI * 2;
+  });
+  label([2], donut, '同步状况 <small>点哪段跳哪段</small>', 'big', [-.95, .1, 0]);
+  const todoTex = (title, sub) => canvasTex(640, 150, (g, w, h) => {
+    g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#F2681D'; g.beginPath(); g.arc(46, h / 2, 12, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#111827'; g.font = '700 46px "Noto Sans SC", sans-serif'; g.textBaseline = 'middle'; g.fillText(title, 82, h / 2 - 16);
+    g.fillStyle = '#8C909B'; g.font = '500 26px "Noto Sans SC", sans-serif'; g.fillText(sub, 82, h / 2 + 30);
+    g.fillStyle = '#F2681D'; g.font = '700 30px "Noto Sans SC", sans-serif'; g.textAlign = 'right'; g.fillText('去处理 →', w - 34, h / 2);
+  });
+  const cardGeo = new THREE.BoxGeometry(2.9, .68, .06), cardSide = new THREE.MeshStandardMaterial({ color: 0xeceae4 });
+  const cards = [['待核对', '确认刊登对应的 ASIN'], ['待选报价', '选从哪个卖家进货'], ['定价拦下', '算不出价，写明原因']].map(([a, b], i) => {
+    const front = new THREE.MeshBasicMaterial({ map: todoTex(a, b) });
+    const c = new THREE.Mesh(cardGeo, [cardSide, cardSide, cardSide, cardSide, front, cardSide]);
+    c.position.set(1.7, 1.1 - i * .95, .6); c.rotation.y = -.28; G2.add(c); return c;
+  });
+  softShadow(G2, 10, 5, 1, 0);
+  groups.push({
+    g: G2, cam: [0, .6, 16.5], look: [-3.6, .1, 0],
+    update(t, pr) {
+      const act = Math.floor(t / 1.6) % 4;
+      segs.forEach((m, i) => {
+        const tg = i === act ? .35 : 0; m.userData.p = (m.userData.p || 0) + (tg - (m.userData.p || 0)) * .1;
+        m.position.copy(m.userData.dir).multiplyScalar(m.userData.p);
+        m.userData.lbl.el.classList.toggle('on', i === act); m.userData.lbl.el.classList.toggle('mute', i !== act);
+      });
+      donut.rotation.set(-.3 + mouse.y * .1, .35 + Math.sin(t * .3) * .08 + mouse.x * .15, 0);
+      cards.forEach((c, i) => { const k = ease(sstep(.2 + i * .12, .7 + i * .12, pr)); c.position.x = 1.7 + (1 - k) * 4; c.position.y = 1.1 - i * .95 + Math.sin(t * 1.2 + i) * .04; });
+    }
+  });
+
+  /* 3 商品：147 块砖一块一条刊登；轮流演示按类别筛选，选中的砖往前探 */
+  const G3 = chapterGroup(SP * 3); G3.scale.setScalar(.55);
+  const CAT = [[93, 0xf2681d], [22, 0xd9cfbf], [19, 0x6d5bd0], [10, 0x4a3aa8], [3, 0x8c909b]];
+  const CATN = [['Music › CDs', 0, 93], ['文具 › 自动铅笔', 93, 22], ['美妆 › 美甲工具', 115, 19], ['DVD / 蓝光', 134, 10]];
+  const cols = 21, rows = 7, n = 147;
+  const bricks = new THREE.InstancedMesh(new THREE.BoxGeometry(.72, .63, .07), new THREE.MeshStandardMaterial({ roughness: .5, metalness: 0 }), n);
+  const baseCol = []; CAT.forEach(([c, col]) => { for (let k = 0; k < c; k++) baseCol.push(new THREE.Color(col)); });
+  const dimCol = new THREE.Color(0xe9e6e0), tmpCol = new THREE.Color();
+  const brickSeed = [], sel = new Float32Array(n);
+  for (let k = 0; k < n; k++) { bricks.setColorAt(k, baseCol[k]); brickSeed.push(rnd()); }
+  G3.add(bricks);
+  const dummy = new THREE.Object3D();
+  softShadow(G3, 26, 8, 0, 0, .1);
+  const filterLbl = label([3], G3, '', 'on big', [-6, 3.6, 0]);
+  label([3], G3, '1 块 = 1 条刊登', 'mute', [3, -3.2, 0]);
+  let lastCat = -1;
+  groups.push({
+    g: G3, cam: [-3, 1, 14], look: [4.2, 0, 0],
+    update(t, pr) {
+      const fly = 1 - ease(sstep(.05, .85, pr));
+      const phase = Math.floor(t / 2.6) % 5, ci = phase - 1;
+      if (phase !== lastCat) { lastCat = phase; filterLbl.w = 0; filterLbl.el.innerHTML = ci < 0 ? '全部 <small>147 条</small>' : `类别：${CATN[ci][0]} <small>${CATN[ci][2]} 条</small>`; }
+      const cx = mouse.x * 8, cy = mouse.y * 3;
+      for (let k = 0; k < n; k++) {
+        const on = ci < 0 || (k >= CATN[ci][1] && k < CATN[ci][1] + CATN[ci][2]) ? 1 : 0;
+        sel[k] += (on - sel[k]) * .08;
+        tmpCol.copy(dimCol).lerp(baseCol[k], sel[k]); bricks.setColorAt(k, tmpCol);
+        const c = k % cols, r = Math.floor(k / cols);
+        const x = (c - (cols - 1) / 2) * .8, y = ((rows - 1) / 2 - r) * .72;
+        const wave = reduce ? 0 : Math.sin(Math.hypot(x - cx, y - cy) * 1.1 - t * 2.4) * .2;
+        const pop = ci < 0 ? 0 : sel[k] * .7;
+        dummy.position.set(x, y + .2, wave + pop + fly * (brickSeed[k] * 26 - 6));
+        dummy.rotation.set(fly * brickSeed[k] * 6, wave * .7 + fly * 3, 0);
+        dummy.scale.setScalar(1 - fly * .5);
+        dummy.updateMatrix(); bricks.setMatrixAt(k, dummy.matrix);
+      }
+      bricks.instanceMatrix.needsUpdate = true; bricks.instanceColor.needsUpdate = true;
+      G3.rotation.y = .22 + mouse.x * .08;
+    }
+  });
+
+  /* 4 核对：两盒 CD 面对面，扫描光栅掠过右边候选，比对线把两边连起来 */
+  const G4 = chapterGroup(SP * 4);
+  const left = makeCase(6); left.scale.setScalar(1.85); left.position.set(-1.75, .2, 0); left.rotation.y = .38; G4.add(left);
+  const right = makeCase(6); right.scale.setScalar(1.85); right.position.set(1.75, .2, 0); right.rotation.y = -.38; G4.add(right);
+  const scan = new THREE.Mesh(new THREE.PlaneGeometry(CW * 1.85 + .2, .05), new THREE.MeshBasicMaterial({ color: 0xf2681d, transparent: true, opacity: .95, depthWrite: false }));
+  const scanGlow = new THREE.Mesh(new THREE.PlaneGeometry(CW * 1.85 + .2, .6), new THREE.MeshBasicMaterial({ map: canvasTex(4, 64, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(242,104,29,0)'); gr.addColorStop(1, 'rgba(242,104,29,.45)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }), transparent: true, depthWrite: false }));
+  scanGlow.position.y = -.35; scan.add(scanGlow);
+  const scanHolder = new THREE.Group(); scanHolder.position.copy(right.position); scanHolder.rotation.y = right.rotation.y; scanHolder.add(scan); scan.position.z = .2; G4.add(scanHolder);
+  [[-.25, .35], [.3, -.05], [.05, -.45]].forEach(([x, y], k) => {
+    const a = new THREE.Vector3(x * 1.85, y * 1.85, .2).applyMatrix4(new THREE.Matrix4().compose(left.position, left.quaternion, new THREE.Vector3(1, 1, 1)));
+    const b = new THREE.Vector3(x * 1.85, y * 1.85, .2).applyMatrix4(new THREE.Matrix4().compose(right.position, right.quaternion, new THREE.Vector3(1, 1, 1)));
+    G4.add(flowTube(new THREE.QuadraticBezierCurve3(a, a.clone().lerp(b, .5).add(new THREE.Vector3(0, .25 - k * .25, 2.4)), b), .02, 4, 0xffffff, .8 + k * .2));
+  });
+  softShadow(G4, 9, 4, 0, 0);
+  label([4], right, '像 <small>封面一致 · 条码一致</small>', 'on big flip', [.75, -.95, .1]);
+  label([4], left, 'eBay 刊登', '', [-.7, .8, .1]);
+  label([4], right, 'Amazon.co.jp 候选', '', [-.7, .8, .1]);
+  groups.push({
+    g: G4, cam: [0, .8, 13.5], look: [-3.0, .1, 0],
+    update(t) {
+      const k = (t * .45) % 1;
+      scan.position.y = ((1 - k) * 1.5 - .75) * 1.6; scan.material.opacity = .95 * Math.sin(k * Math.PI); scanGlow.material.opacity = Math.sin(k * Math.PI);
+      left.rotation.y = .38 + Math.sin(t * .6) * .04 + mouse.x * .1; right.rotation.y = -.38 - Math.sin(t * .6) * .04 + mouse.x * .1;
+      left.position.y = .2 + Math.sin(t * .9) * .08; right.position.y = .2 + Math.sin(t * .9 + 1) * .08;
+    }
+  });
+
+  /* 5 选报价：同一个 ASIN 的卖家报价按合计排成一排柱子，你选的那根升起变橙，CD 落在上面 */
+  const G5 = chapterGroup(SP * 5);
+  const OFF = [[2380, '新品 · FBM'], [2460, '新品 · FBA'], [2590, '新品 · FBA'], [2750, '中古 · 良い'], [3120, '新品 · FBM'], [0, '运费未知']];
+  const CHOSEN = 1, barGeo = new THREE.BoxGeometry(.9, 1, .9);
+  const plinth = new THREE.Mesh(new THREE.BoxGeometry(7.6, .18, 1.8), M.dark); plinth.position.y = -1.9; G5.add(plinth);
+  const bars = OFF.map(([v, sub], i) => {
+    const unknown = !v;
+    let b;
+    if (unknown) { b = new THREE.Group(); const l = edges(barGeo, new THREE.LineDashedMaterial({ color: 0x8c909b, dashSize: .08, gapSize: .06 })); l.computeLineDistances(); b.add(l); }
+    else { b = new THREE.Mesh(barGeo, i === CHOSEN ? M.or : new THREE.MeshStandardMaterial({ color: 0xe5e7eb, roughness: .5, metalness: 0 })); b.add(edges(barGeo, new THREE.LineBasicMaterial({ color: i === CHOSEN ? 0xffb27f : 0x111827 }))); }
+    b.position.x = (i - 2.5) * 1.15; b.userData.h = unknown ? 1.6 : (v - 1900) / 420; G5.add(b);
+    const anchor = new THREE.Object3D(); G5.add(anchor); b.userData.anchor = anchor;
+    label([5], anchor, `<span>${v ? '¥' + v.toLocaleString('en-US') : '未知'}<small>${sub}</small></span>`, 'stack ' + (i === CHOSEN ? 'on' : 'mute'), [-.42, .3, 0]);
+    return b;
+  });
+  const bound = makeCase(3); bound.scale.setScalar(.75); G5.add(bound);
+  label([5], bound, '已绑定 <small>人来选，系统从不预选</small>', 'on', [.9, 1.1, 0]);
+  softShadow(G5, 10, 4, 0, 0);
+  groups.push({
+    g: G5, cam: [-2, 1.6, 15], look: [4.4, .3, 0],
+    update(t, pr) {
+      bars.forEach((b, i) => {
+        const k = ease(sstep(i * .06, .5 + i * .06, pr)), lift = i === CHOSEN ? .35 + Math.sin(t * 2) * .05 : 0;
+        const h = Math.max(.001, b.userData.h * k);
+        b.scale.y = h; b.position.y = -1.81 + h / 2 + lift * k;
+        b.userData.anchor.position.set(b.position.x, b.position.y + h / 2, 0);
+      });
+      const top = bars[CHOSEN].position.y + bars[CHOSEN].scale.y / 2;
+      bound.position.set(bars[CHOSEN].position.x, top + .72 + Math.sin(t * 1.6) * .08, 0);
+      bound.rotation.set(-.12, .3 + Math.sin(t * .8) * .15, 0);
+      M.or.emissiveIntensity = .5 + Math.sin(t * 3) * .15;
+      G5.rotation.y = -.15 + mouse.x * .12;
+    }
+  });
+
+  /* 6 定价规则：五层规则板按优先级叠放，一盒 CD 从上落下，停在它登入的最高一层 */
+  const G6 = chapterGroup(SP * 6);
+  const PL = [['最高', 2.8], ['高', 1.4], ['普通', 0], ['低', -1.4], ['自由定价', -2.8]];
+  const plateGeo = new THREE.BoxGeometry(4.4, .1, 2.6);
+  const plates = PL.map(([nm, y], i) => {
+    const free = i === 4;
+    const mat = new THREE.MeshPhysicalMaterial({ color: free ? 0xf3f1ec : 0xffffff, roughness: .25, clearcoat: 1, transparent: true, opacity: free ? .95 : .6, emissive: 0xf2681d, emissiveIntensity: 0 });
+    const p = new THREE.Mesh(plateGeo, mat); p.position.y = y; G6.add(p);
+    const lm = new THREE.LineBasicMaterial({ color: 0xb9b3a8 }); p.add(edges(plateGeo, lm)); p.userData.lm = lm;
+    p.userData.lbl = label([6], p, '', 'stack flip mute', [-2.3, 0, 1.3]);
+    return p;
+  });
+  const SCN = [[2, 4], [1, 2, 4], [4], [0, 3, 4]];
+  const faller = makeCase(2); faller.scale.setScalar(.8); G6.add(faller);
+  const fallLbl = label([6], faller, '', 'on', [.75, .45, 0]);
+  softShadow(G6, 7, 5, 0, 0);
+  let lastScn = -1;
+  groups.push({
+    g: G6, cam: [2, 1.2, 15], look: [-4.2, 0, 0],
+    update(t) {
+      const D = 3.8, sc = Math.floor(t / D) % SCN.length, k = (t % D) / D, en = SCN[sc], tgt = Math.min(...en);
+      if (sc !== lastScn) {
+        lastScn = sc;
+        plates.forEach((p, i) => { p.userData.lbl.w = 0; p.userData.lbl.el.innerHTML = `<span>${PL[i][0]}${i === 4 ? ' · 内置' : ''}<small>${i === tgt ? '生效' : en.includes(i) ? '已登入 · 不生效' : '未登入'}</small></span>`; p.userData.lbl.el.classList.toggle('on', i === tgt); p.userData.lbl.el.classList.toggle('mute', i !== tgt); });
+        fallLbl.w = 0; fallLbl.el.innerHTML = `由「${PL[tgt][0]}」定价`;
+      }
+      const drop = ease(sstep(0, .32, k)), y = 5.6 + (PL[tgt][1] + .6 - 5.6) * drop;
+      faller.position.set(.3, y, .2); faller.rotation.set(-.25, .4 + Math.sin(t) * .1, 0);
+      fallLbl.el.style.visibility = drop > .98 ? 'visible' : 'hidden';
+      plates.forEach((p, i) => {
+        const on = en.includes(i), hit = i === tgt && drop > .98;
+        p.material.emissiveIntensity += ((hit ? .35 : 0) - p.material.emissiveIntensity) * .12;
+        p.userData.lm.color.set(on ? 0xf2681d : 0xb9b3a8);
+      });
+      G6.rotation.y = -.35 + Math.sin(t * .3) * .06 + mouse.x * .12; G6.rotation.x = .08;
+    }
+  });
+
+  /* 7 定价计算：费用一层层叠成售价，跟着滑块实时长高 */
+  const G7 = chapterGroup(SP * 7);
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.8, .22, 96), M.dark); base.position.y = -2.9; G7.add(base);
+  const baseRing = new THREE.Mesh(new THREE.TorusGeometry(2.7, .02, 8, 128), M.or); baseRing.rotation.x = Math.PI / 2; baseRing.position.y = -2.78; G7.add(baseRing);
+  const tower = new THREE.Group(); tower.position.y = -2.78; G7.add(tower);
+  const SK = .052, slabGeo2 = new THREE.BoxGeometry(2.4, 1, 2.4);
+  const slabs = SLABS.map(s => {
+    const m = new THREE.Mesh(slabGeo2, new THREE.MeshStandardMaterial({ color: s.c, roughness: .5, metalness: 0, envMapIntensity: .35, emissive: s.c, emissiveIntensity: .38 }));
+    m.add(edges(slabGeo2, new THREE.LineBasicMaterial({ color: 0x0c0d10, transparent: true, opacity: .6 })));
+    m.userData.h = .05; tower.add(m); return m;
+  });
+  const cap = new THREE.Mesh(new THREE.BoxGeometry(2.7, .06, 2.7), M.or); tower.add(cap);
+  softShadow(G7, 8, 8, 0, 0, .12);
+  const priceLbl = label([7], cap, '', 'on big flip', [-1.3, .45, 0]);
+  const slabLbls = SLABS.map((s, i) => label([7], slabs[i], s.n, 'mute', [-1.35, 0, 1.2]));
+  groups.push({
+    g: G7, cam: [-4.5, 3.4, 13.5], look: [2.9, 0, 0],
+    update(t, pr) {
+      let y = 0; const grow = ease(sstep(.1, 1, pr));
+      slabs.forEach((m, i) => {
+        const target = Math.max(.04, pricing[SLABS[i].k] * SK) * grow + .001;
+        m.userData.h += (target - m.userData.h) * .12;
+        m.scale.y = m.userData.h; m.position.y = y + m.userData.h / 2; y += m.userData.h + .02;
+        slabLbls[i].el.style.display = pricing[SLABS[i].k] * SK < .18 ? 'none' : '';
+      });
+      cap.position.y = y + .03;
+      priceLbl.w = 0; priceLbl.el.innerHTML = `目标售价 <b class="mono" style="color:var(--or);font-size:15px">$${pricing.total.toFixed(2)}</b>`;
+      tower.rotation.y = -.5 + Math.sin(t * .35) * .2 + mouse.x * .2; base.rotation.y = tower.rotation.y;
+    }
+  });
+
+  /* 8 写回 eBay 与每日维护：中间一只 24 小时表盘，一张光盘依次走过四个环节 */
+  const G8 = chapterGroup(SP * 8);
+  const plate = new THREE.Group(); plate.rotation.x = .3; plate.scale.setScalar(.78); G8.add(plate);
+  const dial = new THREE.Mesh(new THREE.TorusGeometry(1.4, .1, 20, 120), M.or); plate.add(dial);
+  const ticks = new THREE.Group(); plate.add(ticks);
+  for (let h = 0; h < 24; h++) { const a = h / 24 * Math.PI * 2, tk = new THREE.Mesh(new THREE.BoxGeometry(h % 6 ? .04 : .07, h % 6 ? .16 : .3, .04), M.dark); tk.position.set(Math.cos(a) * 1.05, Math.sin(a) * 1.05, 0); tk.rotation.z = a + Math.PI / 2; ticks.add(tk); }
+  const hand = new THREE.Mesh(new THREE.BoxGeometry(.06, .85, .05), M.dark); hand.geometry.translate(0, .42, 0); hand.position.z = .05; plate.add(hand);
+  plate.add(new THREE.Mesh(new THREE.TorusGeometry(3, .014, 6, 220), new THREE.MeshBasicMaterial({ color: 0xcfcac0 })));
+  const STEPS = [['刷新报价', '太旧先刷新'], ['算目标售价', '按生效规则'], ['写入 eBay', '改价 · 改库存'], ['回查确认', '对不上记为失败']];
+  const pucks = STEPS.map(([s, sub], i) => {
+    const a = Math.PI / 2 - i / 4 * Math.PI * 2, g = new THREE.Group();
+    const c = makeCase(i + 4); c.scale.setScalar(.7); c.rotation.x = -.3; g.add(c);
+    const r = new THREE.Mesh(new THREE.TorusGeometry(.68, .025, 8, 64), new THREE.MeshStandardMaterial({ color: 0xcfcac0, emissive: 0xf2681d, emissiveIntensity: 0 })); r.position.z = -.12; g.add(r);
+    g.position.set(Math.cos(a) * 3, Math.sin(a) * 3, 0); plate.add(g); g.userData.ring = r;
+    g.userData.lbl = label([8], g, `<span>${s}<small>${sub}</small></span>`, 'stack mute' + (Math.cos(a) < -.5 ? ' flip' : ''), [Math.cos(a) < -.5 ? -.8 : .8, .3, 0]);
+    return g;
+  });
+  const dialAn = new THREE.Object3D(); dialAn.position.set(0, -1.75, 0); plate.add(dialAn);
+  label([8], dialAn, '每天一次 <small>先 3 个商品试点</small>', '', [-1.0, -.1, 0]);
+  const token = makeDisc(); token.scale.setScalar(.7); plate.add(token);
+  softShadow(G8, 9, 6, 0, 0);
+  groups.push({
+    g: G8, cam: [1.5, 1, 16], look: [-4.0, -.2, 0],
+    update(t) {
+      const s = t * .45, i = Math.floor(s) % 4, k = ease(Math.min(1, (s % 1) * 1.6));
+      const a = Math.PI / 2 - (i + k) / 4 * Math.PI * 2;
+      token.position.set(Math.cos(a) * 3, Math.sin(a) * 3, .55); token.rotation.z = -t * 3;
+      const at = k > .98 ? (i + 1) % 4 : -1;
+      pucks.forEach((p, j) => { const on = j === at; p.userData.ring.material.emissiveIntensity += ((on ? 1.4 : 0) - p.userData.ring.material.emissiveIntensity) * .15; p.userData.lbl.el.classList.toggle('on', on); p.userData.lbl.el.classList.toggle('mute', !on); });
+      hand.rotation.z = -t * .5; dial.rotation.z = t * .1;
+      plate.rotation.y = mouse.x * .15; plate.rotation.x = .3 + mouse.y * .08;
+    }
+  });
+
+  /* 9 再往后：地球线框，东京到美国的航线上，新选的货正在路上 */
+  const G9 = chapterGroup(SP * 9);
+  const globe = new THREE.Group(); globe.scale.setScalar(.8); G9.add(globe);
+  const R = 4;
+  globe.add(new THREE.Mesh(new THREE.SphereGeometry(R * .995, 64, 32), new THREE.MeshLambertMaterial({ color: 0xfaf8f4, emissive: 0xf3efe8, emissiveIntensity: .75 })));
+  const lat = [], gmat = new THREE.LineBasicMaterial({ color: 0xc9c3b8, transparent: true, opacity: .9 });
+  const pushCircle = fn => { for (let k = 0; k < 96; k++) { lat.push(fn(k / 96)); lat.push(fn((k + 1) / 96)); } };
+  const ll = (la, lo, r = R) => { const ph = (90 - la) * Math.PI / 180, th = (lo + 180) * Math.PI / 180; return new THREE.Vector3(-r * Math.sin(ph) * Math.cos(th), r * Math.cos(ph), r * Math.sin(ph) * Math.sin(th)); };
+  for (let la = -75; la <= 75; la += 15) pushCircle(u => ll(la, u * 360 - 180, R * 1.002));
+  for (let lo = -180; lo < 180; lo += 15) pushCircle(u => ll(u * 180 - 90, lo, R * 1.002));
+  globe.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(lat), gmat));
+  softShadow(G9, 9, 6, 0, 0, .12);
+  const tokyo = ll(35.68, 139.69), us = ll(39.5, -98.35);
+  const arcPts = []; for (let k = 0; k <= 64; k++) { const u = k / 64; const v = tokyo.clone().normalize().lerp(us.clone().normalize(), u).normalize(); arcPts.push(v.multiplyScalar(R + Math.sin(u * Math.PI) * 1.6)); }
+  const arc = new THREE.CatmullRomCurve3(arcPts);
+  globe.add(baseTube(arc, .02, new THREE.MeshBasicMaterial({ color: 0xf7c8a8 })));
+  globe.add(flowTube(arc, .045, 4, 0xffffff, .5));
+  const pin = p => { const g = new THREE.Group(); g.position.copy(p); g.lookAt(p.clone().multiplyScalar(2)); g.add(new THREE.Mesh(new THREE.CircleGeometry(.12, 32), M.or)); const r = new THREE.Mesh(new THREE.RingGeometry(.2, .24, 48), new THREE.MeshBasicMaterial({ color: 0xf2681d, transparent: true, side: THREE.DoubleSide })); g.add(r); globe.add(g); return r; };
+  const pinA = pin(tokyo), pinB = pin(us);
+  const travelers = [0, 1, 2].map(i => { const c = makeCase(i * 3); c.scale.setScalar(.5); globe.add(c); return c; });
+  label([9], pinA.parent, '东京 <small>按策略找货</small>', 'flip', [-.3, .6, 0]);
+  label([9], pinB.parent, '美国 <small>审批后上架</small>', '', [.3, .3, 0]);
+  const mid = tokyo.clone().add(us).normalize();
+  globe.quaternion.setFromUnitVectors(mid, new THREE.Vector3(0, .35, 1).normalize());
+  const baseQ = globe.quaternion.clone();
+  groups.push({
+    g: G9, cam: [-2, 1.2, 15.5], look: [3.9, .3, 0],
+    update(t) {
+      travelers.forEach((c, i) => { const u = (t * .07 + i / 3) % 1, p = arc.getPointAt(u), tan = arc.getTangentAt(u); c.position.copy(p); c.lookAt(p.clone().add(tan)); c.rotateY(Math.PI / 2); c.scale.setScalar(Math.max(.001, .5 * sstep(0, .06, u) * (1 - sstep(.94, 1, u)))); });
+      [pinA, pinB].forEach((r, k) => { const q = (t * .6 + k * .5) % 1; r.scale.setScalar(1 + q * 2.5); r.material.opacity = 1 - q; });
+      globe.quaternion.copy(baseQ); globe.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.sin(t * .15) * .25 + mouse.x * .2);
+    }
+  });
+}
+
+/* ---------- 交互与循环 ---------- */
+const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+addEventListener('pointermove', e => { mouse.tx = e.clientX / innerWidth * 2 - 1; mouse.ty = -(e.clientY / innerHeight * 2 - 1); }, { passive: true });
+let narrow = false;
+function resize() {
+  const w = innerWidth, h = innerHeight; narrow = w < 900;
+  if (groups[1]) groups[1].g.scale.setScalar(narrow ? .24 : .3);
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = narrow ? 50 : 38; camera.updateProjectionMatrix(); measure();
+}
+addEventListener('resize', resize);
+const progressEl = document.getElementById('progress');
+let activeCh = -1;
+function updateChrome() {
+  const f = chapterF(), cur = Math.round(f);
+  progressEl.style.transform = `scaleX(${f / (N - 1)})`;
+  if (cur !== activeCh) { activeCh = cur; railLinks.forEach((a, i) => { a.classList.toggle('on', i === cur); if (i === cur) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); }); }
+}
+addEventListener('scroll', updateChrome, { passive: true });
+
+const camPos = new THREE.Vector3(), camLook = new THREE.Vector3(), tPos = new THREE.Vector3(), tLook = new THREE.Vector3();
+const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3(), tmpD = new THREE.Vector3();
+function anchor(i, outPos, outLook) {
+  const c = groups[i], gp = c.g.position, k = narrow ? 1.8 : 1;
+  outPos.set(gp.x + c.cam[0] * (narrow ? .3 : 1), gp.y + c.cam[1], gp.z + c.cam[2] * k);
+  outLook.set(gp.x + (narrow ? 0 : c.look[0]), gp.y + c.look[1] - (narrow ? (i ? 1.8 : 2.2) : 0), gp.z + c.look[2]);
+}
+const clock = new THREE.Clock(); let time = 0, first = true;
+const proj = new THREE.Vector3();
+function frame() {
+  const dt = Math.min(clock.getDelta(), .05); time += dt * (reduce ? .25 : 1);
+  mouse.x += (mouse.tx - mouse.x) * .05; mouse.y += (mouse.ty - mouse.y) * .05;
+  const f = chapterF(), i0 = Math.min(N - 2, Math.floor(f)), fr = f - i0, e = ease(fr);
+  anchor(i0, tmpA, tmpB); anchor(i0 + 1, tmpC, tmpD);
+  tPos.lerpVectors(tmpA, tmpC, e); tLook.lerpVectors(tmpB, tmpD, e);
+  tPos.y += Math.sin(fr * Math.PI) * 3.2; tPos.z += Math.sin(fr * Math.PI) * 4;
+  tPos.x += mouse.x * .5; tPos.y += mouse.y * .3;
+  const k = first || reduce ? 1 : 1 - Math.exp(-dt * 5); first = false;
+  camPos.lerp(tPos, k); camLook.lerp(tLook, k);
+  camera.position.copy(camPos); camera.lookAt(camLook);
+  ground.material.uniforms.uCam.value.copy(camPos);
+  flowMats.forEach(o => o.m.map.offset.x -= dt * o.speed * (reduce ? .2 : 1));
+  const updated = new Set();
+  groups.forEach((c, i) => {
+    const pr = Math.max(0, 1 - Math.abs(f - i));
+    const host = c.shared || c;
+    const near = Math.abs(f - i) < 1.15 || (c.shared && Math.abs(f - (i - 1)) < 1.15);
+    if (near) host.g.visible = true;
+    if (near && !updated.has(host)) { updated.add(host); host.update(time, Math.max(pr, host === c ? 0 : 0), f); }
+  });
+  groups.forEach(c => { const host = c.shared || c; if (!updated.has(host)) host.g.visible = false; });
+  renderer.render(scene, camera);
+  const W = innerWidth, H = innerHeight;
+  labels.forEach(L => {
+    let pr = 0; L.ch.forEach(ci => pr = Math.max(pr, 1 - Math.abs(f - ci) * 2.2));
+    if (pr <= 0.01 || !groups[L.ch[0]] || !(groups[L.ch[0]].shared || groups[L.ch[0]]).g.visible) { if (L.vis) { L.el.style.opacity = 0; L.vis = 0; } return; }
+    L.obj.updateWorldMatrix(true, false);
+    proj.copy(L.off).applyMatrix4(L.obj.matrixWorld); proj.project(camera);
+    const x = (proj.x * .5 + .5) * W, y = (-proj.y * .5 + .5) * H;
+    const lw = L.w || (L.w = L.el.offsetWidth);
+    if (proj.z > 1 || (L.flip ? x - lw < 8 || x > W - 8 : x < 8 || x + lw > W - 8)) { L.el.style.opacity = 0; L.vis = 0; return; }
+    L.el.style.transform = `translate3d(${x.toFixed(1)}px,${(y - 12).toFixed(1)}px,0)${L.flip ? ' translateX(-100%)' : ''} scale(${.92 + pr * .08})`;
+    L.el.style.opacity = Math.min(1, pr).toFixed(2); L.vis = 1;
+  });
+  requestAnimationFrame(frame);
+}
+
+// 定价、里程碑等组需要本章进度：把 update 包一层，按章节号传进去
+function wrapProgress() {
+  groups.forEach((c, i) => {
+    if (c.shared) return; const u = c.update.bind(c);
+    c.update = (t, _pr, f) => u(t, Math.max(0, 1 - Math.abs(f - i)), f);
+  });
+}
+
+const fontsReady = Promise.race([
+  Promise.all(['800 100px "Plus Jakarta Sans"', '700 22px "Plus Jakarta Sans"', '700 30px "Noto Sans JP"', '500 15px "JetBrains Mono"'].map(s => document.fonts.load(s, s.includes('JP') ? '帯日本盤' : 'OE'))),
+  new Promise(r => setTimeout(r, 2500)),
+]).catch(() => { });
+fontsReady.then(() => {
+  build(); wrapProgress(); resize(); updateChrome();
+  if (location.hash) { const s = document.getElementById(location.hash.slice(1)); if (s) { const idx = sections.indexOf(s); if (idx >= 0) scrollTo(0, centers[idx]); } }
+  requestAnimationFrame(frame);
+});
+})();
+</script>
+</body></html>
