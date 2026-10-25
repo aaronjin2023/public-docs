@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="aaronjin2023 的公开资料库，用于分享 HTML 文档、研究报告与项目说明。">
+  <title>公开资料 · public-docs</title>
+  <link rel="canonical" href="https://docs.myakuraku.com/">
+  <style>
+    :root { color-scheme: light; --paper: #e6dbc7; --ink: #062b8a; --field: #ddd0b9; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 18px; line-height: 1.6; }
+    a { color: inherit; text-underline-offset: .2em; }
+    a:focus-visible { outline: 3px solid var(--ink); outline-offset: 6px; }
+    a:hover { text-decoration-thickness: 3px; }
+    .frame { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+    header { display: flex; justify-content: space-between; gap: 24px; padding-block: 28px; }
+    header a { text-decoration: none; }
+    main { padding-block: 60px 72px; }
+    h1 { margin: 0 0 32px; font-size: clamp(64px, 10vw, 128px); font-weight: 800; letter-spacing: -.04em; line-height: 1.05; }
+    .intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 36px; }
+    .intro p { margin: 0; max-width: 30em; font-size: 22px; }
+    .action { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; flex-shrink: 0; padding: 12px 22px; background: var(--ink); color: var(--paper); text-decoration: none; }
+    .action:hover { text-decoration: underline; }
+    .collection { margin-top: 72px; padding: 32px; background: var(--field); }
+    h2 { margin: 0 0 12px; font-size: 24px; line-height: 1.3; }
+    .collection p { margin: 0; max-width: 42em; }
+    footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding-block: 24px 36px; font-size: 16px; }
+    @media (max-width: 600px) {
+      .frame { width: calc(100% - 40px); }
+      header { font-size: 16px; padding-block: 24px; }
+      main { padding-block: 36px 48px; }
+      .intro { display: block; }
+      .intro p { font-size: 20px; }
+      .action { margin-top: 28px; }
+      .collection { margin-top: 48px; padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="frame">
+    <a href="/" aria-label="public-docs 首页">public-docs</a>
+    <a href="https://github.com/aaronjin2023">aaronjin2023</a>
+  </header>
+  <main class="frame" id="main">
+    <h1>公开资料</h1>
+    <div class="intro">
+      <p>用于分享 HTML 文档、研究报告与项目说明。<br>让资料有一个可以直接打开的地址。</p>
+      <a class="action" href="https://github.com/aaronjin2023/public-docs">浏览资料仓库</a>
+    </div>
+    <section class="collection" aria-labelledby="collection-title">
+      <h2 id="collection-title">资料目录</h2>
+      <p>首批资料整理中。后续公开的文档将在这里列出，也可以前往仓库查看已上传的文件。</p>
+    </section>
+  </main>
+  <footer class="frame">
+    <span>docs.myakuraku.com</span>
+    <a href="https://github.com/aaronjin2023/public-docs/blob/main/README.md">资料上传说明</a>
+  </footer>
+</body>
+</html>

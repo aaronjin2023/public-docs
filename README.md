@@ -1,0 +1,29 @@
+# Public docs
+
+公开资料与 HTML 文档。
+
+网站：https://docs.myakuraku.com
+
+仓库：https://github.com/aaronjin2023/public-docs
+
+## 上传资料
+
+直接在 GitHub 网页选择 **Add file → Upload files**，或通过 Git 推送到 `main`。GitHub Pages 从 `main` 分支根目录发布，提交后会自动更新网站，无需安装构建工具。
+
+建议按用途放置文件：
+
+```text
+index.html                   网站首页及资料索引
+reports/example/index.html   报告
+guides/example/index.html    说明与教程
+projects/example/index.html  项目公开资料
+assets/                      图片、样式等共享资源
+```
+
+例如 `reports/example/index.html` 对应 `https://docs.myakuraku.com/reports/example/`。新增资料后，在首页添加相应链接；只上传文件不会自动生成目录。HTML 引用的图片、CSS、JavaScript 需要一起上传，推荐使用相对路径。
+
+`.nojekyll` 让文件直接作为静态内容发布。保留根目录的 `CNAME`，其内容为 `docs.myakuraku.com`；同时保留仓库 Settings → Pages 中的自定义域名设置。
+
+## 公开范围
+
+仓库及网站均公开，包括提交历史。仅上传允许公开分享的内容；没有明确许可的第三方资料不会因为放在此仓库中而自动获得开放许可。当前未对所有资料统一指定许可证，各资料以自身声明为准。
