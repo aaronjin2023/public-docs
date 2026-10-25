@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="跨领域热点观察：三种阅读视角、原始证据和定期发布的数据快照。">
+  <title>观潮 · 跨领域热点观察</title>
+  <link rel="stylesheet" href="styles.css?v=a9a5e3f36e62">
+  <meta name="guanchao-snapshot" content="data/snapshot.a0ea02494700341f.json">
+  <script src="static-client.js?v=ee327dec326f" defer></script>
+  <script src="app.js?v=68153995393b" defer></script>
+  <script src="research.js?v=00377e6ebf0f" defer></script>
+</head>
+<body class="public-view">
+  <a class="skip" href="#main">跳到候选列表</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="领域筛选">
+      <div class="brand"><svg width="27" height="27" viewBox="0 0 28 28" aria-hidden="true"><path d="M2 10c4-6 8 6 12 0s8 6 12 0M2 18c4-6 8 6 12 0s8 6 12 0" fill="none" stroke="currentColor" stroke-width="2.4"/></svg><span>观潮</span></div>
+      <p class="scope-label">跨领域热点观察</p>
+      <div id="navigation"></div><label class="mobile-navigation">浏览范围<select id="mobile-navigation" aria-label="浏览范围"></select></label>
+      <div class="side-bottom"><span class="side-label">公开快照</span><p>免费公开来源<br>每 15 分钟采集<br>每 4 小时分析 · JST</p></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar"><span>实验家 / 观潮</span><span id="sample-time"></span></header>
+      <main id="main" class="sheet">
+        <div class="title-row"><div><h1>热点候选</h1><p class="subtitle">从不同领域发现线索，把判断留在证据之后。</p></div><span class="sample-label">公开阅读版</span></div>
+        <div class="snapshot-note" id="system-note" role="status">正在读取公开数据快照…</div>
+        <div class="view-tabs" role="group" aria-label="阅读视角"><button data-view="opportunity" aria-pressed="false">机会研究</button><button data-view="editorial" aria-pressed="false">内容选题</button><button data-view="news" aria-pressed="true">资讯阅读</button></div>
+        <section class="slice-section" aria-labelledby="slice-heading">
+          <div class="section-title"><h2 id="slice-heading">换一个角度，看同一批事件</h2><button id="threads-toggle" type="button" aria-expanded="false" aria-controls="threads-panel">展开事件脉络</button></div>
+          <div class="slice-controls"><label>切片维度 <select id="slice-dimension" aria-label="切片维度"></select></label><span id="research-count" role="status"></span></div><div id="slice-values" class="slice-values" aria-label="切片筛选"></div>
+          <div id="threads-panel" hidden><p class="coverage-caption" id="research-note"></p><div class="relation-filters"><label>关联窗口（按报道）<select id="relation-days" aria-label="关联时间窗口"><option value="7">近7天</option><option value="30">近30天</option><option value="all">全部积累</option></select></label><label>关系类型 <select id="relation-type" aria-label="关系类型"><option value="">全部关系</option></select></label><label>判断状态 <select id="relation-status" aria-label="判断状态"><option value="">全部状态</option></select></label></div>
+            <div class="thread-layout"><div><div id="thread-graph" aria-label="事件关系图"></div><p id="graph-caption" class="coverage-caption"></p><div class="path-controls"><label>起点<select id="path-from" aria-label="路径起点"></select></label><label>终点<select id="path-to" aria-label="路径终点"></select></label><button id="find-path" type="button">寻找中间的线</button></div><div id="thread-path" role="status"></div></div><div id="relation-list" class="relation-list" aria-label="关系依据清单"></div></div>
+          </div>
+        </section>
+        <div class="toolbar">
+          <label class="search"><span>搜索</span><input id="search" type="search" placeholder="事件、关键词或来源" autocomplete="off"></label>
+          <label class="priority-control"><input id="event-only" type="checkbox">暂不看低优先级</label>
+          <span class="view-count" id="view-count" role="status" aria-live="polite"></span>
+        </div>
+        <div class="reading-grid">
+          <section class="stream" aria-label="候选事件列表"><div class="stream-heading"><span>事件与来源</span><span>更新于 · 日本时间</span></div><div id="events"></div><div class="pagination"><button id="previous" type="button">上一页</button><span id="page-label"></span><button id="next" type="button">下一页</button></div></section>
+          <section id="detail" class="detail" aria-label="事件证据详情" tabindex="-1"></section>
+        </div>
+        <section class="coverage" aria-labelledby="coverage-heading"><div class="section-title"><h2 id="coverage-heading">来源覆盖</h2><span id="coverage-total"></span></div><p class="coverage-caption">中文、日本及国际免费入口；语言与地区分别标注。覆盖并不完整，榜单观测与新闻报道分开判断。</p><div id="sources" class="source-grid"></div></section>
+        <section class="coverage" aria-label="数据与核验"><div class="section-title"><h2>数据与核验</h2><button id="review-open" type="button">今日抽查</button></div><p id="pilot-note" class="coverage-caption"></p><div id="review-queue"></div></section><footer>定期发布快照 · 收藏仅保存在当前浏览器 · AI 判断与来源陈述分开呈现 · 优先级不等于实测热度 · 机会假设尚未验证</footer>
+      </main>
+    </div>
+  </div>
+  <noscript><p class="noscript">请启用 JavaScript 浏览公开事件与研究线索。</p></noscript>
+</body>
+</html>

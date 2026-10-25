@@ -1,0 +1,37 @@
+{
+  "product": "guanchao",
+  "schema_version": 1,
+  "generated_at": "2026-10-25T12:37:40.526776+00:00",
+  "events": 236,
+  "nodes": 170,
+  "relations": 85,
+  "snapshot_sha256": "a0ea02494700341f90167e21ce1acbb6191fd4b2981342eccaba3b086109378d",
+  "files": {
+    "index.html": "00fff2d089b02adc6676ef9d29ab0e63e281ca00a09b5400721724cc577772d1",
+    "styles.css": "a9a5e3f36e62e9ac901efab2889fcb279a0b5741f5c492f9bc5d4f77443e8c61",
+    "research.js": "00377e6ebf0ff00b0aa3a36c58c68289ea4742a7ce41d8984088cb221c466449",
+    ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    ".guanchao-static": "46a09802c303a488e85289ceac7b8a50d2669b6e55d4bb8b10663ee9c7b8dd70",
+    "app.js": "68153995393b993be6cce507cd6c0bf9f31d4db7fcdde084c165e5d7d731d617",
+    "static-client.js": "ee327dec326fce7cd194a5c59f342f0d896e1e3a7d600b253e323dbfd30c8a29",
+    "data/snapshot.a0ea02494700341f.json": "a0ea02494700341f90167e21ce1acbb6191fd4b2981342eccaba3b086109378d",
+    "assets/plex-500.ttf": "6f7a8c4219e021ff7c9131bc5f1f7af97bcd1436a59578d444a8cb92e9791742",
+    "assets/OFL.txt": "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da",
+    "assets/plex-600.ttf": "5311c66fd6d04ae45671236f7eae667b671c06c1dc7e88d52c206e5fadd0fb21",
+    "assets/plex-400.ttf": "6dbe082463cf749cfa057d45c3048c90f4df031496498e5b5bdfd0b6babb9d16"
+  },
+  "file_sizes": {
+    "index.html": 5849,
+    "styles.css": 18394,
+    "research.js": 12999,
+    ".nojekyll": 0,
+    ".guanchao-static": 19,
+    "app.js": 16777,
+    "static-client.js": 6377,
+    "data/snapshot.a0ea02494700341f.json": 1393463,
+    "assets/plex-500.ttf": 205292,
+    "assets/OFL.txt": 4456,
+    "assets/plex-600.ttf": 205284,
+    "assets/plex-400.ttf": 205252
+  }
+}
