@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenEC 商品页原型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* 基础样式原样取自 prototype/index.html；选择器样式与规则页 prototype/rule-page.html 共用 */
+:root{
+  --canvas:#FAF9F6; --surface:#FFFFFF; --sunk:#F3F1EC; --ink:#111827; --ink-2:#4B5160; --ink-3:#8C909B; --line:#ECEAE4; --line-2:#DEDBD3;
+  --or:#F2681D; --or-hi:#FF8A3D; --or-deep:#B9470A; --or-soft:#FFF0E6; --or-ink:#9A3505; --on-or:#FFFFFF;
+  --screen:#12151C; --screen-2:#1B1F29; --screen-ink:#F4F1EC; --screen-mute:#9AA0AD; --screen-line:#2A2F3B;
+  --ok:#15885A; --ok-soft:#E3F5EC; --warn:#B26A00; --warn-soft:#FFF3DB; --bad:#C8372D; --bad-soft:#FDE8E6; --mute-soft:#F1F0EC; --violet:#6D5BD0;
+  --shadow:0 1px 2px rgba(17,24,39,.05),0 10px 30px -12px rgba(17,24,39,.18);
+  --glow:0 10px 30px -8px rgba(242,104,29,.55);
+  --font-display:"Plus Jakarta Sans","Noto Sans SC",sans-serif;
+  --font-body:"Noto Sans SC",-apple-system,BlinkMacSystemFont,"Helvetica Neue","Hiragino Sans",Arial,sans-serif;
+  --font-jp:"Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --spring:cubic-bezier(.34,1.56,.64,1); --out:cubic-bezier(.16,1,.3,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --canvas:#0C0D10; --surface:#15171C; --sunk:#1C1F26; --ink:#F3F1EC; --ink-2:#AEB2BC; --ink-3:#757A86; --line:#23262E; --line-2:#30343E;
+  --or:#FF7A2E; --or-hi:#FF9A55; --or-deep:#E05A12; --or-soft:#3A2114; --or-ink:#FFB27F; --on-or:#160A03;
+  --screen:#07080B; --screen-2:#12141A; --screen-line:#22252E;
+  --ok:#3CCB8A; --ok-soft:#10291F; --warn:#F2B347; --warn-soft:#33260E; --bad:#FF7468; --bad-soft:#3A1715; --mute-soft:#1E2128; --violet:#9B8CFF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -12px rgba(0,0,0,.6); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --canvas:#0C0D10; --surface:#15171C; --sunk:#1C1F26; --ink:#F3F1EC; --ink-2:#AEB2BC; --ink-3:#757A86; --line:#23262E; --line-2:#30343E;
+  --or:#FF7A2E; --or-hi:#FF9A55; --or-deep:#E05A12; --or-soft:#3A2114; --or-ink:#FFB27F; --on-or:#160A03;
+  --screen:#07080B; --screen-2:#12141A; --screen-line:#22252E;
+  --ok:#3CCB8A; --ok-soft:#10291F; --warn:#F2B347; --warn-soft:#33260E; --bad:#FF7468; --bad-soft:#3A1715; --mute-soft:#1E2128; --violet:#9B8CFF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -12px rgba(0,0,0,.6); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--canvas);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.7;letter-spacing:.01em;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--or);outline-offset:2px}
+::selection{background:var(--or);color:#fff}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:0}
+.muted{color:var(--ink-2)} .faint{color:var(--ink-3)}
+[lang="ja"]{font-family:var(--font-jp)}
+
+/* 外壳 */
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100%}
+.rail{background:var(--surface);border-right:1px solid var(--line);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:22px 14px calc(16px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));z-index:20}
+.logo{display:block;height:30px;width:auto;margin:0 10px 22px;align-self:flex-start}
+.store{margin:0 2px 14px;padding:12px;border-radius:14px;background:var(--sunk);display:flex;align-items:center;gap:10px;border:0;text-align:left;cursor:pointer;width:calc(100% - 4px)}
+.store small{display:block;color:var(--ink-3);font-size:11px}
+.live{position:relative;width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+.live::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--ok);animation:ping 1.8s var(--out) infinite}
+@keyframes ping{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.8);opacity:0}}
+.search-btn{margin:0 2px 8px;display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink-3);cursor:pointer;font-size:13px;transition:border-color .2s}
+.search-btn:hover{border-color:var(--or);color:var(--ink)}
+.search-btn kbd{margin-left:auto}
+.nav{position:relative;display:flex;flex-direction:column;gap:2px}
+.nav-ind{position:absolute;left:0;right:0;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--or-hi),var(--or) 50%,var(--or-deep));box-shadow:var(--glow);transition:transform .45s var(--spring);z-index:0}
+.nav-label{font-size:10.5px;letter-spacing:.18em;color:var(--ink-3);padding:16px 14px 6px}
+.nav button{position:relative;z-index:1;display:flex;align-items:center;gap:12px;height:42px;padding:0 14px;border-radius:12px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;text-align:left;font-size:14px;transition:color .25s}
+.nav button:hover:not([aria-current]){background:var(--sunk);color:var(--ink)}
+.nav button[aria-current="page"]{color:#fff;font-weight:500}
+.nav .badge{margin-left:auto;font-family:var(--font-mono);font-size:11px;padding:1px 8px;border-radius:999px;background:var(--or-soft);color:var(--or-ink);transition:background .25s,color .25s}
+.nav button[aria-current="page"] .badge{background:rgba(255,255,255,.22);color:#fff}
+.rail-foot{margin-top:auto;padding:14px 10px 0;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;font-size:13px}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--or-hi),var(--or-deep));color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+main{min-width:0}
+.page{max-width:1340px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (min-width:901px){.page{padding-left:40px;padding-right:max(40px,env(safe-area-inset-right,0px))}}
+.enter{animation:pageIn .55s var(--out) both}
+@keyframes pageIn{from{opacity:.25;transform:translateY(14px);filter:blur(4px)}}
+.stagger>*{animation:rise .6s var(--out) both}
+.stagger>*:nth-child(2){animation-delay:.06s}.stagger>*:nth-child(3){animation-delay:.12s}.stagger>*:nth-child(4){animation-delay:.18s}.stagger>*:nth-child(5){animation-delay:.24s}
+@keyframes rise{from{opacity:.2;transform:translateY(16px)}}
+.ph{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:24px}
+.eyebrow{font-family:var(--font-display);font-size:12px;letter-spacing:.18em;color:var(--or);font-weight:700;text-transform:uppercase;margin:0 0 8px}
+.ph h1{font-weight:700;font-size:32px;line-height:1.3;letter-spacing:.01em;margin:0;text-wrap:balance}
+.ph p{margin:8px 0 0;color:var(--ink-2);max-width:62ch}
+.ph .actions{display:flex;gap:10px;flex-wrap:wrap}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .rail{position:sticky;top:0;height:auto;flex-direction:row;align-items:center;gap:6px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));padding-top:calc(10px + env(safe-area-inset-top,0px));overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .logo{height:22px;margin:0 6px 0 0;align-self:center}
+  .store,.rail-foot,.nav-label,.search-btn,.nav-ind,.proto{display:none}
+  .nav{flex-direction:row} .nav button{white-space:nowrap;height:36px;padding:0 12px} .nav .badge{display:none}
+  .nav button[aria-current="page"]{background:var(--or);color:#fff}
+  .ph h1{font-size:26px}
+}
+
+/* 控件 */
+.btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;border-radius:11px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;font-weight:500;font-size:14px;white-space:nowrap;transition:transform .2s var(--spring),border-color .2s,box-shadow .2s,background .2s}
+.btn:hover{border-color:var(--ink-3);transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn.primary{background:linear-gradient(135deg,var(--or-hi),var(--or) 45%,var(--or-deep));border-color:transparent;color:#fff;box-shadow:var(--glow)}
+.btn.primary::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);animation:shine 3.6s ease-in-out infinite}
+@keyframes shine{0%,60%{left:-60%}100%{left:130%}}
+.btn.quiet{border-color:transparent;background:transparent;color:var(--ink-2)} .btn.quiet:hover{background:var(--sunk);color:var(--ink)}
+.btn.glass{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff;backdrop-filter:blur(8px)} .btn.glass:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.32)}
+.btn.sm{height:32px;padding:0 12px;font-size:13px;border-radius:9px}
+.btn[aria-disabled="true"]{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none} .btn[aria-disabled="true"]::after{display:none}
+kbd{font-family:var(--font-mono);font-size:10.5px;line-height:1;padding:3px 6px;border-radius:5px;border:1px solid currentColor;opacity:.65}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;background:var(--mute-soft);color:var(--ink-2)}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.plain::before{display:none}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.or{background:var(--or-soft);color:var(--or-ink)}
+.pill.pulse::before{animation:blink 1.4s ease-in-out infinite} @keyframes blink{50%{opacity:.25}}
+.card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px;min-width:0;transition:transform .35s var(--out),box-shadow .35s,border-color .35s}
+.card.hover:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--line-2)}
+.spot::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(242,104,29,.1),transparent 45%);opacity:0;transition:opacity .3s}
+.spot:hover::before{opacity:1}
+.card h2{font-size:13px;font-weight:500;color:var(--ink-2);margin:0 0 16px;display:flex;align-items:center;gap:8px}
+.card h2 .r{margin-left:auto}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.grid-main{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:18px}
+@media (max-width:1060px){.grid-main{grid-template-columns:1fr}}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.input{height:40px;border-radius:11px;border:1px solid var(--line-2);background:var(--surface);padding:0 14px;font:inherit;color:var(--ink);width:100%;min-width:0;transition:border-color .2s,box-shadow .2s}
+.input:focus{outline:none;border-color:var(--or);box-shadow:0 0 0 4px var(--or-soft)}
+textarea.input{height:auto;padding:10px 14px;resize:vertical;line-height:1.5}
+label.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2);min-width:0}
+.switch{width:46px;height:28px;border-radius:999px;border:0;background:var(--line-2);position:relative;cursor:pointer;flex:none;transition:background .3s,box-shadow .3s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:transform .45s var(--spring)}
+.switch[aria-checked="true"]{background:var(--or);box-shadow:var(--glow)} .switch[aria-checked="true"]::after{transform:translateX(18px)}
+.switch.big{width:84px;height:46px;background:#3A3F4C} .switch.big::after{width:38px;height:38px;top:4px;left:4px} .switch.big[aria-checked="true"]{background:var(--or)} .switch.big[aria-checked="true"]::after{transform:translateX(38px)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);transition:all .25s var(--out)}
+.chip .c{font-family:var(--font-mono);font-size:11px;color:var(--ink-3)}
+.chip:hover{border-color:var(--or);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--canvas);transform:scale(1.03)} .chip[aria-pressed="true"] .c{color:var(--or-hi)}
+.seg{display:inline-flex;padding:4px;border-radius:13px;background:var(--sunk);gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;height:32px;padding:0 14px;border-radius:9px;cursor:pointer;font-size:13px;color:var(--ink-2);transition:all .25s}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 2px 8px -2px rgba(17,24,39,.2)}
+.tabs{display:flex;gap:26px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+.tabs button{border:0;background:none;padding:12px 0;cursor:pointer;color:var(--ink-2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .2s}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--or);font-weight:500}
+/* 表格 */
+.tablewrap{background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.tablescroll{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;min-width:960px}
+.t th{text-align:left;font-weight:500;font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;padding:13px 18px;border-bottom:1px solid var(--line);white-space:nowrap}
+.t td{padding:12px 18px;border-bottom:1px solid var(--line);vertical-align:middle}
+.t tbody tr:last-child td{border-bottom:0}
+.t tbody tr{cursor:pointer;transition:background .2s;animation:rowIn .5s var(--out) both}
+.t tbody tr:hover{background:linear-gradient(90deg,var(--or-soft),transparent 70%)}
+.t tbody tr:hover .cover{transform:rotate(-5deg) scale(1.1)}
+@keyframes rowIn{from{opacity:.2;transform:translateX(-10px)}}
+.t .r{text-align:right}
+.tfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-top:1px solid var(--line);flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.pager{display:flex;gap:4px;align-items:center}
+.pager button{min-width:32px;height:32px;border-radius:9px;border:0;background:transparent;cursor:pointer;font-family:var(--font-mono);font-size:12px;color:var(--ink-2);transition:all .2s}
+.pager button:hover{background:var(--sunk)} .pager button[aria-current="page"]{background:var(--ink);color:var(--canvas)}
+.pager button:disabled{opacity:.3;cursor:default}
+.tc{display:flex;gap:14px;align-items:center;min-width:0}
+.tc .tt{min-width:0}
+.tc .t1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:380px;font-weight:500}
+.tc .t2{font-size:11px;color:var(--ink-3);margin-top:2px}
+svg.mini{display:block;width:92px;height:28px;overflow:visible}
+
+/* 封面：日版 CD + 帯 */
+.cover{position:relative;flex:none;border-radius:5px;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.08),0 6px 14px -6px rgba(17,24,39,.45);transition:transform .45s var(--spring)}
+.cover .disc{position:absolute;border-radius:50%;right:-18%;top:12%;width:76%;aspect-ratio:1;background:radial-gradient(circle,rgba(0,0,0,.35) 0 9%,transparent 10% 30%,rgba(255,255,255,.18) 31% 32%,transparent 33%),conic-gradient(from 30deg,rgba(255,255,255,.25),rgba(255,255,255,0) 30%,rgba(255,255,255,.2) 55%,rgba(255,255,255,0) 80%)}
+.cover .ini{position:absolute;left:26%;bottom:9%;font-family:var(--font-display);font-weight:700;color:rgba(255,255,255,.94);letter-spacing:0;line-height:1.1}
+.cover .obi{position:absolute;left:0;top:0;bottom:0;width:20%;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;font-family:var(--font-mono);letter-spacing:.06em;overflow:hidden}
+
+/* 弹窗 */
+.overlay{position:fixed;inset:0;background:rgba(10,11,15,.42);backdrop-filter:blur(10px) saturate(1.2);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:calc(5vh + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) calc(5vh + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));overflow-y:auto;animation:fade .2s ease-out}
+.modal{background:var(--canvas);border-radius:26px;width:100%;max-width:1060px;box-shadow:0 40px 100px -20px rgba(0,0,0,.5);animation:pop .45s var(--spring);min-width:0;border:1px solid var(--line)}
+.modal-h{display:flex;align-items:center;gap:12px;padding:20px 24px;border-bottom:1px solid var(--line)}
+.modal-h h3{margin:0;font-size:18px;font-weight:600;letter-spacing:.01em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-h .x{margin-left:auto}
+.modal-b{padding:24px;display:flex;flex-direction:column;gap:18px}
+.modal-f{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;padding:16px 24px;border-top:1px solid var(--line)}
+@keyframes fade{from{opacity:0}} @keyframes pop{from{transform:translateY(24px) scale(.96);opacity:0}}
+.toast{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:80;background:var(--screen);color:#fff;padding:14px 18px;border-radius:14px;font-size:13px;box-shadow:0 20px 40px -10px rgba(0,0,0,.5);display:flex;gap:10px;align-items:center;animation:toastIn .5s var(--spring);max-width:calc(100vw - 48px)}
+.toast .i{width:22px;height:22px;border-radius:50%;background:var(--or);display:grid;place-items:center;flex:none}
+@keyframes toastIn{from{transform:translateY(30px) scale(.9);opacity:0}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.draw{stroke-dashoffset:0}.verdict .ring{stroke-dashoffset:0}}
+.field,div.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2);min-width:0}
+.field .flab{font-size:12.5px;color:var(--ink-2)}
+.field .h{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+.field .err{font-size:11.5px;color:var(--bad);line-height:1.5}
+.input.bad,.pf.bad{border-color:var(--bad)}
+select.input{appearance:none;-webkit-appearance:none;padding-right:34px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238C909B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.btn.danger{color:var(--bad)} .btn.danger:hover{background:var(--bad-soft);color:var(--bad)}
+.btn.primary.danger{color:#fff;background:var(--bad);box-shadow:none} .btn.primary.danger::after{display:none}
+
+
+/* 选择器（店铺 / 类别 / 包装 / 标签） */
+.pick{position:relative}
+.pf{min-height:38px;border-radius:11px;border:1px solid var(--line-2);background:var(--surface);padding:4px 34px 4px 5px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;cursor:pointer;position:relative;transition:border-color .2s,box-shadow .2s}
+.pf:hover{border-color:var(--ink-3)}
+.pf.open,.pf:focus-visible{border-color:var(--or);box-shadow:0 0 0 4px var(--or-soft);outline:none}
+.pf .ph0{color:var(--ink-3);font-size:13px;padding-left:8px}
+.pf .chev{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--ink-3);display:inline-flex;transition:transform .25s var(--out)}
+.pf.open .chev{transform:translateY(-50%) rotate(180deg)}
+.ptag{display:inline-flex;align-items:center;gap:6px;max-width:100%;height:28px;padding:0 3px 0 9px;border-radius:8px;background:var(--sunk);font-size:12.5px;color:var(--ink);min-width:0;animation:tagIn .3s var(--spring)}
+@keyframes tagIn{from{transform:scale(.85);opacity:0}}
+.ptag .tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:360px}
+.ptag .tx i{font-style:normal;color:var(--ink-3);padding:0 3px}
+.ptag .n{font-family:var(--font-mono);font-size:11px;color:var(--ink-3)}
+.ptag .whole{font-size:10.5px;color:var(--or-ink);background:var(--or-soft);padding:0 6px;border-radius:5px;line-height:18px;white-space:nowrap}
+.ptag button{border:0;background:transparent;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;cursor:pointer;color:var(--ink-3);flex:none}
+.ptag button:hover{background:var(--line-2);color:var(--ink)}
+.more{font-size:12px;color:var(--ink-2);padding:0 6px;font-family:var(--font-mono)}
+.pop{position:absolute;z-index:40;top:calc(100% + 6px);left:0;width:max(100%,320px);background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px -18px rgba(17,24,39,.35),0 1px 2px rgba(17,24,39,.06);animation:popIn .22s var(--out);overflow:hidden}
+.pop.wide{width:640px;max-width:calc(100vw - 300px)}
+@keyframes popIn{from{opacity:0;transform:translateY(-4px) scale(.99)}}
+.pop-s{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);color:var(--ink-3)}
+.pop-s input{border:0;outline:none;background:transparent;font:inherit;color:var(--ink);flex:1;min-width:0;height:30px}
+.pop-s .btn{flex:none}
+.pop-tip{padding:8px 14px;font-size:12px;color:var(--ink-2);background:var(--sunk);line-height:1.6;display:flex;gap:8px}
+.pop-tip svg{color:var(--or);flex:none;margin-top:2px}
+.pop-l{max-height:340px;overflow-y:auto;padding:6px;list-style:none;margin:0;overscroll-behavior:contain}
+.pop-f{display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-2)}
+.pop-f .r{margin-left:auto;display:flex;gap:6px}
+.pop-l .none{padding:24px 12px;text-align:center;color:var(--ink-3);font-size:13px}
+.pop-l .cap{font-size:10.5px;letter-spacing:.14em;color:var(--ink-3);padding:8px 10px 4px}
+.opt{display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:34px;padding:0 10px;border-radius:9px;cursor:pointer;font-size:13px;user-select:none}
+.opt:hover,.opt:focus-visible{background:var(--sunk);outline:none}
+.opt .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opt .n,.tr .n{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3)}
+.cb{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--line-2);background:var(--surface);display:grid;place-items:center;transition:background .15s,border-color .15s;color:#fff;flex:none}
+.cb[data-s="true"]{background:var(--or);border-color:var(--or)}
+.cb[data-s="true"][data-inh]{background:color-mix(in srgb,var(--or) 45%,var(--surface));border-color:transparent}
+.cb[data-s="mixed"]{border-color:var(--or)}
+.cb[data-s="mixed"]::after{content:"";width:8px;height:2px;border-radius:1px;background:var(--or)}
+mark{background:var(--or-soft);color:var(--or-ink);border-radius:3px;padding:0 1px}
+.tr{display:flex;align-items:center;gap:4px;min-height:34px;padding-right:10px;border-radius:9px;font-size:13px;position:relative}
+.tr:hover{background:var(--sunk)}
+.tr .tw{width:24px;height:24px;border:0;background:transparent;border-radius:6px;display:grid;place-items:center;cursor:pointer;color:var(--ink-3);flex:none}
+.tr .tw:hover{background:var(--line-2);color:var(--ink)}
+.tr .tw svg{transition:transform .25s var(--out)}
+.tr .tw[aria-expanded="true"] svg{transform:rotate(90deg)}
+.tr .tw.leaf{visibility:hidden}
+.tr .lab{display:flex;align-items:center;gap:9px;flex:1;min-width:0;cursor:pointer;min-height:34px;border-radius:7px;outline-offset:0}
+.tr .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr .sub{font-size:11px;color:var(--ink-3);white-space:nowrap}
+.tr .n{margin-left:auto;padding-left:10px}
+.tr.top>.lab .nm{font-weight:500}
+.tr .guide{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.sr .lab{padding:5px 0 5px 10px;align-items:flex-start}
+.sr .cb{margin-top:3px}
+.sr .sp{display:flex;flex-direction:column;min-width:0}
+.sr .path{font-size:11.5px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr .n{margin-top:2px}
+
+
+:root{--slate:#56657E;--slate-soft:#EBEEF3}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--slate:#93A3BD;--slate-soft:#1D2330}}
+:root[data-theme="dark"]{--slate:#93A3BD;--slate-soft:#1D2330}
+.pill.slate{background:var(--slate-soft);color:var(--slate)}
+.tdot{width:7px;height:7px;border-radius:50%;flex:none;display:inline-block}
+.mini-seg{display:inline-flex;background:var(--sunk);border-radius:7px;padding:2px;flex:none}
+.mini-seg button{border:0;background:transparent;font-size:11px;padding:0 8px;height:22px;border-radius:5px;cursor:pointer;color:var(--ink-3)}
+.mini-seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(17,24,39,.12)}
+.sumgrid{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;font-size:13px;padding:14px 16px;border-radius:14px;background:var(--sunk);margin:0}
+.sumgrid dt{color:var(--ink-3)} .sumgrid dd{margin:0;min-width:0}
+.conf{border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);background:var(--warn-soft);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-size:13px}
+.conf-h{display:flex;gap:10px;align-items:flex-start;color:var(--ink-2)} .conf-h svg{color:var(--warn);margin-top:2px} .conf-h b{color:var(--ink)}
+.conf .seg{display:flex;background:var(--surface)} .conf .seg button{flex:1}
+.conf-l{list-style:none;margin:0;padding:0;max-height:200px;overflow-y:auto;background:var(--surface);border-radius:10px}
+.conf-l li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 10px;border-top:1px solid var(--line)}
+.conf-l li:first-child{border-top:0}
+.conf-l .t1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px} .conf-l .t2{font-size:11px;color:var(--ink-3)}
+
+
+/* ===== 商品页 ===== */
+.ph .actions{align-items:center}
+.tabs .c{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);margin-left:6px}
+.tabs button[aria-selected="true"] .c{color:var(--or)}
+.tabs{margin-bottom:14px}
+.fcard{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px 16px;margin-bottom:14px}
+.frow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) minmax(0,1.1fr) auto;gap:12px;align-items:start}
+.frow2{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line-2);animation:panelIn .3s var(--out)}
+@keyframes panelIn{from{opacity:0;transform:translateY(-4px)}}
+.flab-row{display:flex;align-items:center;gap:8px;min-height:20px}
+.mini-seg{display:inline-flex;background:var(--sunk);border-radius:7px;padding:2px;margin-left:auto}
+.mini-seg button{border:0;background:transparent;font-size:11px;padding:0 8px;height:20px;border-radius:5px;cursor:pointer;color:var(--ink-3)}
+.mini-seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(17,24,39,.12)}
+.sfield{position:relative}
+.sfield .input{padding-left:36px;height:38px}
+.sfield svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-3)}
+.more-btn{align-self:end;height:38px}
+.more-btn .c{font-family:var(--font-mono);font-size:11px;background:var(--or);color:#fff;border-radius:999px;padding:0 6px;line-height:17px}
+.active-f{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px;font-size:12px;color:var(--ink-3)}
+.af{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 3px 0 10px;border-radius:999px;background:var(--or-soft);color:var(--or-ink);font-size:12px;max-width:340px;animation:tagIn .3s var(--spring)}
+.af span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.af button{border:0;background:transparent;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:inherit;flex:none}
+.af button:hover{background:rgba(0,0,0,.08)}
+.clear-all{border:0;background:none;color:var(--ink-2);cursor:pointer;font-size:12px;text-decoration:underline;text-underline-offset:3px}
+.listhead{display:flex;align-items:center;gap:10px;margin:0 2px 10px;font-size:13px;color:var(--ink-2)}
+.listhead .r{margin-left:auto;font-size:12px;color:var(--ink-3)}
+.selbar{display:flex;align-items:center;gap:10px;justify-content:center;padding:9px 18px;background:var(--or-soft);color:var(--or-ink);font-size:13px;border-bottom:1px solid var(--line);animation:panelIn .25s var(--out)}
+.lnk{border:0;background:none;color:var(--or-deep);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-size:13px;padding:0}
+table.t.pt{min-width:0;table-layout:fixed}
+.pt td{padding:11px 14px} .pt th{padding:12px 14px}
+.pt .cbx{width:46px;padding-right:0}
+.pt tbody tr{animation:none}
+.pt tr[aria-selected="true"] td{background:color-mix(in srgb,var(--or-soft) 60%,transparent)}
+.cbbtn{border:0;background:transparent;padding:6px;margin:-6px;cursor:pointer;display:grid;place-items:center;border-radius:6px}
+.tt1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.tt2{font-size:11.5px;color:var(--ink-3);font-family:var(--font-mono);letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tagrow{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:6px;position:relative}
+.tagc{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:7px;background:var(--sunk);font-size:11.5px;color:var(--ink-2);border:0;cursor:pointer;white-space:nowrap;transition:background .2s}
+.tagc:hover{background:var(--line-2);color:var(--ink)}
+.tagc i,.tdot{width:7px;height:7px;border-radius:50%;flex:none;display:inline-block}
+.tagc.big{height:28px;font-size:12.5px;padding:0 4px 0 10px;cursor:default}
+.tagc.big button{border:0;background:transparent;width:20px;height:20px;border-radius:6px;display:grid;place-items:center;cursor:pointer;color:var(--ink-3)}
+.tagc.big button:hover{background:var(--line-2);color:var(--ink)}
+.tagadd{height:22px;min-width:22px;padding:0 6px;border-radius:7px;border:1px dashed var(--line-2);background:transparent;color:var(--ink-3);display:inline-flex;align-items:center;gap:4px;cursor:pointer;font-size:11.5px;transition:all .2s}
+.tagadd:hover{border-color:var(--or);color:var(--or)}
+.tagrow .pop{width:280px;top:calc(100% + 4px)}
+.own{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:0;cursor:pointer;color:var(--ink);font-size:13px;max-width:100%;text-align:left}
+.own span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.own:hover span{color:var(--or-deep);text-decoration:underline;text-underline-offset:3px}
+.own.free{cursor:default;color:var(--ink-2)} .own.free:hover span{color:var(--ink-2);text-decoration:none}
+.hints{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.hints .pill{height:20px;font-size:11px;padding:0 8px}
+.prc{font-family:var(--font-mono);font-size:13px;text-align:right;white-space:nowrap;letter-spacing:0}
+.prc .to{color:var(--or-ink);font-weight:600}
+.prc .arr{color:var(--ink-3);padding:0 3px}
+.prc .s{font-size:11px;color:var(--ink-3);font-family:var(--font-body)}
+.syn .s{font-size:11px;color:var(--ink-3);margin-top:2px;font-family:var(--font-mono)}
+.bulkbar{position:sticky;bottom:16px;margin-top:16px;padding:10px 12px 10px 18px;background:var(--screen);color:var(--screen-ink);border-radius:18px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;box-shadow:0 20px 40px -12px rgba(0,0,0,.45);z-index:20;animation:barIn .45s var(--spring)}
+@keyframes barIn{from{transform:translateY(20px);opacity:0}}
+.bulkbar .cnt{font-size:13px;margin-right:8px;white-space:nowrap}
+.bulkbar .cnt b{font-family:var(--font-display);font-size:18px;color:var(--or-hi);margin:0 2px}
+.bulkbar .sp{flex:1}
+.bulkbar .vr{width:1px;height:22px;background:var(--screen-line);margin:0 4px}
+.bulkbar .btn.glass[aria-disabled="true"]{opacity:.4}
+.samples{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.samples .smp{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 14px;border-top:1px solid var(--line);font-size:13px}
+.samples .smp:first-child{border-top:0}
+.samples .smp .t1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.samples .smp .t2{font-size:11.5px;color:var(--ink-3)}
+.samples .more2{padding:8px 14px;font-size:12px;color:var(--ink-3);border-top:1px solid var(--line);background:var(--sunk)}
+.sumgrid{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;font-size:13px;padding:14px 16px;border-radius:14px;background:var(--sunk)}
+.sumgrid dt{color:var(--ink-3)} .sumgrid dd{margin:0;min-width:0}
+.eff{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--or-soft);color:var(--or-ink);font-size:13px}
+.eff b{color:var(--ink)}
+.step{font-size:11px;letter-spacing:.12em;color:var(--ink-3)}
+.drawer-ov{position:fixed;inset:0;background:rgba(10,11,15,.32);backdrop-filter:blur(4px);z-index:50;animation:fade .2s ease-out}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(620px,100vw);background:var(--canvas);border-left:1px solid var(--line);z-index:51;display:flex;flex-direction:column;animation:slideIn .45s var(--out);box-shadow:-30px 0 80px -30px rgba(0,0,0,.4)}
+@keyframes slideIn{from{transform:translateX(48px);opacity:0}}
+.dr-h{padding:20px 24px 18px;border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:flex-start;background:var(--surface)}
+.dr-h h3{margin:0 0 4px;font-size:16px;font-weight:600;line-height:1.45}
+.dr-h .x{margin-left:auto;flex:none}
+.dr-b{flex:1;overflow-y:auto;padding:18px 24px 40px;display:flex;flex-direction:column;gap:14px}
+.dsec{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 18px}
+.dsec h4{margin:0 0 12px;font-size:13px;font-weight:500;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+.dsec h4 .r{margin-left:auto;font-weight:400}
+.pbox{display:grid;grid-template-columns:1fr 28px 1fr;align-items:center;gap:8px}
+.pb .k{font-size:12px;color:var(--ink-3)}
+.pb .v{font-family:var(--font-display);font-size:26px;font-weight:700;line-height:1.3;font-variant-numeric:tabular-nums}
+.pb .v.to{color:var(--or-ink)}
+.pbox .arr{color:var(--ink-3);display:grid;place-items:center}
+.dkv{display:grid;grid-template-columns:auto 1fr;gap:7px 16px;font-size:12.5px;margin:14px 0 0;padding-top:14px;border-top:1px dashed var(--line-2)}
+.dkv dt{color:var(--ink-3)} .dkv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.inline-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.inline-row .input{height:36px;flex:1;min-width:180px}
+.confirm-inline{margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--sunk);font-size:12.5px;color:var(--ink-2);display:flex;gap:10px;align-items:center;flex-wrap:wrap;animation:panelIn .25s var(--out)}
+.confirm-inline .r{margin-left:auto;display:flex;gap:6px}
+.tm-list{list-style:none;margin:0;padding:0;max-height:380px;overflow-y:auto;border:1px solid var(--line);border-radius:14px}
+.tm-row{display:grid;grid-template-columns:26px minmax(0,1fr) 70px auto;gap:10px;align-items:center;padding:8px 12px;border-top:1px solid var(--line);font-size:13px;min-height:46px}
+.tm-row:first-child{border-top:0}
+.tm-row .sw{width:18px;height:18px;border-radius:6px;border:0;cursor:pointer;transition:transform .2s var(--spring)}
+.tm-row .sw:hover{transform:scale(1.2)}
+.tm-row .n{font-family:var(--font-mono);font-size:12px;color:var(--ink-3);text-align:right}
+.tm-row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:text;border-bottom:1px dashed transparent}
+.tm-row .nm:hover{border-bottom-color:var(--line-2)}
+.tm-row input{height:30px}
+.tm-row.del{background:var(--bad-soft)}
+.tm-add{display:flex;gap:8px}
+.tm-add .input{height:38px}
+.proto-panel{position:fixed;left:256px;bottom:16px;z-index:45;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);font-size:12px;width:250px;overflow:hidden}
+.pp-h{display:flex;align-items:center;gap:8px;width:100%;border:0;background:var(--screen);color:var(--screen-ink);padding:9px 14px;cursor:pointer;font-size:12px;letter-spacing:.06em}
+.pp-h .faint{margin-left:auto;color:var(--screen-mute)}
+.pp-b{padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px}
+.pp-b p{margin:0;color:var(--ink-3);line-height:1.6}
+.pp-b .seg{display:flex} .pp-b .seg button{flex:1;padding:0 8px;font-size:12px}
+.rcell{position:relative;display:inline-block;max-width:100%;outline:none}
+.rcell .rn{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:999px;padding:0 6px;line-height:16px;flex:none}
+.rpop{position:absolute;z-index:30;left:-10px;top:calc(100% + 6px);width:300px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 50px -18px rgba(17,24,39,.35);padding:8px;opacity:0;visibility:hidden;transform:translateY(-3px);transition:opacity .18s,transform .25s var(--out),visibility .18s}
+.rpop.up{top:auto;bottom:calc(100% + 6px)}
+.rcell:hover .rpop,.rcell:focus-within .rpop{opacity:1;visibility:visible;transform:none}
+.rpop .cap{font-size:10.5px;letter-spacing:.12em;color:var(--ink-3);padding:4px 8px 6px}
+.rp{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 8px;border-radius:9px;font-size:12.5px}
+.rp.on{background:var(--ok-soft)}
+.rp .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pp{font-size:11px;color:var(--ink-3);background:var(--sunk);border-radius:6px;text-align:center;line-height:20px;padding:0 4px;white-space:nowrap}
+.rlist{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.rlist li{display:flex;gap:10px;align-items:center;padding:9px 12px;border-top:1px solid var(--line);font-size:13px;min-height:46px;flex-wrap:wrap}
+.rlist li:first-child{border-top:0}
+.rlist li.on{background:color-mix(in srgb,var(--ok-soft) 70%,transparent)}
+.rlist .pp{min-width:40px}
+.rlist .r{margin-left:auto;display:flex;gap:6px;align-items:center}
+.lnk2{border:0;background:none;padding:0;cursor:pointer;font:inherit;color:var(--ink)} .lnk2:hover{color:var(--or-deep);text-decoration:underline;text-underline-offset:3px}
+.rule-checks{border:1px solid var(--line-2);border-radius:14px;padding:6px}
+.rule-checks .opt{border:0;background:transparent;width:100%;text-align:left}
+.note{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--sunk);font-size:13px}
+.note.warn{background:var(--warn-soft)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<script>
+(function(){
+const {useState,useEffect,useRef,useMemo,useLayoutEffect} = React;
+const html = htm.bind(React.createElement);
+const WORDMARK = "data:image/png;base64,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";
+const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* ---------- 图标（与定稿同一套线性图标） ---------- */
+const P = {
+  home:"M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
+  disc:["M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z","M12 9.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5z"],
+  check:["M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z","M8 12l3 3 5-6"],
+  search:["M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14z","M20 20l-4-4"],
+  tag:["M3 12V4h8l10 10-8 8z","M7.5 6.5a1 1 0 1 0 0 2a1 1 0 1 0 0-2z"],
+  shield:["M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z","M9 12l2 2 4-4"],
+  sliders:["M4 7h9","M17 7h3","M15 5v4","M4 17h3","M11 17h9","M9 15v4","M4 12h13","M19 10v4"],
+  refresh:["M20 11a8 8 0 0 0-14.7-4.3L4 8","M4 4v4h4","M4 13a8 8 0 0 0 14.7 4.3L20 16","M20 20v-4h-4"],
+  plus:["M12 5v14","M5 12h14"], x:["M6 6l12 12","M18 6L6 18"], left:"M15 6l-6 6 6 6", right:"M9 6l6 6-6 6", down:"M6 9l6 6 6-6", arrow:["M5 12h14","M13 6l6 6-6 6"],
+  spark:["M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z","M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"],
+  alert:["M12 3l10 18H2z","M12 10v5","M12 18v.01"], ok:"M5 12l5 5 9-11", edit:["M4 20h4L19 9l-4-4L4 16z"],
+  trash:["M4 7h16","M9 7V4h6v3","M6 7l1 13h10l1-13"], power:["M12 3v8","M6.3 6.3a8 8 0 1 0 11.4 0"],
+  box:["M3 7l9-4 9 4v10l-9 4-9-4z","M3 7l9 4 9-4","M12 11v10"], undo:["M9 14L4 9l5-5","M4 9h10a6 6 0 0 1 0 12h-3"],
+  link:["M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1","M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"],
+  move:["M4 12h12","M12 8l4 4-4 4","M20 5v14"], tree:["M5 4v16","M5 8h6","M5 16h6","M14 6h6v4h-6z","M14 14h6v4h-6z"],
+};
+function Ic({n,s=18,w=1.9}){ const d=[].concat(P[n]); return html`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=${w} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style=${{flex:"none"}}>${d.map((p,i)=>html`<path key=${i} d=${p}/>`)}</svg>`; }
+
+/* ---------- 示例数据 ---------- */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const SEP=":";
+// 开发库里的真实类别与条数
+const FEW_CATS=[
+  ["Music:CDs",93],
+  ["Health & Beauty:Nail Care, Manicure & Pedicure:Nail Care Tools:Manicure & Pedicure Tools & Kits",19],
+  ["Business & Industrial:Office:Office Supplies:Pens, Pencils & Markers:Mechanical Pencils",12],
+  ["Collectibles:Pens & Writing Instruments:Pencils:Mechanical",10],
+  ["Movies & TV:DVDs & Blu-ray Discs",10],
+  ["Music:Other Formats",2],
+  ["Business & Industrial:Office:Office Supplies:Desk Accessories:Staplers",1],
+];
+// "类别很多"演示：按 eBay 美国站的真实层级补的叶子类别
+const EXTRA_CATS=`Music:Vinyl Records
+Music:Cassettes
+Music:Music Memorabilia:Rock & Pop:Posters
+Music:Music Memorabilia:Rock & Pop:Ticket Stubs
+Music:Music Memorabilia:Rock & Pop:Photographs
+Movies & TV:Laserdiscs
+Movies & TV:VHS Tapes
+Movies & TV:Movie Memorabilia:Posters:Originals-International
+Movies & TV:Movie Memorabilia:Pressbooks
+Movies & TV:Movie Memorabilia:Lobby Cards
+Video Games & Consoles:Video Games
+Video Games & Consoles:Video Game Consoles
+Video Games & Consoles:Video Game Accessories:Controllers & Attachments
+Video Game & Consoles:Video Game Accessories:Memory Cards
+Video Games & Consoles:Video Game Accessories:Cables & Adapters
+Video Games & Consoles:Video Game Strategy Guides & Manuals
+Video Games & Consoles:Video Game Merchandise
+Toys & Hobbies:Action Figures & Accessories:Action Figures
+Toys & Hobbies:Action Figures & Accessories:Action Figure Accessories
+Toys & Hobbies:Models & Kits:Automotive
+Toys & Hobbies:Models & Kits:Robots & Mecha
+Toys & Hobbies:Models & Kits:Aircraft
+Toys & Hobbies:Models & Kits:Military
+Toys & Hobbies:Diecast & Toy Vehicles:Cars, Trucks & Vans
+Toys & Hobbies:Diecast & Toy Vehicles:Trains
+Toys & Hobbies:Collectible Card Games:CCG Individual Cards
+Toys & Hobbies:Collectible Card Games:CCG Sealed Booster Packs
+Toys & Hobbies:Collectible Card Games:CCG Sealed Decks & Kits
+Toys & Hobbies:Puzzles:Jigsaw Puzzles
+Toys & Hobbies:Radio Control & Control Line:RC Model Vehicles & Kits
+Toys & Hobbies:Vintage & Antique Toys:Tin Toys
+Collectibles:Pens & Writing Instruments:Pens:Fountain Pens
+Collectibles:Pens & Writing Instruments:Pens:Ballpoint Pens
+Collectibles:Pens & Writing Instruments:Pencils:Wood-Cased
+Collectibles:Pens & Writing Instruments:Inks
+Collectibles:Pens & Writing Instruments:Pen Cases
+Collectibles:Animation Art & Merchandise:Animation Merchandise:Keychains
+Collectibles:Animation Art & Merchandise:Animation Merchandise:Figures
+Collectibles:Animation Art & Merchandise:Animation Merchandise:Posters
+Collectibles:Animation Art & Merchandise:Animation Art:Production Cels
+Collectibles:Cultures & Ethnicities:Asian:Japanese
+Collectibles:Kitchen & Home:Kitchenware:Teapots
+Collectibles:Comic Books & Memorabilia:Comics:Manga
+Business & Industrial:Office:Office Supplies:Pens, Pencils & Markers:Ballpoint Pens
+Business & Industrial:Office:Office Supplies:Pens, Pencils & Markers:Gel Pens
+Business & Industrial:Office:Office Supplies:Pens, Pencils & Markers:Highlighters
+Business & Industrial:Office:Office Supplies:Pens, Pencils & Markers:Erasers
+Business & Industrial:Office:Office Supplies:Pens, Pencils & Markers:Pencil Leads
+Business & Industrial:Office:Office Supplies:Desk Accessories:Tape Dispensers
+Business & Industrial:Office:Office Supplies:Desk Accessories:Paper Clips
+Business & Industrial:Office:Office Supplies:Desk Accessories:Hole Punches
+Business & Industrial:Office:Office Supplies:Notebooks & Writing Pads
+Business & Industrial:Office:Office Supplies:Correction Tape
+Business & Industrial:Office:Office Equipment:Calculators
+Business & Industrial:Office:Office Equipment:Label Makers
+Health & Beauty:Nail Care, Manicure & Pedicure:Nail Care Tools:Nail Clippers
+Health & Beauty:Nail Care, Manicure & Pedicure:Nail Care Tools:Nail Files & Buffers
+Health & Beauty:Nail Care, Manicure & Pedicure:Nail Care Tools:Cuticle Pushers
+Health & Beauty:Nail Care, Manicure & Pedicure:Nail Polish
+Health & Beauty:Nail Care, Manicure & Pedicure:Nail Art Accessories
+Health & Beauty:Skin Care:Face:Moisturizers
+Health & Beauty:Skin Care:Face:Cleansers
+Health & Beauty:Skin Care:Face:Masks
+Health & Beauty:Skin Care:Sunscreen
+Health & Beauty:Makeup:Eyes:Eyeliner
+Health & Beauty:Makeup:Eyes:Mascara
+Health & Beauty:Makeup:Lips:Lipstick
+Health & Beauty:Makeup:Makeup Tools & Accessories:Brushes
+Health & Beauty:Fragrances
+Health & Beauty:Shaving & Hair Removal:Razors
+Health & Beauty:Oral Care:Toothbrushes
+Health & Beauty:Hair Care & Styling:Hair Brushes & Combs
+Home & Garden:Kitchen, Dining & Bar:Flatware, Knives & Cutlery:Kitchen Knives
+Home & Garden:Kitchen, Dining & Bar:Flatware, Knives & Cutlery:Knife Sharpeners
+Home & Garden:Kitchen, Dining & Bar:Dinnerware & Serveware:Bowls
+Home & Garden:Kitchen, Dining & Bar:Dinnerware & Serveware:Chopsticks
+Home & Garden:Kitchen, Dining & Bar:Bar Tools & Accessories
+Home & Garden:Kitchen, Dining & Bar:Teapots & Tea Kettles
+Home & Garden:Home Décor:Wind Chimes
+Home & Garden:Home Décor:Noren Curtains
+Home & Garden:Household Supplies & Cleaning
+Books & Magazines:Books
+Books & Magazines:Magazines
+Books & Magazines:Textbooks, Education & Reference
+Cameras & Photo:Lenses & Filters:Lenses
+Cameras & Photo:Lenses & Filters:Lens Caps
+Cameras & Photo:Film Photography:Film Cameras
+Cameras & Photo:Film Photography:Film
+Cameras & Photo:Digital Cameras
+Cameras & Photo:Camera & Photo Accessories:Straps & Hand Grips
+Consumer Electronics:Portable Audio & Headphones:Headphones
+Consumer Electronics:Portable Audio & Headphones:Portable Cassette Players
+Consumer Electronics:Portable Audio & Headphones:MiniDisc Players
+Consumer Electronics:Vintage Electronics:Vintage Audio & Video:Vintage Amplifiers & Preamps
+Consumer Electronics:Vintage Electronics:Vintage Audio & Video:Vintage Turntables
+Consumer Electronics:Home Audio:Speakers
+Sporting Goods:Fishing:Fishing Lures & Flies:Hard Baits
+Sporting Goods:Fishing:Fishing Lures & Flies:Soft Baits
+Sporting Goods:Fishing:Fishing Reels
+Sporting Goods:Golf:Golf Clubs:Drivers
+Sporting Goods:Golf:Golf Balls
+Sporting Goods:Outdoor Sports:Camping & Hiking:Camping Cookware
+Clothing, Shoes & Accessories:Men:Men's Accessories:Wallets
+Clothing, Shoes & Accessories:Women:Women's Accessories:Hair Accessories
+Clothing, Shoes & Accessories:Specialty:Traditional & Cultural Wear:Kimonos
+Jewelry & Watches:Watches, Parts & Accessories:Watches:Wristwatches
+Jewelry & Watches:Watches, Parts & Accessories:Watch Accessories:Watch Bands
+Crafts:Sewing:Sewing Tools & Supplies
+Crafts:Art Supplies:Drawing & Lettering Supplies:Pens & Markers
+Crafts:Art Supplies:Painting Supplies:Paint Brushes
+Crafts:Art Supplies:Painting Supplies:Watercolor Paint
+Crafts:Scrapbooking & Paper Crafts:Stamping & Embossing:Stamps
+Crafts:Scrapbooking & Paper Crafts:Washi Tape
+Musical Instruments & Gear:Guitars & Basses:Electric Guitars
+Musical Instruments & Gear:Guitars & Basses:Parts & Accessories:Picks
+Musical Instruments & Gear:Pro Audio Equipment:Effects Pedals
+Pet Supplies:Dog Supplies:Collars & Tags
+Pet Supplies:Cat Supplies:Toys
+Antiques:Asian Antiques:Japan:Netsuke
+Antiques:Asian Antiques:Japan:Lacquerware`.split("\n").map(s=>s.trim().replace(/^Video Game & Consoles/,"Video Games & Consoles"));
+
+const FEW_STORES=["Synthetic Records","demo-store-jp"];
+const MANY_STORES=[...FEW_STORES,"tokyo-finds","kansai-select","nippon-stationery-lab","retro-media-jp","osaka-beauty-supply","hokkaido-outdoors","kyoto-kitchen-goods","showa-toybox"];
+const FEW_PKGS=["CD 纸箱","CD 气泡袋","DVD 纸箱","小件文具袋","美甲工具盒"];
+const MANY_PKGS=[...FEW_PKGS,"黑胶硬纸箱","中号纸箱 30×20×10","大号纸箱 40×30×20","防震泡棉盒","化妆品小盒","厨刀专用盒","相机镜头盒","模型手办盒","平信信封"];
+const FEW_TAGS=["日版","帯付","初回限定","二手","送礼"];
+const MANY_TAGS=[...FEW_TAGS,"绝版","签名","生产完了","未开封","美品","有瑕疵","限定色","联名款","季节限定","重量超 1kg","易碎","含电池","液体","高价值","低价走量","新品试卖","复购款","节日促销","黑五","清仓","主推","测试中","慢销","爆款","待涨价","竞品低价","无竞品","需报关说明","尺寸超标","仅美国","国际可发","广告投放中","广告暂停","批量采购","单件采购","供应商 A","供应商 B","乐天来源","骏河屋来源","亚马逊直营"];
+const SKINS=[["#F2681D","#111827"],["#111827","#F2681D"],["#2E2A4F","#FFC49A"],["#7A2E12","#F4E9DC"],["#1E5B4F","#F2681D"],["#E9E3D8","#B9470A"],["#3B4B6B","#FFF0E6"],["#9A3505","#FFC49A"]];
+const LIGHT=["#E9E3D8","#F4E9DC","#FFF0E6","#FFC49A"];
+const POOL={
+  music:["City Pop Collection","Showa Kayo Best Selection","Anime Song Memorial","Jazz Café Tokyo","Shibuya-kei Classics","Original Soundtrack","Idol Single Collection","Enka Masters","Synthetic Album"],
+  movie:["Studio Classics Blu-ray Box","Tokusatsu Series DVD","Anime Movie Blu-ray","Drama Complete DVD-BOX","Kaiju Collection Blu-ray"],
+  pencil:["Pentel Orenz 0.3mm Mechanical Pencil","Uni Kuru Toga Advance 0.5mm","Pilot Dr. Grip CL 0.5mm","Zebra DelGuard 0.5mm","Rotring 600 0.7mm","Pentel Graph 1000 for Pro","Uni Shift 0.5mm Pipe Lock"],
+  stapler:["Max Vaimo 11 Flat-Clinch Stapler","Plus Papery Compact Stapler","Kokuyo Harinacs Staple-Free Stapler"],
+  nail:["Green Bell Takumi no Waza Nail Clipper","Kai Seki Magoroku Nail Care Set","Suwada Classic Nail Nipper","Stainless Cuticle Pusher Set","Glass Nail File Japan"],
+};
+const segs=k=>k.split(SEP);
+const pathText=k=>segs(k).join(" › ");
+const anc=k=>{ const s=segs(k); return s.slice(0,-1).map((_,i)=>s.slice(0,i+1).join(SEP)); };
+const isDesc=(k,a)=>k.startsWith(a+SEP);
+const covered=(sel,k)=>sel.includes(k)||anc(k).some(a=>sel.includes(a));
+const catLabel=k=>{ const s=segs(k); return s.length<=3?s.join(" › "):s[0]+" › … › "+s.slice(-2).join(" › "); };
+
+function buildTree(cats){
+  const map=new Map(), roots=[];
+  for(const [path,n] of cats){ const s=segs(path); let parent=null;
+    s.forEach((name,i)=>{ const key=s.slice(0,i+1).join(SEP); let nd=map.get(key);
+      if(!nd){ nd={key,name,depth:i,children:[],count:0,leaves:0,parent:parent?parent.key:null}; map.set(key,nd); (parent?parent.children:roots).push(nd); }
+      nd.count+=n; if(i===s.length-1) nd.leaf=true; parent=nd; });
+    anc(path).concat(path).forEach(k=>map.get(k).leaves++);
+  }
+  const sort=a=>{ a.sort((x,y)=>y.count-x.count||x.name.localeCompare(y.name)); a.forEach(c=>sort(c.children)); }; sort(roots);
+  return {roots,map};
+}
+function titleFor(path,r,i){ const pk=a=>a[Math.floor(r()*a.length)]; const leaf=segs(path).slice(-1)[0];
+  if(/^Music:CDs/.test(path)) return pk(POOL.music)+" Vol."+(1+i%12)+" Japan CD w/ OBI";
+  if(/^Music/.test(path)) return pk(POOL.music)+" "+pk(["8cm CD Single","MiniDisc","Cassette","LP"])+" Japan";
+  if(/^Movies/.test(path)) return pk(POOL.movie)+" Japan Ver. Region A";
+  if(/Mechanical/.test(leaf)) return pk(POOL.pencil)+" Japan";
+  if(/Stapler/.test(leaf)) return pk(POOL.stapler);
+  if(/Nail|Manicure|Cuticle/.test(path)) return pk(POOL.nail);
+  return "Japanese "+leaf.replace(/s$/,"")+" · Import #"+(100+i);
+}
+function pkgFor(path,pkgs,r){ const pk=a=>a[Math.floor(r()*a.length)];
+  if(/CDs|Other Formats|Cassettes/.test(path)) return pk(["CD 纸箱","CD 气泡袋"]);
+  if(/DVD|Laserdisc|VHS/.test(path)) return "DVD 纸箱";
+  if(/Pencil|Pens|Stapler|Office|Writing/.test(path)) return "小件文具袋";
+  if(/Nail/.test(path)) return "美甲工具盒";
+  return pk(pkgs);
+}
+
+/* ---------- 小组件 ---------- */
+const Pill=({tone,children,plain,pulse})=>html`<span class=${"pill "+(tone||"")+(plain?" plain":"")+(pulse?" pulse":"")}>${children}</span>`;
+function Btn({kind,sm,icon,children,onClick,disabled,title}){ return html`<button class=${"btn "+(kind||"")+(sm?" sm":"")} onClick=${disabled?undefined:onClick} aria-disabled=${disabled?"true":undefined} title=${title}>${icon&&html`<${Ic} n=${icon} s=${sm?15:16}/>`}${children}</button>`; }
+const Cb=({s,inh})=>html`<span class="cb" data-s=${String(s)} data-inh=${inh?"":undefined} aria-hidden="true">${s===true?html`<${Ic} n="ok" s=${11} w=${3.2}/>`:null}</span>`;
+const hl=(t,q)=>{ const s=(q||"").trim(); if(!s) return t; const i=t.toLowerCase().indexOf(s.toLowerCase()); if(i<0) return t; return html`${t.slice(0,i)}<mark>${t.slice(i,i+s.length)}</mark>${t.slice(i+s.length)}`; };
+function Cover({it,size=44}){ const [bg,obi]=it.skin;
+  return html`<div class="cover" style=${{width:size,height:size,background:`linear-gradient(150deg,${bg},color-mix(in srgb,${bg} 62%,#000))`}} aria-hidden="true">
+    ${it.disc&&html`<div class="disc"></div>`}<div class="obi" style=${{background:obi}}></div>
+    <div class="ini" style=${{fontSize:size*.32,color:LIGHT.includes(bg)?"#111827":undefined}}>${it.ini}</div></div>`; }
+let toastSet=null; const toast=t=>toastSet&&toastSet({t,k:Date.now()});
+function Toast(){ const [t,setT]=useState(null); toastSet=setT; useEffect(()=>{ if(!t) return; const h=setTimeout(()=>setT(null),2800); return ()=>clearTimeout(h); },[t]);
+  return t?html`<div class="toast" role="status" key=${t.k}><span class="i"><${Ic} n="ok" s=${13} w=${3}/></span>${t.t}</div>`:null; }
+function Modal({title,onClose,children,footer,width=560}){
+  useEffect(()=>{ const h=e=>{ if(e.key==="Escape"){e.stopPropagation();onClose();} }; window.addEventListener("keydown",h,true); const o=document.body.style.overflow; document.body.style.overflow="hidden";
+    return ()=>{window.removeEventListener("keydown",h,true);document.body.style.overflow=o;}; },[onClose]);
+  return html`<div class="overlay" onMouseDown=${e=>{if(e.target===e.currentTarget)onClose()}}>
+    <div class="modal" role="dialog" aria-modal="true" aria-label=${title} style=${{maxWidth:width}}>
+      <div class="modal-h"><h3>${title}</h3><button class="btn quiet sm x" aria-label="关闭" onClick=${onClose}><${Ic} n="x" s=${16}/></button></div>
+      <div class="modal-b">${children}</div>${footer&&html`<div class="modal-f">${footer}</div>`}</div></div>`; }
+function Pager({page,set,total,size}){ const pages=Math.max(1,Math.ceil(total/size)),a=total?(page-1)*size+1:0,b=Math.min(page*size,total),list=[];
+  for(let p=1;p<=pages;p++){ if(p===1||p===pages||Math.abs(p-page)<=1) list.push(p); else if(list[list.length-1]!=="…") list.push("…"); }
+  return html`<div class="tfoot"><span>第 <span class="mono">${a}–${b}</span> 条，共 <span class="mono">${total}</span> 条</span><div class="pager">
+    <button disabled=${page<=1} onClick=${()=>set(page-1)} aria-label="上一页"><${Ic} n="left" s=${14}/></button>
+    ${list.map((p,i)=>p==="…"?html`<span key=${"e"+i} class="faint">…</span>`:html`<button key=${p} aria-current=${p===page?"page":undefined} onClick=${()=>set(p)}>${p}</button>`)}
+    <button disabled=${page>=pages} onClick=${()=>set(page+1)} aria-label="下一页"><${Ic} n="right" s=${14}/></button></div></div>`; }
+function usePop(){ const [open,setOpen]=useState(false); const ref=useRef(null);
+  useEffect(()=>{ if(!open) return; const h=e=>{ if(ref.current&&!ref.current.contains(e.target)) setOpen(false); }; const k=e=>{ if(e.key==="Escape"){ setOpen(false); const f=ref.current&&ref.current.querySelector(".pf"); f&&f.focus(); } };
+    document.addEventListener("mousedown",h); document.addEventListener("keydown",k); return ()=>{document.removeEventListener("mousedown",h);document.removeEventListener("keydown",k);}; },[open]);
+  return [open,setOpen,ref]; }
+const keyAct=fn=>e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fn(); } };
+
+/* 通用多选：店铺 / 包装 / 标签。选项多时可搜索，字段里只露前几个 */
+function MultiPick({label,opts,counts,value,onChange,empty,err,limit=4}){
+  const [open,setOpen,ref]=usePop(); const [q,setQ]=useState("");
+  const ql=q.trim().toLowerCase(); const list=opts.filter(o=>o.toLowerCase().includes(ql));
+  const tog=o=>onChange(value.includes(o)?value.filter(x=>x!==o):[...value,o]);
+  return html`<div class="pick" ref=${ref}>
+    <div class=${"pf"+(open?" open":"")+(err?" bad":"")} role="button" tabIndex="0" aria-haspopup="listbox" aria-expanded=${open} aria-label=${label+"，已选 "+value.length+" 项"} onClick=${()=>setOpen(!open)} onKeyDown=${keyAct(()=>setOpen(!open))}>
+      ${value.length?value.slice(0,limit).map(v=>html`<span class="ptag" key=${v}><span class="tx">${v}</span><span class="n">${counts[v]||0}</span><button aria-label=${"移除 "+v} onClick=${e=>{e.stopPropagation();tog(v)}}><${Ic} n="x" s=${12}/></button></span>`):html`<span class="ph0">${empty}</span>`}
+      ${value.length>limit&&html`<span class="more">+${value.length-limit}</span>`}
+      <span class="chev"><${Ic} n="down" s=${16}/></span></div>
+    ${open&&html`<div class="pop" role="dialog" aria-label=${"选择"+label}>
+      ${opts.length>8&&html`<div class="pop-s"><${Ic} n="search" s=${15}/><input autoFocus placeholder=${"搜索"+label+"（共 "+opts.length+" 个）"} value=${q} onInput=${e=>setQ(e.target.value)}/></div>`}
+      <ul class="pop-l" role="listbox" aria-multiselectable="true" aria-label=${label}>
+        ${list.map(o=>{ const on=value.includes(o); return html`<li key=${o} class="opt" role="option" tabIndex="0" aria-selected=${on} onClick=${()=>tog(o)} onKeyDown=${keyAct(()=>tog(o))}><${Cb} s=${on}/><span class="nm">${hl(o,q)}</span><span class="n">${counts[o]||0}</span></li>`; })}
+        ${!list.length&&html`<li class="none">没有匹配的${label}</li>`}</ul>
+      <div class="pop-f">已选 <span class="mono">${value.length}</span> / ${opts.length}<span class="r">${value.length>0&&html`<button class="btn quiet sm" onClick=${()=>onChange([])}>清空</button>`}${ql&&list.length>0&&html`<button class="btn quiet sm" onClick=${()=>onChange([...new Set([...value,...list])])}>全选结果</button>`}<button class="btn sm" onClick=${()=>setOpen(false)}>完成</button></span></div></div>`}
+  </div>`;
+}
+
+/* 类别树：勾上级 = 含全部子类（以后新出现的也算）；在已选上级里取消某个子类 = 改为逐个勾选其余子类 */
+function toggleCat(sel,nd,map){
+  if(sel.includes(nd.key)) return sel.filter(x=>x!==nd.key);
+  const a=anc(nd.key).find(x=>sel.includes(x));
+  if(a){ const out=sel.filter(x=>x!==a); const path=[...anc(nd.key).filter(x=>x===a||isDesc(x,a)),nd.key];
+    for(let i=0;i<path.length-1;i++) map.get(path[i]).children.forEach(c=>{ if(c.key!==path[i+1]) out.push(c.key); });
+    return out; }
+  return [...sel.filter(x=>!isDesc(x,nd.key)),nd.key];
+}
+function CatPick({tree,value,onChange,err}){
+  const [open,setOpen,ref]=usePop(); const [q,setQ]=useState(""); const [exp,setExp]=useState(()=>new Set());
+  const small=tree.map.size<=30;
+  useEffect(()=>{ if(!open) return; setExp(()=>{ const s=new Set(); if(small) tree.map.forEach(nd=>nd.children.length&&s.add(nd.key)); else value.forEach(k=>anc(k).forEach(a=>s.add(a))); return s; }); },[open,tree]);
+  const st=nd=>covered(value,nd.key)?true:value.some(s=>isDesc(s,nd.key))?"mixed":false;
+  const tog=nd=>onChange(toggleCat(value,nd,tree.map));
+  const tx=k=>setExp(e=>{ const s=new Set(e); s.has(k)?s.delete(k):s.add(k); return s; });
+  const cover=value.reduce((s,k)=>s+((tree.map.get(k)||{}).count||0),0);
+  const rows=[]; const walk=a=>a.forEach(nd=>{ rows.push(nd); if(nd.children.length&&exp.has(nd.key)) walk(nd.children); }); walk(tree.roots);
+  const ql=q.trim().toLowerCase();
+  const hits=ql?[...tree.map.values()].filter(nd=>nd.name.toLowerCase().includes(ql)).sort((a,b)=>a.depth-b.depth||b.count-a.count):null;
+  const allOpen=exp.size>0&&[...tree.map.values()].every(nd=>!nd.children.length||exp.has(nd.key));
+  const label=k=>{ const nd=tree.map.get(k); const s=segs(k); const short=s.length<=3?s:[s[0],"…",...s.slice(-2)];
+    return html`<span class="ptag" key=${k} title=${pathText(k)+(nd&&!nd.leaf?"（整类，含以后新出现的子类别）":"")}><span class="tx">${short.map((x,i)=>html`${i?html`<i>›</i>`:""}${x}`)}</span>${nd&&!nd.leaf&&html`<span class="whole">整类</span>`}<span class="n">${nd?nd.count:0}</span><button aria-label=${"移除 "+pathText(k)} onClick=${e=>{e.stopPropagation();onChange(value.filter(x=>x!==k))}}><${Ic} n="x" s=${12}/></button></span>`; };
+  const row=nd=>{ const s=st(nd), inh=s===true&&!value.includes(nd.key), ex=exp.has(nd.key);
+    return html`<li key=${nd.key} class=${"tr"+(nd.depth===0?" top":"")} role="treeitem" aria-level=${nd.depth+1} aria-expanded=${nd.children.length?ex:undefined} aria-selected=${s===true} style=${{paddingLeft:4+nd.depth*22}}>
+      ${Array.from({length:nd.depth},(_,i)=>html`<span key=${i} class="guide" style=${{left:16+i*22}}></span>`)}
+      <button class=${"tw"+(nd.children.length?"":" leaf")} tabIndex=${nd.children.length?0:-1} aria-expanded=${ex} aria-label=${(ex?"收起 ":"展开 ")+nd.name} onClick=${()=>tx(nd.key)}><${Ic} n="right" s=${14}/></button>
+      <div class="lab" role="checkbox" tabIndex="0" aria-checked=${s==="mixed"?"mixed":String(s)} title=${inh?"上级已整类勾选；取消这里会改为逐个勾选其余子类":pathText(nd.key)}
+        onClick=${()=>tog(nd)} onKeyDown=${e=>{ if(e.key==="ArrowRight"&&nd.children.length&&!ex){e.preventDefault();tx(nd.key);} else if(e.key==="ArrowLeft"&&ex){e.preventDefault();tx(nd.key);} else keyAct(()=>tog(nd))(e); }}>
+        <${Cb} s=${s} inh=${inh}/><span class="nm">${nd.name}</span>${nd.children.length?html`<span class="sub">${nd.leaves} 个子类</span>`:null}<span class="n">${nd.count}</span></div></li>`; };
+  const hit=nd=>{ const s=st(nd), inh=s===true&&!value.includes(nd.key);
+    return html`<li key=${nd.key} class="tr sr" role="treeitem" aria-level="1" aria-selected=${s===true}>
+      <div class="lab" role="checkbox" tabIndex="0" aria-checked=${s==="mixed"?"mixed":String(s)} onClick=${()=>tog(nd)} onKeyDown=${keyAct(()=>tog(nd))}>
+        <${Cb} s=${s} inh=${inh}/><span class="sp"><span class="nm">${hl(nd.name,q)}${nd.children.length?html` <span class="sub">· ${nd.leaves} 个子类</span>`:null}</span><span class="path" title=${pathText(nd.key)}>${nd.depth?anc(nd.key).map(a=>tree.map.get(a).name).join(" › "):"顶级类别"}</span></span><span class="n">${nd.count}</span></div></li>`; };
+  return html`<div class="pick" ref=${ref}>
+    <div class=${"pf"+(open?" open":"")+(err?" bad":"")} role="button" tabIndex="0" aria-haspopup="tree" aria-expanded=${open} aria-label=${"类别，已选 "+value.length+" 项"} onClick=${()=>setOpen(!open)} onKeyDown=${keyAct(()=>setOpen(!open))}>
+      ${value.length?value.slice(0,4).map(label):html`<span class="ph0">选择类别（支持搜索，可多选）</span>`}
+      ${value.length>4&&html`<span class="more">+${value.length-4}</span>`}
+      <span class="chev"><${Ic} n="down" s=${16}/></span></div>
+    ${open&&html`<div class="pop wide" role="dialog" aria-label="选择类别">
+      <div class="pop-s"><${Ic} n="search" s=${15}/><input autoFocus placeholder=${"搜索类别名，例如 pencil、CD（共 "+tree.map.size+" 个节点）"} value=${q} onInput=${e=>setQ(e.target.value)}/>
+        ${!ql&&html`<button class="btn quiet sm" onClick=${()=>setExp(allOpen?new Set():new Set([...tree.map.values()].filter(nd=>nd.children.length).map(nd=>nd.key)))}>${allOpen?"全部收起":"全部展开"}</button>`}</div>
+      <div class="pop-tip"><${Ic} n="tree" s=${14}/><span>勾上级 = 包含它下面全部子类别，<b>以后新出现的子类别也自动包含</b>。数字是该类别下的刊登条数。</span></div>
+      <ul class="pop-l" role="tree" aria-multiselectable="true" aria-label="eBay 类别">
+        ${hits?(hits.length?[html`<li class="cap" key="cap">找到 ${hits.length} 个类别${hits.length>80?"，只显示前 80 个，请再输入几个字":""}</li>`,...hits.slice(0,80).map(hit)]:html`<li class="none">没有包含「${q}」的类别</li>`):rows.map(row)}</ul>
+      <div class="pop-f">已选 <span class="mono">${value.length}</span> 项 · 覆盖 <span class="mono">${cover}</span> 条刊登<span class="r">${value.length>0&&html`<button class="btn quiet sm" onClick=${()=>onChange([])}>清空</button>`}<button class="btn sm" onClick=${()=>setOpen(false)}>完成</button></span></div></div>`}
+    ${value.length>4&&!open&&html`<div class="h" style=${{marginTop:6}}>${value.slice(4).map(k=>catLabel(k)).join("；")}</div>`}
+  </div>`;
+}
+
+
+
+/* ---------- 商品页数据 ---------- */
+const usd=v=>"$"+(+v).toFixed(2);
+// 一条刊登可登入多条规则，由优先级最高的那条定价；同一优先级只能一条；内置「自由定价」最低，人人都在
+const PRIO={top:"最高",high:"高",normal:"普通",low:"低",bottom:"最低"}; const PR={top:0,high:1,normal:2,low:3,bottom:4};
+const RULE_PRIO={"日版 CD 促销":"high","日版 CD 标准":"normal","日版 CD 新品":"normal","文具通用":"normal","美妆小件":"normal","DVD 清仓":"low"};
+const RULES=Object.keys(RULE_PRIO);
+const FREE="自由定价";
+const rank=r=>PR[RULE_PRIO[r]];
+const sortRules=rs=>rs.slice().sort((a,b)=>rank(a)-rank(b));
+const ruleLabel=r=>r?"规则「"+r+"」":FREE;
+const TAG_COLORS=["#F2681D","#15885A","#B26A00","#C8372D","#6D5BD0","#56657E","#0E7490","#9A3505"];
+const STATUS=[["all","全部"],["pending","待核对"],["confirmed","待选报价"],["bound","已绑定"],["ended","已结束"]];
+const ST_PILL={pending:["待核对","warn"],confirmed:["待选报价","or"],bound:["已绑定","ok"],ended:["已结束",""]};
+const SYNC={aligned:["已对齐","ok"],pending:["待同步到 eBay","or"],failed:["同步失败","bad"],off:["不同步",""],none:["—",""]};
+const HINTS={loss:["亏本","bad"],alert:["超出提醒线","warn"],blocked:["算不出价","bad"],room:["有降价空间","ok"]};
+const hash=(a,b)=>{ let h=2166136261; for(const c of a+"|"+b){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } return ((h>>>0)%10000)/10000; };
+// 目标售价由生效规则直接给出（原型里用确定的伪随机代替真实计算），登入或移出后立刻变化
+function view(L){
+  const eff=sortRules(L.rules)[0]||null;
+  if(L.status!=="bound") return {eff,target:null,sync:"none",hint:null};
+  if(eff&&!L.pkg) return {eff,target:null,sync:"none",hint:"blocked"};
+  const h=eff?hash(eff,L.id):1; const target=!eff||h<.55?L.price:Math.ceil(L.price*(.85+hash(L.id,eff+"f")*.4)-.99)+.99;
+  const sync=L.syncOff?"off":target===L.price?"aligned":L.failed?"failed":"pending";
+  const g=eff?hash(L.id,eff+"h"):1; const hint=g<.05?"loss":g<.11&&target!==L.price?"alert":g<.17&&target===L.price?"room":null;
+  return {eff,target,sync,hint,room:hint==="room"?+(1+hash(L.id,"r")*6).toFixed(2):null};
+}
+function makeData(mode){
+  const r=rng(mode==="few"?7001:7002); const many=mode==="many"; const pk=a=>a[Math.floor(r()*a.length)];
+  const cats=many?[...FEW_CATS,...EXTRA_CATS.map(p=>[p,1+Math.floor(Math.pow(r(),2.4)*70)])]:FEW_CATS;
+  const stores=many?MANY_STORES:FEW_STORES, pkgs=many?MANY_PKGS:FEW_PKGS;
+  const tags=(many?MANY_TAGS:FEW_TAGS).map((name,i)=>({name,color:TAG_COLORS[i%TAG_COLORS.length]}));
+  const listings=[]; let seq=0;
+  for(const [path,n] of cats){ for(let i=0;i<n;i++){ const id=seq++;
+    const title=titleFor(path,r,i); const price=Math.ceil(18+r()*50-.99)+.99;
+    const st=r(); const status=st<.08?"pending":st<.13?"confirmed":st<.94?"bound":"ended";
+    const rules=[];
+    if(/^Music:CDs/.test(path)){ const o=r(); if(o<.62) rules.push("日版 CD 标准"); else if(o<.8) rules.push("日版 CD 新品"); if(r()<.15) rules.push("日版 CD 促销"); }
+    else if(/^Music/.test(path)&&r()<.5) rules.push("日版 CD 标准");
+    if(/^Movies/.test(path)&&r()<.6) rules.push("DVD 清仓");
+    if(/Pencil|Pens|Stapler/.test(path)&&r()<.7) rules.push("文具通用");
+    if(/Nail|Makeup|Skin/.test(path)&&r()<.6) rules.push("美妆小件");
+    const tg=[]; for(let k=0;k<3;k++){ if(r()<.4){ const t=tags[Math.floor(Math.pow(r(),1.5)*tags.length)].name; if(!tg.includes(t)) tg.push(t); } }
+    const words=title.split(/[\s.-]+/).filter(w=>/^[A-Za-z]/.test(w));
+    listings.push({id,title,cat:path,store:many?stores[Math.min(stores.length-1,Math.floor(Math.pow(r(),1.8)*stores.length))]:(r()<.8?stores[0]:stores[1]),
+      price,status,rules,pkg:r()<.05?null:pkgFor(path,pkgs,r),tags:tg,syncOff:r()<.04,failed:r()<.08,
+      sku:"SR-"+segs(path)[0].replace(/[^A-Z]/g,"").slice(0,3)+"-"+String(1000+id),itemId:"2856"+String(Math.floor(r()*1e8)).padStart(8,"0"),
+      asin:"B0"+Math.floor(r()*36**8).toString(36).toUpperCase().padStart(8,"0"),quote:900+Math.floor(r()*40)*100,shipJ:pk([0,350,450,600]),seller:pk(["Amazon.co.jp","タワーレコード","HMV&BOOKS","ディスクユニオン","ネオウィング"]),
+      synced:"10-"+(20+Math.floor(r()*5))+" "+String(Math.floor(r()*24)).padStart(2,"0")+":"+String(Math.floor(r()*60)).padStart(2,"0"),
+      skin:SKINS[Math.floor(r()*SKINS.length)],ini:(words[0]||"J")[0].toUpperCase()+((words[1]||"")[0]||"").toUpperCase(),disc:/^(Music|Movies)/.test(path)});
+  } }
+  return {mode,cats,stores,pkgs,tags,listings,tree:buildTree(cats)};
+}
+const EMPTY_F={status:"all",q:"",cats:[],tags:[],tagMode:"all",pkgs:[],eff:[],sync:[],hints:[]};
+function match(L,f,st=true){
+  if(st&&f.status!=="all"&&L.status!==f.status) return false;
+  const q=f.q.trim().toLowerCase(); if(q&&!(L.title.toLowerCase().includes(q)||L.itemId.includes(q)||L.sku.toLowerCase().includes(q))) return false;
+  if(f.cats.length&&!covered(f.cats,L.cat)) return false;
+  if(f.tags.length&&!(f.tagMode==="all"?f.tags.every(t=>L.tags.includes(t)):f.tags.some(t=>L.tags.includes(t)))) return false;
+  if(f.pkgs.length&&!f.pkgs.includes(L.pkg||"未设置包装")) return false;
+  if(f.eff.length&&!f.eff.includes(ruleLabel(L.eff))) return false;
+  if(f.sync.length&&!f.sync.includes(SYNC[L.sync][0])) return false;
+  if(f.hints.length&&!f.hints.includes(L.hint?HINTS[L.hint][0]:"")) return false;
+  return true; }
+const cntBy=(ls,fn)=>{ const m={}; ls.forEach(L=>[].concat(fn(L)).forEach(v=>{ if(v) m[v]=(m[v]||0)+1; })); return m; };
+// 登入 dest 时，同优先级的旧规则就是冲突
+const conflictOf=(L,dest)=>L.rules.filter(r=>r!==dest&&rank(r)===rank(dest));
+
+/* 生效规则单元格：悬停或聚焦展开它登入的全部规则 */
+function RuleCell({L,up}){
+  const all=sortRules(L.rules);
+  return html`<div class="rcell" tabIndex="0" aria-label=${"生效规则："+ruleLabel(L.eff)+"，共登入 "+(all.length+1)+" 条规则"}>
+    <span class=${"own"+(L.eff?"":" free")}><span>${L.eff?L.eff:FREE}</span>${all.length>0&&html`<span class="rn">${all.length+1}</span>`}</span>
+    <div class=${"rpop"+(up?" up":"")} role="tooltip"><div class="cap">登入的规则 · 按优先级</div>
+      ${all.map((r,i)=>html`<div key=${r} class=${"rp"+(i===0?" on":"")}><span class="pp">${PRIO[RULE_PRIO[r]]}</span><span class="nm">${r}</span>${i===0?html`<${Pill} tone="ok">生效中<//>`:html`<span class="faint">被覆盖</span>`}</div>`)}
+      <div class=${"rp"+(all.length?"":" on")}><span class="pp">内置</span><span class="nm">自由定价</span>${all.length?html`<span class="faint">被覆盖</span>`:html`<${Pill} tone="ok">生效中<//>`}</div></div></div>`; }
+
+/* ---------- 标签选择（列表、详情、批量共用） ---------- */
+function TagList({all,value,onToggle,onCreate,q,setQ}){
+  const ql=q.trim().toLowerCase(); const list=all.filter(t=>t.name.toLowerCase().includes(ql)); const exists=all.some(t=>t.name===q.trim());
+  return html`<div class="pop-s"><${Ic} n="search" s=${15}/><input autoFocus placeholder=${"搜索或新建标签（共 "+all.length+" 个）"} value=${q} onInput=${e=>setQ(e.target.value)} onKeyDown=${e=>{ if(e.key==="Enter"&&q.trim()&&!exists&&onCreate){ onCreate(q.trim()); setQ(""); } }}/></div>
+    <ul class="pop-l" role="listbox" aria-multiselectable="true" aria-label="标签" style=${{maxHeight:260}}>
+      ${q.trim()&&!exists&&onCreate&&html`<li class="opt" role="option" tabIndex="0" onClick=${()=>{ onCreate(q.trim()); setQ(""); }} onKeyDown=${keyAct(()=>{ onCreate(q.trim()); setQ(""); })}><${Ic} n="plus" s=${14}/><span class="nm">新建标签「${q.trim()}」并加上</span><span></span></li>`}
+      ${list.map(t=>{ const on=value.includes(t.name); return html`<li key=${t.name} class="opt" role="option" tabIndex="0" aria-selected=${on} onClick=${()=>onToggle(t.name)} onKeyDown=${keyAct(()=>onToggle(t.name))}><${Cb} s=${on}/><span class="nm"><span class="tdot" style=${{background:t.color,marginRight:7}}></span>${hl(t.name,q)}</span><span></span></li>`; })}
+      ${!list.length&&!q.trim()&&html`<li class="none">还没有标签</li>`}</ul>`; }
+function RowTags({L,tagMap,allTags,toggleTag,createTag,filterTag}){
+  const [open,setOpen,ref]=usePop(); const [q,setQ]=useState("");
+  const show=L.tags.slice(0,3);
+  return html`<div class="tagrow" ref=${ref} onClick=${e=>e.stopPropagation()}>
+    ${show.map(t=>html`<button key=${t} class="tagc" title=${"只看带「"+t+"」标签的"} onClick=${()=>filterTag(t)}><i style=${{background:(tagMap[t]||{}).color}}></i>${t}</button>`)}
+    ${L.tags.length>3&&html`<span class="tagc" style=${{cursor:"default"}} title=${L.tags.slice(3).join("、")}>+${L.tags.length-3}</span>`}
+    <button class="tagadd" aria-label=${"编辑标签："+L.title} aria-expanded=${open} onClick=${()=>setOpen(!open)}><${Ic} n=${L.tags.length?"edit":"plus"} s=${12}/>${L.tags.length?"":"标签"}</button>
+    ${open&&html`<div class="pop" role="dialog" aria-label="编辑标签"><${TagList} all=${allTags} value=${L.tags} q=${q} setQ=${setQ} onToggle=${t=>toggleTag([L.id],t,!L.tags.includes(t))} onCreate=${n=>{ createTag(n); toggleTag([L.id],n,true); }}/>
+      <div class="pop-f">已加 <span class="mono">${L.tags.length}</span> 个<span class="r"><button class="btn sm" onClick=${()=>setOpen(false)}>完成</button></span></div></div>`}
+  </div>`; }
+
+/* ---------- 批量确认 ---------- */
+const ACTIONS={join:"登入规则",leave:"移出规则",pkg:"设置包装",addTag:"加标签",rmTag:"减标签"};
+function ConflictBox({conf,dest,mode,setMode,each,setEach}){
+  if(!conf.length) return null;
+  return html`<div class="conf"><div class="conf-h"><${Ic} n="alert" s=${16}/><div><b>${conf.length} 条已在同为「${PRIO[RULE_PRIO[dest]]}」优先级的其他规则里。</b>同一条刊登不能登入两条同优先级的规则，是否更换规则（从旧规则移出、登入「${dest}」）？</div></div>
+    <div class="seg" role="radiogroup" aria-label="同优先级冲突处理">${[["replace","全部更换"],["skip","全部跳过"],["each","逐条选择"]].map(([k,t])=>html`<button key=${k} role="radio" aria-checked=${mode===k} aria-pressed=${mode===k} onClick=${()=>setMode(k)}>${t}</button>`)}</div>
+    ${mode==="each"&&html`<ul class="conf-l">${conf.map(L=>html`<li key=${L.id}><${Cover} it=${L} size=${28}/><div style=${{minWidth:0}}><div class="t1" lang="en">${L.title}</div><div class="t2">已在规则「${conflictOf(L,dest).join("」「")}」</div></div>
+      <span class="mini-seg"><button aria-pressed=${each[L.id]!==false} onClick=${()=>setEach(s=>({...s,[L.id]:true}))}>更换</button><button aria-pressed=${each[L.id]===false} onClick=${()=>setEach(s=>({...s,[L.id]:false}))}>跳过</button></span></li>`)}</ul>`}</div>`; }
+function BulkModal({act,targets,allMode,D,allTags,onClose,onApply}){
+  const [dest,setDest]=useState(act==="join"?RULES[0]:act==="pkg"?D.pkgs[0]:null);
+  const [tagSel,setTagSel]=useState([]); const [ruleSel,setRuleSel]=useState([]); const [q,setQ]=useState(""); const [step,setStep]=useState(1); const [typed,setTyped]=useState("");
+  const [mode,setMode]=useState("replace"); const [each,setEach]=useState({});
+  const conf=act==="join"?targets.filter(L=>!L.rules.includes(dest)&&conflictOf(L,dest).length):[];
+  const rep=id=>mode==="replace"?true:mode==="skip"?false:each[id]!==false;
+  const es=act==="join"?targets.filter(L=>!(conf.includes(L)&&!rep(L.id))):targets;
+  const n=es.length, big=n>100;
+  const present=act==="rmTag"?allTags.filter(t=>targets.some(L=>L.tags.includes(t.name))):allTags;
+  const presentRules=sortRules(RULES.filter(r=>targets.some(L=>L.rules.includes(r))));
+  const changed=act==="join"?es.filter(L=>!L.rules.includes(dest)).length:act==="leave"?es.filter(L=>ruleSel.some(r=>L.rules.includes(r))).length:act==="pkg"?es.filter(L=>L.pkg!==dest).length:act==="addTag"?es.filter(L=>tagSel.some(t=>!L.tags.includes(t))).length:es.filter(L=>tagSel.some(t=>L.tags.includes(t))).length;
+  const becomeEff=act==="join"?es.filter(L=>!L.rules.filter(r=>!(rep(L.id)&&conflictOf(L,dest).includes(r))).some(r=>rank(r)<rank(dest))).length:0;
+  const ready=(act==="addTag"||act==="rmTag")?tagSel.length>0:act==="leave"?ruleSel.length>0:true;
+  const effect={join:html`登入后，<b>「${dest}」（${PRIO[RULE_PRIO[dest]]}优先级）</b>是刊登登入的规则里优先级最高的，就按它定价：目标售价立刻变化，下一次每日同步改到 eBay。原来登入的其他规则不受影响。`,
+    leave:html`移出后，刊登由剩下的规则里优先级最高的那条定价；<b>一条都不剩就回到自由定价</b>（按 eBay 现价）。目标售价立刻变化，下一次每日同步改到 eBay。`,
+    pkg:html`只改 OpenEC 里的包装信息。<b>包装会影响规则算出的目标售价</b>；缺包装的刊登设好后就能算价。`,
+    addTag:html`标签只在 OpenEC 里用，用来筛选和给规则圈候选，<b>不会改 eBay</b>。`,rmTag:html`标签只在 OpenEC 里用；按标签圈候选的规则，可能不再把这些刊登当候选（已登入的不受影响）。`}[act];
+  const go=()=>onApply({act,dest,tagSel,ruleSel,ids:es.map(L=>L.id),replace:act==="join"?conf.filter(L=>rep(L.id)).map(L=>[L.id,conflictOf(L,dest)]):[],changed,n,skipped:targets.length-n});
+  if(step===2) return html`<${Modal} title="再次确认条数" width=${500} onClose=${onClose} footer=${html`<${Btn} kind="quiet" onClick=${()=>setStep(1)}>上一步<//><${Btn} kind="primary" disabled=${typed!==String(n)} onClick=${go}>确认${ACTIONS[act]} ${n} 条<//>`}>
+    <span class="step">第 2 步 / 共 2 步</span><p style=${{margin:0}}>一次处理 <b class="mono">${n}</b> 条，超过 100 条需要输入条数确认。${allMode?"按当前筛选执行；如果执行时条数变了，会停下来请你重新确认。":""}</p>
+    <label class="field">输入 <b class="mono" style=${{color:"var(--ink)"}}>${n}</b><input class=${"input mono"+(typed&&typed!==String(n)?" bad":"")} autoFocus inputMode="numeric" value=${typed} onInput=${e=>setTyped(e.target.value.replace(/\D/g,""))}/></label><//>`;
+  return html`<${Modal} title=${ACTIONS[act]+" · "+targets.length+" 条"} width=${640} onClose=${onClose} footer=${html`<${Btn} kind="quiet" onClick=${onClose}>取消<//><${Btn} kind="primary" disabled=${!ready||!n} onClick=${()=>big?setStep(2):go()}>${big?"下一步：确认条数":ACTIONS[act]+" "+n+" 条"}<//>`}>
+    ${big&&html`<span class="step">第 1 步 / 共 2 步</span>`}
+    ${act==="join"&&html`<label class="field">登入哪条规则<select class="input" value=${dest} onChange=${e=>{ setDest(e.target.value); setEach({}); }}>${sortRules(RULES).map(r=>html`<option key=${r} value=${r}>${r} · ${PRIO[RULE_PRIO[r]]}优先级</option>`)}</select></label>`}
+    ${act==="leave"&&html`<div class="field"><span class="flab">从哪些规则移出（自由定价是内置的，不能移出）</span><div class="rule-checks">${presentRules.length?presentRules.map(r=>{ const on=ruleSel.includes(r), c=targets.filter(L=>L.rules.includes(r)).length; return html`<button key=${r} class="opt" role="checkbox" aria-checked=${on} onClick=${()=>setRuleSel(s=>on?s.filter(x=>x!==r):[...s,r])}><${Cb} s=${on}/><span class="nm">${r} <span class="faint">· ${PRIO[RULE_PRIO[r]]}</span></span><span class="n">${c} 条</span></button>`; }):html`<p class="sub" style=${{margin:0}}>选中的刊登都只在自由定价里。</p>`}</div></div>`}
+    ${act==="pkg"&&html`<label class="field">包装<select class="input" value=${dest} onChange=${e=>setDest(e.target.value)}>${D.pkgs.map(r=>html`<option key=${r}>${r}</option>`)}</select></label>`}
+    ${(act==="addTag"||act==="rmTag")&&html`<div class="field"><span class="flab">${act==="addTag"?"加上哪些标签":"去掉哪些标签（只列出选中刊登上有的）"}</span><div style=${{border:"1px solid var(--line-2)",borderRadius:14,overflow:"hidden"}}><${TagList} all=${present} value=${tagSel} q=${q} setQ=${setQ} onToggle=${t=>setTagSel(s=>s.includes(t)?s.filter(x=>x!==t):[...s,t])}/></div></div>`}
+    <div class="eff"><${Ic} n="alert" s=${16}/><div>${effect}</div></div>
+    ${act==="join"&&html`<${ConflictBox} conf=${conf} dest=${dest} mode=${mode} setMode=${setMode} each=${each} setEach=${setEach}/>`}
+    <dl class="sumgrid"><dt>范围</dt><dd>${allMode?"全部符合当前筛选的刊登（含其他页）":"勾选的刊登"}</dd><dt>条数</dt><dd><b class="mono">${n}</b> 条${ready&&changed!==n?html`<span class="faint">（会改变 ${changed} 条，其余已经是这样）</span>`:""}${targets.length!==n?html`<span class="faint">，跳过 ${targets.length-n} 条</span>`:""}</dd>
+      ${act==="join"&&html`<dt>登入后按它生效</dt><dd><b class="mono">${becomeEff}</b> 条<span class="faint">，其余仍由更高优先级的规则定价</span></dd>`}</dl>
+    <div><div class="flab" style=${{fontSize:12.5,color:"var(--ink-2)",marginBottom:8}}>前 ${Math.min(5,n)} 条样例</div><div class="samples">
+      ${es.slice(0,5).map(L=>html`<div class="smp" key=${L.id}><${Cover} it=${L} size=${32}/><div style=${{minWidth:0}}><div class="t1" lang="en">${L.title}</div><div class="t2">${L.sku} · 生效：${ruleLabel(L.eff)}${L.rules.length>1?" · 共登入 "+(L.rules.length+1)+" 条":""}</div></div><span class="mono">${usd(L.price)}</span></div>`)}
+      ${n>5&&html`<div class="more2">还有 ${n-5} 条</div>`}</div></div><//>`;
+}
+
+/* ---------- 标签管理 ---------- */
+function TagManager({tags,counts,setTags,onDelete,onRename,onClose}){
+  const [q,setQ]=useState(""); const [nn,setNn]=useState(""); const [ed,setEd]=useState(null); const [ev,setEv]=useState(""); const [del,setDel]=useState(null);
+  const list=tags.filter(t=>t.name.toLowerCase().includes(q.trim().toLowerCase()));
+  const add=()=>{ const t=nn.trim(); if(!t) return; if(tags.some(x=>x.name===t)){ toast("已经有「"+t+"」"); return; } setTags([{name:t,color:TAG_COLORS[tags.length%TAG_COLORS.length]},...tags]); setNn(""); toast("已新建标签「"+t+"」"); };
+  const cycle=t=>setTags(tags.map(x=>x.name===t.name?{...x,color:TAG_COLORS[(TAG_COLORS.indexOf(x.color)+1)%TAG_COLORS.length]}:x));
+  const saveName=t=>{ const v=ev.trim(); setEd(null); if(!v||v===t.name) return; if(tags.some(x=>x.name===v)){ toast("已经有「"+v+"」"); return; } onRename(t.name,v); };
+  return html`<${Modal} title=${"标签管理 · "+tags.length+" 个"} width=${600} onClose=${onClose} footer=${html`<${Btn} onClick=${onClose}>完成<//>`}>
+    <div class="tm-add"><input class="input" placeholder="新标签名，回车创建" value=${nn} onInput=${e=>setNn(e.target.value)} onKeyDown=${e=>e.key==="Enter"&&add()}/><${Btn} icon="plus" onClick=${add}>新建<//></div>
+    <div class="sfield"><${Ic} n="search" s=${15}/><input class="input" placeholder="搜索标签" value=${q} onInput=${e=>setQ(e.target.value)}/></div>
+    <ul class="tm-list">${list.map(t=>html`<li key=${t.name} class=${"tm-row"+(del===t.name?" del":"")}>
+      <button class="sw" style=${{background:t.color}} title="点一下换颜色" aria-label=${"更换「"+t.name+"」的颜色"} onClick=${()=>cycle(t)}></button>
+      ${ed===t.name?html`<input class="input" autoFocus value=${ev} onInput=${e=>setEv(e.target.value)} onBlur=${()=>saveName(t)} onKeyDown=${e=>{ if(e.key==="Enter") saveName(t); if(e.key==="Escape") setEd(null); }}/>`:html`<span class="nm" title="点击改名" onClick=${()=>{ setEd(t.name); setEv(t.name); }}>${t.name}</span>`}
+      <span class="n">${counts[t.name]||0} 条</span>
+      ${del===t.name?html`<span class="inline-row" style=${{gap:4}}><span style=${{fontSize:12,color:"var(--bad)"}}>从 ${counts[t.name]||0} 条移除并删除？</span><button class="btn sm primary danger" onClick=${()=>{ onDelete(t.name); setDel(null); }}>删除</button><button class="btn sm quiet" onClick=${()=>setDel(null)}>取消</button></span>`
+        :html`<span class="inline-row" style=${{gap:2}}><button class="btn quiet sm" aria-label=${"改名 "+t.name} onClick=${()=>{ setEd(t.name); setEv(t.name); }}><${Ic} n="edit" s=${14}/></button><button class="btn quiet sm danger" aria-label=${"删除 "+t.name} onClick=${()=>setDel(t.name)}><${Ic} n="trash" s=${14}/></button></span>`}
+    </li>`)}${!list.length&&html`<li class="tm-row"><span></span><span class="faint">没有匹配的标签</span></li>`}</ul><//>`;
+}
+
+/* ---------- 商品详情（侧边抽屉） ---------- */
+function Detail({L,D,tags,tagMap,onClose,update,toggleTag,createTag}){
+  const [q,setQ]=useState(""); const [ask,setAsk]=useState(null); const [pkg,setPkg]=useState(L.pkg||"");
+  const notIn=sortRules(RULES.filter(r=>!L.rules.includes(r))); const [pick,setJoin]=useState(notIn[0]||""); const join=notIn.includes(pick)?pick:(notIn[0]||"");
+  const [addOpen,setAddOpen,addRef]=usePop();
+  useEffect(()=>{ const h=e=>{ if(e.key==="Escape"&&!addOpen) onClose(); }; window.addEventListener("keydown",h); return ()=>window.removeEventListener("keydown",h); },[onClose,addOpen]);
+  const all=sortRules(L.rules);
+  const doJoin=replace=>{ if(!join||L.rules.includes(join)) return; update(L.id,{rules:[...L.rules.filter(r=>!replace.includes(r)),join]}); setAsk(null); toast("已登入规则「"+join+"」"+(replace.length?"，并从「"+replace.join("」「")+"」移出":"")); };
+  const tryJoin=()=>{ const c=conflictOf(L,join); if(c.length) setAsk({type:"conf",c}); else doJoin([]); };
+  return html`<div><div class="drawer-ov" onClick=${onClose}></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-label=${"商品详情："+L.title}>
+    <div class="dr-h"><${Cover} it=${L} size=${64}/><div style=${{minWidth:0}}><h3 lang="en">${L.title}</h3><div class="tt2">${L.sku} · #${L.itemId}</div><div class="tt2" style=${{fontFamily:"var(--font-body)"}} title=${pathText(L.cat)}>${pathText(L.cat)}</div>
+      <div style=${{display:"flex",gap:6,marginTop:8}}><${Pill} tone=${ST_PILL[L.status][1]}>${ST_PILL[L.status][0]}<//><${Pill} plain>${L.store}<//></div></div>
+      <button class="btn quiet sm x" aria-label="关闭" onClick=${onClose}><${Ic} n="x" s=${16}/></button></div>
+    <div class="dr-b">
+      <section class="dsec"><h4><${Ic} n="tag" s=${15}/>售价与同步<span class="r">${L.sync!=="none"&&html`<${Pill} tone=${SYNC[L.sync][1]} pulse=${L.sync==="pending"}>${SYNC[L.sync][0]}<//>`}</span></h4>
+        ${L.target==null?html`<div class="note warn"><${Ic} n="alert"/><div><b>${L.status!=="bound"?"还没有目标售价":"算不出目标售价"}</b>${L.status!=="bound"?"绑定采购报价后，生效规则才能算价。":"缺包装，补上包装后生效规则就能算价。"}</div></div>`
+        :html`<div class="pbox"><div class="pb"><div class="k">eBay 现价</div><div class="v">${usd(L.price)}</div></div><span class="arr"><${Ic} n="arrow"/></span><div class="pb"><div class="k">目标售价 · ${L.eff?"由规则「"+L.eff+"」算出":"自由定价，按 eBay 现价"}</div><div class=${"v"+(L.target!==L.price?" to":"")}>${usd(L.target)}</div></div></div>
+          <div class="hints" style=${{marginTop:10}}>${L.hint&&L.hint!=="blocked"&&html`<${Pill} tone=${HINTS[L.hint][1]}>${L.hint==="room"?"有 "+usd(L.room)+" 降价空间":HINTS[L.hint][0]}<//>`}</div>
+          <dl class="dkv"><dt>同步</dt><dd>${L.sync==="aligned"?"eBay 售价已和目标一致":L.sync==="pending"?"下一次每日自动同步会把 eBay 售价改成目标售价":L.sync==="failed"?"上次同步没成功，下一次每日同步会重试":"这条刊登关闭了同步，目标售价不会同步到 eBay"}</dd><dt>上次同步</dt><dd class="mono">${L.synced}</dd></dl>`}
+      </section>
+      <section class="dsec"><h4><${Ic} n="sliders" s=${15}/>登入的规则<span class="r faint" style=${{fontSize:12}}>按优先级，最上面的生效</span></h4>
+        <ul class="rlist">${all.map((r,i)=>html`<li key=${r} class=${i===0?"on":""}><span class="pp">${PRIO[RULE_PRIO[r]]}</span><button class="lnk2" onClick=${()=>toast("（原型）打开规则「"+r+"」")}>${r}</button>
+            ${i===0?html`<${Pill} tone="ok">生效中<//>`:html`<span class="faint" style=${{fontSize:12}}>被「${all[0]}」覆盖</span>`}
+            <span class="r">${ask&&ask.type==="rm"&&ask.r===r?html`<span style=${{fontSize:12,color:"var(--ink-2)"}}>移出后${all.length>1?(i===0?"由「"+all[1]+"」生效":"生效规则不变"):"回到自由定价"}</span><button class="btn sm quiet" onClick=${()=>setAsk(null)}>取消</button><button class="btn sm primary" onClick=${()=>{ update(L.id,{rules:L.rules.filter(x=>x!==r)}); setAsk(null); toast("已从规则「"+r+"」移出"); }}>移出</button>`
+              :html`<button class="btn sm quiet" onClick=${()=>setAsk({type:"rm",r})}>移出</button>`}</span></li>`)}
+          <li class=${all.length?"":"on"}><span class="pp">内置</span><span>自由定价</span>${all.length?html`<span class="faint" style=${{fontSize:12}}>被覆盖</span>`:html`<${Pill} tone="ok">生效中<//>`}<span class="r faint" style=${{fontSize:12}}>默认都在，不能移出</span></li></ul>
+        ${notIn.length>0&&html`<div class="inline-row" style=${{marginTop:12}}><select class="input" aria-label="登入规则" value=${join} onChange=${e=>{ setJoin(e.target.value); setAsk(null); }}>${notIn.map(r=>html`<option key=${r} value=${r}>${r} · ${PRIO[RULE_PRIO[r]]}优先级</option>`)}</select><${Btn} sm icon="move" onClick=${tryJoin}>登入规则<//></div>`}
+        ${ask&&ask.type==="conf"&&html`<div class="confirm-inline"><span>「${join}」和「${ask.c.join("」「")}」同为${PRIO[RULE_PRIO[join]]}优先级，一条刊登只能登入其中一条。更换规则？</span><span class="r"><button class="btn sm quiet" onClick=${()=>setAsk(null)}>取消</button><button class="btn sm primary" onClick=${()=>doJoin(ask.c)}>更换</button></span></div>`}
+        <p class="sub" style=${{margin:"10px 0 0"}}>规则的筛选只圈候选；刊登登入哪些规则、谁优先级最高，决定它按哪条规则定价。</p></section>
+      <section class="dsec"><h4><${Ic} n="tag" s=${15}/>标签<span class="r faint" style=${{fontSize:12}}>只在 OpenEC 里用</span></h4>
+        <div class="tagrow" ref=${addRef} style=${{marginTop:0,gap:6}}>
+          ${L.tags.map(t=>html`<span key=${t} class="tagc big"><i style=${{background:(tagMap[t]||{}).color}}></i>${t}<button aria-label=${"去掉标签 "+t} onClick=${()=>toggleTag([L.id],t,false)}><${Ic} n="x" s=${12}/></button></span>`)}
+          <button class="tagadd" style=${{height:28}} aria-expanded=${addOpen} onClick=${()=>setAddOpen(!addOpen)}><${Ic} n="plus" s=${13}/>添加标签</button>
+          ${addOpen&&html`<div class="pop" style=${{width:300}}><${TagList} all=${tags} value=${L.tags} q=${q} setQ=${setQ} onToggle=${t=>toggleTag([L.id],t,!L.tags.includes(t))} onCreate=${n=>{ createTag(n); toggleTag([L.id],n,true); }}/><div class="pop-f">已加 <span class="mono">${L.tags.length}</span> 个<span class="r"><button class="btn sm" onClick=${()=>setAddOpen(false)}>完成</button></span></div></div>`}
+        </div>${!L.tags.length&&html`<p class="sub" style=${{margin:"8px 0 0"}}>还没有标签。</p>`}</section>
+      <section class="dsec"><h4><${Ic} n="box" s=${15}/>包装${!L.pkg&&html`<${Pill} tone="bad">未设置<//>`}</h4>
+        <div class="inline-row"><select class="input" aria-label="包装" value=${pkg} onChange=${e=>setPkg(e.target.value)}><option value="">请选择包装</option>${D.pkgs.map(p=>html`<option key=${p}>${p}</option>`)}</select>
+          <${Btn} sm disabled=${pkg===(L.pkg||"")||!pkg} onClick=${()=>{ update(L.id,{pkg}); toast("包装已改为「"+pkg+"」，目标售价已按生效规则重算"); }}>保存<//></div>
+        <p class="sub" style=${{margin:"10px 0 0"}}>包装决定运费，会影响规则算出的目标售价。</p></section>
+      <section class="dsec"><h4><${Ic} n="link" s=${15}/>采购来源<span class="r"><button class="lnk" onClick=${()=>toast("（原型）跳到核对页")}>${L.status==="bound"?"换报价":"去核对"}</button></span></h4>
+        ${L.status==="bound"||L.status==="ended"?html`<dl class="dkv" style=${{margin:0,padding:0,border:0}}><dt>ASIN</dt><dd class="mono">${L.asin}</dd><dt>卖家</dt><dd lang="ja">${L.seller}</dd><dt>报价 + 运费</dt><dd class="mono">¥${L.quote.toLocaleString()} + ¥${L.shipJ}</dd><dt>报价刷新</dt><dd>每天自动刷新</dd></dl>`:html`<p class="sub" style=${{margin:0}}>还没有确认对应的 Amazon 商品。</p>`}</section>
+    </div></aside></div>`;
+}
+
+/* ---------- 页面 ---------- */
+const PAGE=20;
+function ProductsPage({D,mode}){
+  const [ls,setLs]=useState(D.listings); const [tags,setTags]=useState(D.tags);
+  useEffect(()=>{ setLs(D.listings); setTags(D.tags); setF(EMPTY_F); },[D]);
+  const [f,setF]=useState(EMPTY_F); const [more,setMore]=useState(false); const [pg,setPg]=useState(1);
+  const [sel,setSel]=useState({all:false,ids:[]}); const [modal,setModal]=useState(null); const [open,setOpen]=useState(null); const [tm,setTm]=useState(false);
+  const setFk=(k,v)=>{ setF(o=>({...o,[k]:v})); setPg(1); };
+  const fsig=JSON.stringify(f);
+  useEffect(()=>{ setSel({all:false,ids:[]}); },[fsig]);
+  const V=useMemo(()=>ls.map(L=>({...L,...view(L)})),[ls]);
+  const tagMap=useMemo(()=>Object.fromEntries(tags.map(t=>[t.name,t])),[tags]);
+  const list=useMemo(()=>V.filter(L=>match(L,f)),[V,fsig]);
+  const stN=useMemo(()=>{ const base=V.filter(L=>match(L,f,false)); const m={all:base.length}; base.forEach(L=>m[L.status]=(m[L.status]||0)+1); return m; },[V,fsig]);
+  const pages=Math.max(1,Math.ceil(list.length/PAGE)); const cp=Math.min(pg,pages); const rows=list.slice((cp-1)*PAGE,cp*PAGE);
+  const tagN=useMemo(()=>cntBy(V,L=>L.tags),[V]);
+  const pkgN=useMemo(()=>cntBy(V,L=>L.pkg||"未设置包装"),[V]);
+  const effN=useMemo(()=>cntBy(V,L=>ruleLabel(L.eff)),[V]);
+  const syncN=useMemo(()=>cntBy(V,L=>L.sync==="none"?null:SYNC[L.sync][0]),[V]);
+  const hintN=useMemo(()=>cntBy(V,L=>L.hint?HINTS[L.hint][0]:null),[V]);
+  const update=(id,patch)=>setLs(a=>a.map(L=>L.id===id?{...L,...patch}:L));
+  const toggleTag=(ids,t,on)=>setLs(a=>a.map(L=>ids.includes(L.id)?{...L,tags:on?(L.tags.includes(t)?L.tags:[...L.tags,t]):L.tags.filter(x=>x!==t)}:L));
+  const createTag=n=>setTags(ts=>ts.some(t=>t.name===n)?ts:[{name:n,color:TAG_COLORS[ts.length%TAG_COLORS.length]},...ts]);
+  const pageIds=rows.map(L=>L.id);
+  const selN=sel.all?list.length:sel.ids.length;
+  const pageAll=pageIds.length>0&&(sel.all||pageIds.every(i=>sel.ids.includes(i)));
+  const pageSome=!pageAll&&pageIds.some(i=>sel.ids.includes(i));
+  const togRow=id=>setSel(s=>s.all?{all:false,ids:list.map(L=>L.id).filter(i=>i!==id)}:{all:false,ids:s.ids.includes(id)?s.ids.filter(i=>i!==id):[...s.ids,id]});
+  const togPage=()=>setSel(s=>pageAll?{all:false,ids:s.all?[]:s.ids.filter(i=>!pageIds.includes(i))}:{all:false,ids:[...new Set([...s.ids,...pageIds])]});
+  const targets=()=>sel.all?list:V.filter(L=>sel.ids.includes(L.id));
+  const apply=({act,dest,tagSel,ruleSel,ids,replace,changed,n,skipped})=>{
+    const rp=Object.fromEntries(replace||[]);
+    setLs(a=>a.map(L=>{ if(!ids.includes(L.id)) return L;
+      if(act==="join") return L.rules.includes(dest)?L:{...L,rules:[...L.rules.filter(r=>!(rp[L.id]||[]).includes(r)),dest]};
+      if(act==="leave") return {...L,rules:L.rules.filter(r=>!ruleSel.includes(r))};
+      if(act==="pkg") return {...L,pkg:dest};
+      if(act==="addTag") return {...L,tags:[...new Set([...L.tags,...tagSel])]}; if(act==="rmTag") return {...L,tags:L.tags.filter(t=>!tagSel.includes(t))};
+      return L; }));
+    setModal(null); setSel({all:false,ids:[]}); toast(ACTIONS[act]+"：匹配 "+n+" 条，改变 "+changed+" 条，未变 "+(n-changed)+" 条"+(skipped?"，跳过 "+skipped+" 条":"")+(replace&&replace.length?"，更换 "+replace.length+" 条":"")+"，失败 0 条"); };
+  const af=[];
+  f.cats.forEach(k=>af.push(["cats",k,"类别："+catLabel(k)]));
+  f.tags.forEach(k=>af.push(["tags",k,"标签："+k]));
+  [["pkgs","包装"],["eff","生效规则"],["sync","同步"],["hints","提示"]].forEach(([k,l])=>f[k].forEach(v=>af.push([k,v,l+"："+v])));
+  const moreN=f.pkgs.length+f.eff.length+f.sync.length+f.hints.length;
+  const tagOpts=tags.map(t=>t.name);
+  const openL=open==null?null:V.find(L=>L.id===open);
+  return html`<div>
+    <header class="ph"><div><p class="eyebrow">Catalog</p><h1>商品</h1><p>店里的 eBay 刊登。每条刊登按它登入的规则里优先级最高的那条定价（默认在内置的自由定价里）；每天自动同步，把 eBay 售价对齐到目标售价。</p></div>
+      <div class="actions"><${Btn} icon="tag" onClick=${()=>setTm(true)}>标签管理<//><${Btn} icon="refresh" title="从 eBay 读取最新刊登，不改价" onClick=${()=>toast("（原型）正在从 eBay 读取刊登")}>读取刊登<//></div></header>
+    <div class="tabs" role="tablist" aria-label="按状态筛选">${STATUS.map(([k,l])=>html`<button key=${k} role="tab" aria-selected=${f.status===k} onClick=${()=>setFk("status",k)}>${l}<span class="c">${stN[k]||0}</span></button>`)}</div>
+    <section class="fcard" aria-label="商品筛选">
+      <div class="frow">
+        <div class="field"><div class="flab-row"><span class="flab">搜索</span></div><div class="sfield"><${Ic} n="search" s=${15}/><input class="input" type="search" placeholder="标题 / Item ID / SKU" value=${f.q} onInput=${e=>setFk("q",e.target.value)}/></div></div>
+        <div class="field"><div class="flab-row"><span class="flab">类别</span></div><${CatPick} tree=${D.tree} value=${f.cats} onChange=${v=>setFk("cats",v)}/></div>
+        <div class="field"><div class="flab-row"><span class="flab">标签</span><span class="mini-seg" role="radiogroup" aria-label="标签匹配方式"><button role="radio" aria-checked=${f.tagMode==="all"} aria-pressed=${f.tagMode==="all"} onClick=${()=>setFk("tagMode","all")}>同时包含</button><button role="radio" aria-checked=${f.tagMode==="any"} aria-pressed=${f.tagMode==="any"} onClick=${()=>setFk("tagMode","any")}>任一</button></span></div>
+          <${MultiPick} label="标签" opts=${tagOpts} counts=${tagN} value=${f.tags} onChange=${v=>setFk("tags",v)} empty="全部标签" limit=${2}/></div>
+        <button class="btn more-btn" aria-expanded=${more} onClick=${()=>setMore(!more)}><${Ic} n="sliders" s=${15}/>更多筛选${moreN?html`<span class="c">${moreN}</span>`:""}</button>
+      </div>
+      ${more&&html`<div class="frow2">
+        <div class="field"><span class="flab">包装</span><${MultiPick} label="包装" opts=${["未设置包装",...D.pkgs]} counts=${pkgN} value=${f.pkgs} onChange=${v=>setFk("pkgs",v)} empty="全部包装" limit=${1}/></div>
+        <div class="field"><span class="flab">生效规则</span><${MultiPick} label="生效规则" opts=${[...sortRules(RULES).map(ruleLabel),FREE]} counts=${effN} value=${f.eff} onChange=${v=>setFk("eff",v)} empty="全部规则" limit=${1}/></div>
+        <div class="field"><span class="flab">同步</span><${MultiPick} label="同步状态" opts=${["待同步到 eBay","已对齐","同步失败","不同步"]} counts=${syncN} value=${f.sync} onChange=${v=>setFk("sync",v)} empty="全部" limit=${1}/></div>
+        <div class="field"><span class="flab">提示</span><${MultiPick} label="提示" opts=${["亏本","超出提醒线","算不出价","有降价空间"]} counts=${hintN} value=${f.hints} onChange=${v=>setFk("hints",v)} empty="全部" limit=${1}/></div>
+      </div>`}
+      ${af.length>0&&html`<div class="active-f"><span>已筛选</span>${af.map(([k,v,t])=>html`<span class="af" key=${k+v} title=${k==="cats"?pathText(v):t}><span>${t}</span><button aria-label=${"去掉 "+t} onClick=${()=>setFk(k,f[k].filter(x=>x!==v))}><${Ic} n="x" s=${12}/></button></span>`)}<button class="clear-all" onClick=${()=>{ setF(o=>({...EMPTY_F,status:o.status})); setPg(1); }}>清空筛选</button></div>`}
+    </section>
+    <div class="listhead"><span>符合筛选 <b class="mono" style=${{color:"var(--ink)"}}>${list.length}</b> 条</span><span class="r">待同步到 eBay ${list.filter(L=>L.sync==="pending").length} 条 · 亏本 ${list.filter(L=>L.hint==="loss").length} 条</span></div>
+    <div class="tablewrap">
+      ${pageAll&&list.length>pageIds.length&&html`<div class="selbar" role="status">${sel.all?html`已选全部符合筛选的 <b class="mono">${list.length}</b> 条（含其他页）。筛选一改，选择会自动取消。<button class="lnk" onClick=${()=>setSel({all:false,ids:pageIds})}>只选本页 ${pageIds.length} 条</button>`
+        :html`已选本页 <b class="mono">${pageIds.length}</b> 条。<button class="lnk" onClick=${()=>setSel({all:true,ids:[]})}>选择全部符合筛选的 ${list.length} 条</button>`}</div>`}
+      <div class="tablescroll"><table class="t pt">
+        <colgroup><col style=${{width:46}}/><col/><col style=${{width:96}}/><col style=${{width:190}}/><col style=${{width:170}}/><col style=${{width:136}}/></colgroup>
+        <thead><tr><th class="cbx"><button class="cbbtn" role="checkbox" aria-checked=${pageAll?"true":pageSome?"mixed":"false"} aria-label="全选本页" onClick=${togPage}><${Cb} s=${pageAll?true:pageSome?"mixed":false}/></button></th><th>商品 · 标签</th><th>状态</th><th>生效规则 · 提示</th><th class="r">eBay 现价 → 目标售价</th><th>同步</th></tr></thead>
+        <tbody>${rows.map((L,ri)=>{ const on=sel.all||sel.ids.includes(L.id); return html`<tr key=${L.id} aria-selected=${on} onClick=${()=>setOpen(L.id)}>
+          <td class="cbx" onClick=${e=>e.stopPropagation()}><button class="cbbtn" role="checkbox" aria-checked=${on} aria-label=${"选择 "+L.title} onClick=${()=>togRow(L.id)}><${Cb} s=${on}/></button></td>
+          <td><div class="tc"><${Cover} it=${L} size=${44}/><div class="tt" style=${{minWidth:0}}><div class="tt1" lang="en" title=${L.title}>${L.title}</div><div class="tt2">${L.sku} · #${L.itemId}</div>
+            <${RowTags} L=${L} tagMap=${tagMap} allTags=${tags} toggleTag=${toggleTag} createTag=${createTag} filterTag=${t=>{ if(!f.tags.includes(t)) setFk("tags",[...f.tags,t]); }}/></div></div></td>
+          <td><${Pill} tone=${ST_PILL[L.status][1]}>${ST_PILL[L.status][0]}<//></td>
+          <td onClick=${e=>e.stopPropagation()}><${RuleCell} L=${L} up=${ri>=rows.length-3&&ri>2}/>
+            ${L.hint&&html`<div class="hints"><${Pill} tone=${HINTS[L.hint][1]}>${L.hint==="room"?"有 "+usd(L.room)+" 降价空间":L.hint==="blocked"?"算不出价 · 缺包装":HINTS[L.hint][0]}<//></div>`}</td>
+          <td class="prc">${L.target==null?html`<span>${usd(L.price)}</span><div class="s">还没有目标售价</div>`:L.target===L.price?html`<span>${usd(L.price)}</span><div class="s">与目标一致</div>`:html`<span class="faint">${usd(L.price)}</span><span class="arr">→</span><span class="to">${usd(L.target)}</span><div class="s">${(L.target>L.price?"+":"−")+usd(Math.abs(L.target-L.price))}</div>`}</td>
+          <td class="syn">${L.sync==="none"?html`<span class="faint">—</span>`:html`<${Pill} tone=${SYNC[L.sync][1]} pulse=${L.sync==="pending"}>${SYNC[L.sync][0]}<//>`}${L.sync!=="none"&&html`<div class="s">${L.sync==="pending"?"下次自动同步":"上次 "+L.synced}</div>`}</td>
+        </tr>`; })}</tbody></table></div>
+      ${!rows.length&&html`<div class="empty"><b>没有符合条件的商品</b>换个筛选或搜索词试试。</div>`}
+      ${list.length>PAGE&&html`<${Pager} page=${cp} set=${setPg} total=${list.length} size=${PAGE}/>`}
+    </div>
+    ${selN>0&&html`<div class="bulkbar" role="toolbar" aria-label="批量操作"><span class="cnt">已选<b>${selN}</b>条${sel.all?"（全部符合筛选）":""}</span>
+      <button class="btn glass sm" onClick=${()=>setModal("join")}><${Ic} n="move" s=${14}/>登入规则…</button>
+      <button class="btn glass sm" onClick=${()=>setModal("leave")}>移出规则…</button><span class="vr"></span>
+      <button class="btn glass sm" onClick=${()=>setModal("pkg")}><${Ic} n="box" s=${14}/>设置包装…</button>
+      <button class="btn glass sm" onClick=${()=>setModal("addTag")}><${Ic} n="plus" s=${14}/>加标签…</button>
+      <button class="btn glass sm" onClick=${()=>setModal("rmTag")}>减标签…</button>
+      <span class="sp"></span><button class="btn glass sm" onClick=${()=>setSel({all:false,ids:[]})}>取消选择</button></div>`}
+    ${modal&&html`<${BulkModal} act=${modal} targets=${targets()} allMode=${sel.all} D=${D} allTags=${tags} onClose=${()=>setModal(null)} onApply=${apply}/>`}
+    ${tm&&html`<${TagManager} tags=${tags} counts=${tagN} setTags=${setTags} onClose=${()=>setTm(false)}
+      onRename=${(a,b)=>{ setTags(ts=>ts.map(t=>t.name===a?{...t,name:b}:t)); setLs(x=>x.map(L=>L.tags.includes(a)?{...L,tags:L.tags.map(t=>t===a?b:t)}:L)); setF(o=>({...o,tags:o.tags.map(t=>t===a?b:t)})); toast("已改名为「"+b+"」"); }}
+      onDelete=${n=>{ const c=tagN[n]||0; setTags(ts=>ts.filter(t=>t.name!==n)); setLs(x=>x.map(L=>L.tags.includes(n)?{...L,tags:L.tags.filter(t=>t!==n)}:L)); setF(o=>({...o,tags:o.tags.filter(t=>t!==n)})); toast("已删除「"+n+"」，从 "+c+" 条刊登移除"); }}/>`}
+    ${openL&&html`<${Detail} key=${openL.id} L=${openL} D=${D} tags=${tags} tagMap=${tagMap} onClose=${()=>setOpen(null)} update=${update} toggleTag=${toggleTag} createTag=${createTag}/>`}
+  </div>`;
+}
+
+const NAV=[{key:"workspace",label:"工作台",icon:"home"},{key:"products",label:"商品",icon:"disc"},{key:"review",label:"核对",icon:"check"},{key:"sourcing",label:"选品",icon:"search"},{key:"pricing",label:"定价",icon:"tag"},{key:"maintenance",label:"维护",icon:"shield"},{key:"settings",label:"设置",icon:"sliders"}];
+function Nav(){
+  const ref=useRef(null); const [y,setY]=useState(null);
+  useLayoutEffect(()=>{ const nav=ref.current; const m=()=>{ const el=nav.querySelector('[aria-current="page"]'); if(el) setY(el.offsetTop); }; m(); const ro=new ResizeObserver(m); ro.observe(nav); window.addEventListener("resize",m); document.fonts&&document.fonts.ready.then(m); return ()=>{ ro.disconnect(); window.removeEventListener("resize",m); }; },[]);
+  const item=n=>html`<button key=${n.key} aria-current=${n.key==="products"?"page":undefined} onClick=${()=>toast("（原型）前往「"+n.label+"」")}><${Ic} n=${n.icon}/>${n.label}</button>`;
+  return html`<nav class="nav" aria-label="主导航" ref=${ref}>${y!=null&&html`<span class="nav-ind" style=${{top:0,transform:`translateY(${y}px)`}}></span>`}
+    <div class="nav-label">日常</div>${NAV.slice(0,3).map(item)}<div class="nav-label">经营</div>${NAV.slice(3).map(item)}</nav>`;
+}
+function App(){
+  const [mode,setMode]=useState("few"); const [pp,setPp]=useState(true);
+  const D=useMemo(()=>makeData(mode),[mode]);
+  return html`<div class="app">
+    <aside class="rail">
+      <img class="logo" src=${WORDMARK} alt="OpenEC"/>
+      <div class="proto">原型 · 示例数据</div>
+      <button class="store" title="切换店铺"><span class="live"></span><span style=${{minWidth:0}}><b style=${{fontWeight:500}}>Synthetic Records</b><small>eBay 美国 · ${D.listings.length.toLocaleString()} 条</small></span></button>
+      <button class="search-btn"><${Ic} n="search" s=${15}/>搜索商品或页面<kbd>⌘K</kbd></button>
+      <${Nav}/>
+      <div class="rail-foot"><span class="avatar">A</span><div style=${{minWidth:0}}><div style=${{fontWeight:500}}>Alex</div><div class="faint" style=${{fontSize:11}}>管理员 · Demo Trading</div></div></div>
+    </aside>
+    <main><div class="page enter"><${ProductsPage} D=${D} mode=${mode}/></div></main>
+    <aside class="proto-panel" aria-label="原型控制"><button class="pp-h" aria-expanded=${pp} onClick=${()=>setPp(!pp)}><${Ic} n="sliders" s=${14}/>原型控制<span class="faint">${pp?"收起":"展开"}</span></button>
+      ${pp&&html`<div class="pp-b"><div class="seg" role="radiogroup" aria-label="演示数据"><button role="radio" aria-checked=${mode==="few"} aria-pressed=${mode==="few"} onClick=${()=>setMode("few")}>类别少 · 7</button><button role="radio" aria-checked=${mode==="many"} aria-pressed=${mode==="many"} onClick=${()=>setMode("many")}>类别很多 · ${FEW_CATS.length+EXTRA_CATS.length}</button></div>
+        <p>${mode==="few"?"开发库里的 7 个真实类别、5 个标签。":D.tree.map.size+" 个类别节点、"+D.tags.length+" 个标签、"+D.pkgs.length+" 种包装。"}全选后可试「选择全部符合筛选的 M 条」；超过 100 条要输入条数。「日版 CD 标准」和「日版 CD 新品」同为普通优先级，可试冲突提示。</p></div>`}</aside>
+    <${Toast}/>
+  </div>`;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App}/>`);
+})();
+</script>
+</body>
+</html>

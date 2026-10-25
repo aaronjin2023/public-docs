@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body>
+<title>OpenEC 工作区原型</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* 布局：白色侧栏（橙色滑块指示当前页）+ 暖白画布；工作台顶部是一块"深色屏幕"英雄区，与登录页里的产品截图同一语言；摘要在上、明细在下，详情进弹窗 */
+:root{
+  --canvas:#FAF9F6; --surface:#FFFFFF; --sunk:#F3F1EC; --ink:#111827; --ink-2:#4B5160; --ink-3:#8C909B; --line:#ECEAE4; --line-2:#DEDBD3;
+  --or:#F2681D; --or-hi:#FF8A3D; --or-deep:#B9470A; --or-soft:#FFF0E6; --or-ink:#9A3505; --on-or:#FFFFFF;
+  --screen:#12151C; --screen-2:#1B1F29; --screen-ink:#F4F1EC; --screen-mute:#9AA0AD; --screen-line:#2A2F3B;
+  --ok:#15885A; --ok-soft:#E3F5EC; --warn:#B26A00; --warn-soft:#FFF3DB; --bad:#C8372D; --bad-soft:#FDE8E6; --mute-soft:#F1F0EC; --violet:#6D5BD0;
+  --shadow:0 1px 2px rgba(17,24,39,.05),0 10px 30px -12px rgba(17,24,39,.18);
+  --glow:0 10px 30px -8px rgba(242,104,29,.55);
+  --font-display:"Plus Jakarta Sans","Noto Sans SC",sans-serif;
+  --font-body:"Noto Sans SC",-apple-system,BlinkMacSystemFont,"Helvetica Neue","Hiragino Sans",Arial,sans-serif;
+  --font-jp:"Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --spring:cubic-bezier(.34,1.56,.64,1); --out:cubic-bezier(.16,1,.3,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --canvas:#0C0D10; --surface:#15171C; --sunk:#1C1F26; --ink:#F3F1EC; --ink-2:#AEB2BC; --ink-3:#757A86; --line:#23262E; --line-2:#30343E;
+  --or:#FF7A2E; --or-hi:#FF9A55; --or-deep:#E05A12; --or-soft:#3A2114; --or-ink:#FFB27F; --on-or:#160A03;
+  --screen:#07080B; --screen-2:#12141A; --screen-line:#22252E;
+  --ok:#3CCB8A; --ok-soft:#10291F; --warn:#F2B347; --warn-soft:#33260E; --bad:#FF7468; --bad-soft:#3A1715; --mute-soft:#1E2128; --violet:#9B8CFF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -12px rgba(0,0,0,.6); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --canvas:#0C0D10; --surface:#15171C; --sunk:#1C1F26; --ink:#F3F1EC; --ink-2:#AEB2BC; --ink-3:#757A86; --line:#23262E; --line-2:#30343E;
+  --or:#FF7A2E; --or-hi:#FF9A55; --or-deep:#E05A12; --or-soft:#3A2114; --or-ink:#FFB27F; --on-or:#160A03;
+  --screen:#07080B; --screen-2:#12141A; --screen-line:#22252E;
+  --ok:#3CCB8A; --ok-soft:#10291F; --warn:#F2B347; --warn-soft:#33260E; --bad:#FF7468; --bad-soft:#3A1715; --mute-soft:#1E2128; --violet:#9B8CFF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -12px rgba(0,0,0,.6); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--canvas);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.7;letter-spacing:.01em;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--or);outline-offset:2px}
+::selection{background:var(--or);color:#fff}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:0}
+.muted{color:var(--ink-2)} .faint{color:var(--ink-3)}
+[lang="ja"]{font-family:var(--font-jp)}
+
+/* 外壳 */
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100%}
+.rail{background:var(--surface);border-right:1px solid var(--line);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:22px 14px calc(16px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));z-index:20}
+.logo{display:block;height:30px;width:auto;margin:0 10px 22px;align-self:flex-start}
+.store{margin:0 2px 14px;padding:12px;border-radius:14px;background:var(--sunk);display:flex;align-items:center;gap:10px;border:0;text-align:left;cursor:pointer;width:calc(100% - 4px)}
+.store small{display:block;color:var(--ink-3);font-size:11px}
+.live{position:relative;width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+.live::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--ok);animation:ping 1.8s var(--out) infinite}
+@keyframes ping{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.8);opacity:0}}
+.search-btn{margin:0 2px 8px;display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink-3);cursor:pointer;font-size:13px;transition:border-color .2s}
+.search-btn:hover{border-color:var(--or);color:var(--ink)}
+.search-btn kbd{margin-left:auto}
+.nav{position:relative;display:flex;flex-direction:column;gap:2px}
+.nav-ind{position:absolute;left:0;right:0;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--or-hi),var(--or) 50%,var(--or-deep));box-shadow:var(--glow);transition:transform .45s var(--spring);z-index:0}
+.nav-label{font-size:10.5px;letter-spacing:.18em;color:var(--ink-3);padding:16px 14px 6px}
+.nav button{position:relative;z-index:1;display:flex;align-items:center;gap:12px;height:42px;padding:0 14px;border-radius:12px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;text-align:left;font-size:14px;transition:color .25s}
+.nav button:hover:not([aria-current]){background:var(--sunk);color:var(--ink)}
+.nav button[aria-current="page"]{color:#fff;font-weight:500}
+.nav .badge{margin-left:auto;font-family:var(--font-mono);font-size:11px;padding:1px 8px;border-radius:999px;background:var(--or-soft);color:var(--or-ink);transition:background .25s,color .25s}
+.nav button[aria-current="page"] .badge{background:rgba(255,255,255,.22);color:#fff}
+.rail-foot{margin-top:auto;padding:14px 10px 0;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;font-size:13px}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--or-hi),var(--or-deep));color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+main{min-width:0}
+.page{max-width:1340px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (min-width:901px){.page{padding-left:40px;padding-right:max(40px,env(safe-area-inset-right,0px))}}
+.enter{animation:pageIn .55s var(--out) both}
+@keyframes pageIn{from{opacity:.25;transform:translateY(14px);filter:blur(4px)}}
+.stagger>*{animation:rise .6s var(--out) both}
+.stagger>*:nth-child(2){animation-delay:.06s}.stagger>*:nth-child(3){animation-delay:.12s}.stagger>*:nth-child(4){animation-delay:.18s}.stagger>*:nth-child(5){animation-delay:.24s}
+@keyframes rise{from{opacity:.2;transform:translateY(16px)}}
+.ph{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:24px}
+.eyebrow{font-family:var(--font-display);font-size:12px;letter-spacing:.18em;color:var(--or);font-weight:700;text-transform:uppercase;margin:0 0 8px}
+.ph h1{font-weight:700;font-size:32px;line-height:1.3;letter-spacing:.01em;margin:0;text-wrap:balance}
+.ph p{margin:8px 0 0;color:var(--ink-2);max-width:62ch}
+.ph .actions{display:flex;gap:10px;flex-wrap:wrap}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .rail{position:sticky;top:0;height:auto;flex-direction:row;align-items:center;gap:6px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));padding-top:calc(10px + env(safe-area-inset-top,0px));overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .logo{height:22px;margin:0 6px 0 0;align-self:center}
+  .store,.rail-foot,.nav-label,.search-btn,.nav-ind,.proto{display:none}
+  .nav{flex-direction:row} .nav button{white-space:nowrap;height:36px;padding:0 12px} .nav .badge{display:none}
+  .nav button[aria-current="page"]{background:var(--or);color:#fff}
+  .ph h1{font-size:26px}
+}
+
+/* 控件 */
+.btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;border-radius:11px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;font-weight:500;font-size:14px;white-space:nowrap;transition:transform .2s var(--spring),border-color .2s,box-shadow .2s,background .2s}
+.btn:hover{border-color:var(--ink-3);transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn.primary{background:linear-gradient(135deg,var(--or-hi),var(--or) 45%,var(--or-deep));border-color:transparent;color:#fff;box-shadow:var(--glow)}
+.btn.primary::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);animation:shine 3.6s ease-in-out infinite}
+@keyframes shine{0%,60%{left:-60%}100%{left:130%}}
+.btn.quiet{border-color:transparent;background:transparent;color:var(--ink-2)} .btn.quiet:hover{background:var(--sunk);color:var(--ink)}
+.btn.glass{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff;backdrop-filter:blur(8px)} .btn.glass:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.32)}
+.btn.sm{height:32px;padding:0 12px;font-size:13px;border-radius:9px}
+.btn[aria-disabled="true"]{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none} .btn[aria-disabled="true"]::after{display:none}
+kbd{font-family:var(--font-mono);font-size:10.5px;line-height:1;padding:3px 6px;border-radius:5px;border:1px solid currentColor;opacity:.65}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;background:var(--mute-soft);color:var(--ink-2)}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.plain::before{display:none}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.or{background:var(--or-soft);color:var(--or-ink)}
+.pill.pulse::before{animation:blink 1.4s ease-in-out infinite} @keyframes blink{50%{opacity:.25}}
+.card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px;min-width:0;transition:transform .35s var(--out),box-shadow .35s,border-color .35s}
+.card.hover:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--line-2)}
+.spot::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(242,104,29,.1),transparent 45%);opacity:0;transition:opacity .3s}
+.spot:hover::before{opacity:1}
+.card h2{font-size:13px;font-weight:500;color:var(--ink-2);margin:0 0 16px;display:flex;align-items:center;gap:8px}
+.card h2 .r{margin-left:auto}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.grid-main{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:18px}
+@media (max-width:1060px){.grid-main{grid-template-columns:1fr}}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.input{height:40px;border-radius:11px;border:1px solid var(--line-2);background:var(--surface);padding:0 14px;font:inherit;color:var(--ink);width:100%;min-width:0;transition:border-color .2s,box-shadow .2s}
+.input:focus{outline:none;border-color:var(--or);box-shadow:0 0 0 4px var(--or-soft)}
+textarea.input{height:auto;padding:10px 14px;resize:vertical;line-height:1.5}
+label.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2);min-width:0}
+.switch{width:46px;height:28px;border-radius:999px;border:0;background:var(--line-2);position:relative;cursor:pointer;flex:none;transition:background .3s,box-shadow .3s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:transform .45s var(--spring)}
+.switch[aria-checked="true"]{background:var(--or);box-shadow:var(--glow)} .switch[aria-checked="true"]::after{transform:translateX(18px)}
+.switch.big{width:84px;height:46px;background:#3A3F4C} .switch.big::after{width:38px;height:38px;top:4px;left:4px} .switch.big[aria-checked="true"]{background:var(--or)} .switch.big[aria-checked="true"]::after{transform:translateX(38px)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);transition:all .25s var(--out)}
+.chip .c{font-family:var(--font-mono);font-size:11px;color:var(--ink-3)}
+.chip:hover{border-color:var(--or);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--canvas);transform:scale(1.03)} .chip[aria-pressed="true"] .c{color:var(--or-hi)}
+.seg{display:inline-flex;padding:4px;border-radius:13px;background:var(--sunk);gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;height:32px;padding:0 14px;border-radius:9px;cursor:pointer;font-size:13px;color:var(--ink-2);transition:all .25s}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 2px 8px -2px rgba(17,24,39,.2)}
+.tabs{display:flex;gap:26px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+.tabs button{border:0;background:none;padding:12px 0;cursor:pointer;color:var(--ink-2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .2s}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--or);font-weight:500}
+
+/* 英雄区（深色屏幕） */
+.hero{position:relative;overflow:hidden;border-radius:28px;background:var(--screen);color:var(--screen-ink);padding:36px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;align-items:center;isolation:isolate}
+.blob{position:absolute;border-radius:50%;filter:blur(60px);z-index:-1;pointer-events:none}
+.hero .b1{width:440px;height:440px;background:radial-gradient(circle,rgba(242,104,29,.85),transparent 65%);right:-90px;top:-170px;animation:drift 14s ease-in-out infinite alternate}
+.hero .b2{width:380px;height:380px;background:radial-gradient(circle,rgba(185,71,10,.8),transparent 65%);left:30%;bottom:-230px;animation:drift 18s ease-in-out infinite alternate-reverse}
+.hero .b3{width:240px;height:240px;background:radial-gradient(circle,rgba(109,91,208,.45),transparent 65%);left:-70px;top:-90px;animation:drift 22s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(-60px,40px) scale(1.15)}}
+.grid-bg{position:absolute;inset:0;z-index:-1;background-image:radial-gradient(rgba(255,255,255,.09) 1px,transparent 1px);background-size:22px 22px;-webkit-mask-image:linear-gradient(90deg,#000 25%,transparent 85%);mask-image:linear-gradient(90deg,#000 25%,transparent 85%)}
+.hero h2{font-weight:700;font-size:clamp(26px,3.2vw,40px);line-height:1.35;letter-spacing:.01em;margin:14px 0 14px;text-wrap:balance}
+.hero h2 em{font-style:normal;background:linear-gradient(90deg,var(--or-hi),#FFC49A,var(--or-hi));background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 4s linear infinite}
+.hero p{color:var(--screen-mute);margin:0 0 24px;max-width:46ch}
+.hero .cta{display:flex;gap:10px;flex-wrap:wrap}
+.live-tag{display:inline-flex;align-items:center;gap:10px;font-size:12px;color:var(--screen-mute);padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+.donut-wrap{display:flex;align-items:center;gap:24px;justify-content:center;flex-wrap:wrap}
+.donut{width:216px;height:216px;flex:none;filter:drop-shadow(0 10px 30px rgba(242,104,29,.25))}
+.donut circle{fill:none;stroke-width:15;transition:stroke-dasharray 1.3s var(--out)}
+.dl{display:flex;flex-direction:column;gap:6px;min-width:160px}
+.dl button{all:unset;cursor:pointer;display:grid;grid-template-columns:10px 1fr auto;gap:12px;align-items:center;font-size:13px;color:var(--screen-mute);padding:6px 10px;margin:0 -10px;border-radius:9px;transition:background .2s,color .2s}
+.dl button:hover{background:rgba(255,255,255,.07);color:#fff}
+.dl .sw{width:10px;height:10px;border-radius:3px}
+.dl .v{font-family:var(--font-mono);color:#fff}
+@media (max-width:900px){.hero{grid-template-columns:1fr;padding:24px;border-radius:22px}}
+
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin:18px 0}
+@media (max-width:1060px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.kpis{grid-template-columns:1fr}}
+.kpi .k{font-size:12.5px;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+.kpi .v{font-family:var(--font-display);font-weight:700;font-size:34px;letter-spacing:-.01em;line-height:1.2;margin:10px 0 2px}
+.kpi .v small{font-family:var(--font-mono);font-size:13px;font-weight:400;color:var(--ink-3);letter-spacing:0;margin-left:6px}
+.kpi .d{font-size:12px;color:var(--ink-3)}
+svg.spark{display:block;width:100%;height:46px;margin-top:12px;overflow:visible}
+.draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw 1.5s var(--out) .25s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.next-row{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:16px;align-items:center;padding:16px 12px;margin:0 -12px;border-radius:14px;transition:background .2s}
+.next-row:hover{background:var(--sunk)}
+.next-row .n{font-family:var(--font-display);font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
+.next-row .h{font-weight:500}
+.next-row .d{font-size:12.5px;color:var(--ink-2)}
+.next-row .bar{height:4px;border-radius:999px;background:var(--sunk);margin-top:8px;overflow:hidden;max-width:320px}
+.next-row .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--or-hi),var(--or-deep));border-radius:inherit;transform-origin:left;animation:grow 1.2s var(--out) .3s both}
+@keyframes grow{from{transform:scaleX(0)}}
+.next-row.zero .n{color:var(--ink-3)}
+@media (max-width:560px){.next-row{grid-template-columns:52px minmax(0,1fr)}.next-row .btn{grid-column:2;justify-self:start}}
+.meter{height:8px;border-radius:999px;background:var(--sunk);overflow:hidden} .meter>i{display:block;height:100%;background:linear-gradient(90deg,var(--or-hi),var(--or-deep));border-radius:999px;transform-origin:left;animation:grow 1.2s var(--out) both}
+.feed{list-style:none;margin:0;padding:0;position:relative}
+.feed::before{content:"";position:absolute;left:5px;top:6px;bottom:20px;width:2px;background:var(--line)}
+.feed li{position:relative;padding:0 0 16px 26px;font-size:13px}
+.feed li::before{content:"";position:absolute;left:0;top:5px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--or)}
+.feed li:first-child::before{background:var(--or);box-shadow:0 0 0 4px var(--or-soft)}
+.feed .tm{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);display:block}
+.perm{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--line);font-size:13px}
+.perm:first-of-type{border-top:0}
+
+/* 表格 */
+.tablewrap{background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.tablescroll{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;min-width:960px}
+.t th{text-align:left;font-weight:500;font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;padding:13px 18px;border-bottom:1px solid var(--line);white-space:nowrap}
+.t td{padding:12px 18px;border-bottom:1px solid var(--line);vertical-align:middle}
+.t tbody tr:last-child td{border-bottom:0}
+.t tbody tr{cursor:pointer;transition:background .2s;animation:rowIn .5s var(--out) both}
+.t tbody tr:hover{background:linear-gradient(90deg,var(--or-soft),transparent 70%)}
+.t tbody tr:hover .cover{transform:rotate(-5deg) scale(1.1)}
+@keyframes rowIn{from{opacity:.2;transform:translateX(-10px)}}
+.t .r{text-align:right}
+.tfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-top:1px solid var(--line);flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.pager{display:flex;gap:4px;align-items:center}
+.pager button{min-width:32px;height:32px;border-radius:9px;border:0;background:transparent;cursor:pointer;font-family:var(--font-mono);font-size:12px;color:var(--ink-2);transition:all .2s}
+.pager button:hover{background:var(--sunk)} .pager button[aria-current="page"]{background:var(--ink);color:var(--canvas)}
+.pager button:disabled{opacity:.3;cursor:default}
+.tc{display:flex;gap:14px;align-items:center;min-width:0}
+.tc .tt{min-width:0}
+.tc .t1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:380px;font-weight:500}
+.tc .t2{font-size:11px;color:var(--ink-3);margin-top:2px}
+svg.mini{display:block;width:92px;height:28px;overflow:visible}
+
+/* 封面：日版 CD + 帯 */
+.cover{position:relative;flex:none;border-radius:5px;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.08),0 6px 14px -6px rgba(17,24,39,.45);transition:transform .45s var(--spring)}
+.cover .disc{position:absolute;border-radius:50%;right:-18%;top:12%;width:76%;aspect-ratio:1;background:radial-gradient(circle,rgba(0,0,0,.35) 0 9%,transparent 10% 30%,rgba(255,255,255,.18) 31% 32%,transparent 33%),conic-gradient(from 30deg,rgba(255,255,255,.25),rgba(255,255,255,0) 30%,rgba(255,255,255,.2) 55%,rgba(255,255,255,0) 80%)}
+.cover .ini{position:absolute;left:26%;bottom:9%;font-family:var(--font-display);font-weight:700;color:rgba(255,255,255,.94);letter-spacing:0;line-height:1.1}
+.cover .obi{position:absolute;left:0;top:0;bottom:0;width:20%;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;font-family:var(--font-mono);letter-spacing:.06em;overflow:hidden}
+
+/* 弹窗 */
+.overlay{position:fixed;inset:0;background:rgba(10,11,15,.42);backdrop-filter:blur(10px) saturate(1.2);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:calc(5vh + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) calc(5vh + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));overflow-y:auto;animation:fade .2s ease-out}
+.modal{background:var(--canvas);border-radius:26px;width:100%;max-width:1060px;box-shadow:0 40px 100px -20px rgba(0,0,0,.5);animation:pop .45s var(--spring);min-width:0;border:1px solid var(--line)}
+.modal-h{display:flex;align-items:center;gap:12px;padding:20px 24px;border-bottom:1px solid var(--line)}
+.modal-h h3{margin:0;font-size:18px;font-weight:600;letter-spacing:.01em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-h .x{margin-left:auto}
+.modal-b{padding:24px;display:flex;flex-direction:column;gap:18px}
+.modal-f{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;padding:16px 24px;border-top:1px solid var(--line)}
+@keyframes fade{from{opacity:0}} @keyframes pop{from{transform:translateY(24px) scale(.96);opacity:0}}
+.sleeves{display:grid;grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr);align-items:stretch}
+.sleeve{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;min-width:0}
+.sleeve .src{display:flex;align-items:center;gap:8px;font-size:10.5px;letter-spacing:.18em;color:var(--ink-3);margin-bottom:16px;font-weight:700}
+.sleeve .body{display:flex;gap:18px;min-width:0}
+.sleeve .ttl{font-size:16px;line-height:1.5;font-weight:500;margin:0 0 10px;overflow-wrap:anywhere}
+.ebay .ttl{font-family:Arial,Helvetica,sans-serif}
+.price{font-family:var(--font-display);font-size:26px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+.sub{font-size:12.5px;color:var(--ink-2)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;font-size:12.5px;margin:16px 0 0;padding-top:16px;border-top:1px dashed var(--line-2)}
+.kv dt{color:var(--ink-3)} .kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.joint{display:flex;align-items:center;justify-content:center;position:relative}
+.joint::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px dashed var(--line-2)}
+.joint.on::before{border:0;height:3px;margin-top:-1.5px;background:linear-gradient(90deg,var(--or-deep),var(--or-hi),var(--or-deep));background-size:200% 100%;animation:flow 1.4s linear infinite}
+@keyframes flow{to{background-position:-200% 0}}
+.joint span{position:relative;width:42px;height:42px;border-radius:50%;background:var(--surface);border:1px solid var(--line-2);display:grid;place-items:center;color:var(--ink-3)}
+.joint.on span{background:linear-gradient(135deg,var(--or-hi),var(--or-deep));border-color:transparent;color:#fff;box-shadow:var(--glow);animation:pop .5s var(--spring)}
+@media (max-width:760px){.sleeves{grid-template-columns:1fr}.joint{height:44px}.joint::before{left:50%;right:auto;top:0;bottom:0;border-top:0;border-left:2px dashed var(--line-2)}.joint.on::before{width:3px;height:auto;margin:0;left:50%}}
+.receipt{font-size:13px;display:grid;grid-template-columns:1fr auto;gap:9px 18px}
+.receipt .mono{text-align:right}
+.receipt .tot{border-top:2px solid var(--ink);padding-top:12px;font-weight:700;font-size:15px}
+.receipt .tot.mono{font-family:var(--font-display);font-size:24px;letter-spacing:-.01em;color:var(--or)}
+.offer{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px;cursor:pointer;background:var(--surface);transition:all .25s var(--out)}
+.offer:hover{border-color:var(--or);transform:translateX(3px)}
+.offer[aria-checked="true"]{border-color:var(--or);box-shadow:0 0 0 4px var(--or-soft)}
+.radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--line-2);transition:border .3s var(--spring)}
+.offer[aria-checked="true"] .radio{border:6px solid var(--or)}
+.note{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:14px;background:var(--sunk);font-size:13px}
+.note.warn{background:var(--warn-soft)} .note.or{background:var(--or-soft)}
+.note b{display:block;margin-bottom:2px}
+.note .act{margin-left:auto;flex:none}
+@media (max-width:560px){.note{flex-wrap:wrap}.note .act{margin-left:0}}
+
+/* 核对：深色试听台 */
+.booth{position:relative;overflow:hidden;isolation:isolate;background:var(--screen);color:var(--screen-ink);border-radius:28px;padding:36px 30px;display:grid;grid-template-columns:minmax(0,1fr) 170px minmax(0,1fr);gap:20px;align-items:center}
+.booth .b1{width:380px;height:380px;left:8%;top:-130px;background:radial-gradient(circle,rgba(242,104,29,.6),transparent 65%);animation:drift 16s ease-in-out infinite alternate}
+.booth .b2{width:380px;height:380px;right:4%;bottom:-170px;background:radial-gradient(circle,rgba(109,91,208,.45),transparent 65%);animation:drift 20s ease-in-out infinite alternate-reverse}
+.lb{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;min-width:0}
+.lb .tag{font-size:10.5px;letter-spacing:.2em;color:var(--screen-mute);font-weight:700}
+.lb .ttl{font-size:15px;font-weight:500;line-height:1.55;overflow-wrap:anywhere;max-width:34ch}
+.jacket{position:relative;perspective:900px;width:210px;height:210px;max-width:100%}
+.jacket .cover{position:relative;z-index:2}
+.jacket:hover .cover{transform:rotateY(-14deg) rotateX(6deg) scale(1.03)}
+.jacket .cd{position:absolute;z-index:1;top:4%;left:4%;width:92%;height:92%;border-radius:50%;background:radial-gradient(circle,var(--screen) 0 7%,#d9d9d9 7.5% 9%,transparent 9.5% 16%,rgba(255,255,255,.65) 16.5% 17%,transparent 17.5%),conic-gradient(from 0deg,#c9cdd6,#f5f6f8,#a7adb9,#eef0f3,#b8bdc8,#f8f9fa,#c9cdd6);box-shadow:0 10px 30px rgba(0,0,0,.5);animation:outR .9s var(--out) .15s both,spinR 5s linear 1.05s infinite}
+.jacket.l .cd{animation:outL .9s var(--out) .15s both,spinL 5s linear 1.05s infinite}
+@keyframes outR{from{transform:translateX(0) rotate(0)}to{transform:translateX(30%) rotate(120deg)}}
+@keyframes spinR{from{transform:translateX(30%) rotate(120deg)}to{transform:translateX(30%) rotate(480deg)}}
+@keyframes outL{from{transform:translateX(0) rotate(0)}to{transform:translateX(-30%) rotate(-120deg)}}
+@keyframes spinL{from{transform:translateX(-30%) rotate(-120deg)}to{transform:translateX(-30%) rotate(-480deg)}}
+.verdict{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.verdict svg{width:100px;height:100px}
+.verdict .lbl{font-weight:700;font-size:19px;letter-spacing:.02em}
+.verdict.match{color:#3CCB8A} .verdict.mismatch{color:#FF7468} .verdict.unsure{color:#F2B347}
+.verdict .ring{stroke-dasharray:264;stroke-dashoffset:264;animation:ring 1s var(--out) .3s forwards}
+@keyframes ring{to{stroke-dashoffset:0}}
+.stamp{position:absolute;inset:0;display:grid;place-items:center;z-index:5;pointer-events:none;background:rgba(7,8,11,.35)}
+.stamp span{font-family:var(--font-jp);font-weight:700;font-size:64px;color:var(--or-hi);border:6px solid var(--or-hi);border-radius:20px;padding:6px 26px;transform:rotate(-12deg);letter-spacing:.12em;animation:stamp .5s cubic-bezier(.2,1.6,.4,1) both;text-shadow:0 0 30px rgba(242,104,29,.7);box-shadow:0 0 50px rgba(242,104,29,.4),inset 0 0 30px rgba(242,104,29,.3)}
+.stamp.skip span{color:#AEB2BC;border-color:#AEB2BC;text-shadow:none;box-shadow:none}
+@keyframes stamp{from{transform:rotate(-12deg) scale(2.6);opacity:0}60%{opacity:1}to{transform:rotate(-12deg) scale(1)}}
+@media (max-width:900px){.booth{grid-template-columns:1fr;padding:24px}}
+.cmp{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+.cmp td,.cmp th{padding:11px 18px;border-bottom:1px solid var(--line);text-align:left}
+.cmp tbody tr:last-child td,.cmp tbody tr:last-child th{border-bottom:0}
+.cmp th{font-weight:500;color:var(--ink-3);font-size:12px;width:90px}
+.cmp tr.diff td{background:var(--warn-soft)}
+.cmp .mk{width:40px;text-align:center}
+.actionbar{position:sticky;bottom:12px;margin-top:20px;padding:12px 14px;background:color-mix(in srgb,var(--surface) 82%,transparent);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:18px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;z-index:5;box-shadow:var(--shadow)}
+
+/* 选品漏斗 */
+.funnel{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:20px}
+.funnel button{position:relative;overflow:hidden;border:1px solid var(--line);background:var(--surface);border-radius:18px;padding:16px 18px 14px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px;transition:all .35s var(--out)}
+.funnel button:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.funnel button[aria-pressed="true"]{background:var(--screen);color:#fff;border-color:var(--screen)}
+.funnel button[aria-pressed="true"] .fs,.funnel button[aria-pressed="true"] .fl{color:var(--screen-mute)}
+.funnel .fs{font-size:11px;color:var(--ink-3);letter-spacing:.08em}
+.funnel .fv{font-family:var(--font-display);font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+.funnel .fl{font-size:12.5px;color:var(--ink-2)}
+.funnel .flowbar{height:4px;border-radius:999px;margin-top:10px;background:repeating-linear-gradient(90deg,var(--or) 0 10px,var(--or-hi) 10px 20px);background-size:40px 100%;animation:stripes 1s linear infinite}
+.funnel button:not([aria-pressed="true"]) .flowbar{background:var(--line);animation:none}
+@keyframes stripes{to{background-position:40px 0}}
+@media (max-width:900px){.funnel{grid-template-columns:repeat(5,minmax(130px,1fr));overflow-x:auto;padding-bottom:4px}}
+.strat{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.titlemeter{display:flex;align-items:center;gap:10px;font-size:12px}
+.titlemeter .meter{flex:1} .titlemeter .meter>i{animation:none;transition:width .3s var(--out)}
+.ai-badge{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 12px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(90deg,#F2681D,#6D5BD0,#F2681D);background-size:200% 100%;animation:flow 3s linear infinite}
+
+/* 维护 */
+.safety{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1.6fr);gap:18px}
+@media (max-width:1060px){.safety{grid-template-columns:1fr}}
+.power{overflow:hidden;isolation:isolate;background:var(--screen);color:#fff;border-color:var(--screen)}
+.power .state{font-weight:700;font-size:26px;letter-spacing:.01em;line-height:1.3}
+.power .sub{color:var(--screen-mute)}
+.power .halo{position:absolute;inset:-60%;z-index:-1;background:conic-gradient(from 0deg,transparent,rgba(242,104,29,.4),transparent 30%);animation:rot 4s linear infinite;opacity:0;transition:opacity .6s}
+.power.on .halo{opacity:1}
+@keyframes rot{to{transform:rotate(1turn)}}
+svg.pulse{display:block;width:100%;height:60px;margin-top:18px}
+.beat{stroke-dasharray:60 540;animation:beat 2.2s linear infinite}
+@keyframes beat{from{stroke-dashoffset:600}to{stroke-dashoffset:0}}
+.slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.slots{grid-template-columns:1fr}}
+.slot{position:relative;border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;background:var(--surface);cursor:pointer;text-align:left;transition:all .35s var(--out)}
+.slot:hover{transform:translateY(-4px) rotate(-.6deg);box-shadow:var(--shadow);border-color:var(--or)}
+.slot .n{position:absolute;top:10px;right:14px;font-family:var(--font-display);font-weight:700;font-size:24px;color:var(--line-2)}
+.slot.empty{border:1.5px dashed var(--line-2);justify-content:center;align-items:center;color:var(--ink-3);min-height:160px;background:transparent}
+.slot .s1{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.run{display:grid;grid-template-columns:110px minmax(0,1fr);gap:18px;padding:18px 0;border-top:1px solid var(--line)}
+.run:first-child{border-top:0;padding-top:4px}
+.run .rt{font-family:var(--font-mono);font-size:12px;color:var(--ink-2)}
+.run ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.run li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;font-size:13px}
+@media (max-width:560px){.run{grid-template-columns:1fr;gap:8px}}
+
+/* 命令面板、提示 */
+.cmdk{max-width:640px;background:var(--surface);overflow:hidden}
+.cmdk input{border:0;height:62px;font-size:17px;padding:0 22px;width:100%;background:transparent;color:var(--ink);border-bottom:1px solid var(--line);font-family:inherit}
+.cmdk input:focus{outline:none}
+.cmdk ul{list-style:none;margin:0;padding:8px;max-height:52vh;overflow-y:auto}
+.cmdk li button{width:100%;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;border:0;background:transparent;cursor:pointer;text-align:left;transition:background .15s}
+.cmdk li button[data-active="true"]{background:var(--or-soft)}
+.cmdk .grp{font-size:10.5px;color:var(--ink-3);letter-spacing:.16em;padding:10px 12px 4px}
+.toast{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:80;background:var(--screen);color:#fff;padding:14px 18px;border-radius:14px;font-size:13px;box-shadow:0 20px 40px -10px rgba(0,0,0,.5);display:flex;gap:10px;align-items:center;animation:toastIn .5s var(--spring);max-width:calc(100vw - 48px)}
+.toast .i{width:22px;height:22px;border-radius:50%;background:var(--or);display:grid;place-items:center;flex:none}
+@keyframes toastIn{from{transform:translateY(30px) scale(.9);opacity:0}}
+.proto{font-size:10.5px;letter-spacing:.12em;color:var(--ink-3);padding:0 12px 14px;margin-top:-14px}
+.empty{padding:60px 20px;text-align:center;color:var(--ink-2)}
+.empty b{display:block;font-size:18px;color:var(--ink);margin-bottom:4px}
+.formula{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+.formula span{padding:6px 10px;border-radius:9px;background:var(--sunk)}
+.formula i{font-style:normal;color:var(--or);font-weight:700}
+.stat-row{display:flex;gap:30px;flex-wrap:wrap}
+.stat .v{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+.stat .k{font-size:12px;color:var(--ink-3)}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.dash-add{border:1.5px dashed var(--line-2);background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--ink-2);min-height:210px;border-radius:20px;transition:all .3s var(--out)}
+.dash-add:hover{border-color:var(--or);color:var(--or);transform:translateY(-3px)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.draw{stroke-dashoffset:0}.verdict .ring{stroke-dashoffset:0}}
+</style>
+
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<script>
+(function(){
+const {useState,useEffect,useRef,useCallback,useLayoutEffect} = React;
+const html = htm.bind(React.createElement);
+const WORDMARK = "data:image/png;base64,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";
+const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- 图标 ---------- */
+const P = {
+  home:"M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
+  disc:["M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z","M12 9.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5z"],
+  check:["M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z","M8 12l3 3 5-6"],
+  search:["M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14z","M20 20l-4-4"],
+  tag:["M3 12V4h8l10 10-8 8z","M7.5 6.5a1 1 0 1 0 0 2a1 1 0 1 0 0-2z"],
+  shield:["M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z","M9 12l2 2 4-4"],
+  sliders:["M4 7h9","M17 7h3","M15 5v4","M4 17h3","M11 17h9","M9 15v4","M4 12h13","M19 10v4"],
+  refresh:["M20 11a8 8 0 0 0-14.7-4.3L4 8","M4 4v4h4","M4 13a8 8 0 0 0 14.7 4.3L20 16","M20 20v-4h-4"],
+  plus:["M12 5v14","M5 12h14"], x:["M6 6l12 12","M18 6L6 18"],
+  left:"M15 6l-6 6 6 6", right:"M9 6l6 6-6 6", arrow:["M5 12h14","M13 6l6 6-6 6"],
+  spark:["M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z","M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"],
+  link:["M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1","M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"],
+  unlink:["M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1","M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1","M4 4l16 16"],
+  play:"M7 4l13 8-13 8z", alert:["M12 3l10 18H2z","M12 10v5","M12 18v.01"], ok:"M5 12l5 5 9-11", no:["M7 7l10 10","M17 7L7 17"], q:["M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7v.5","M12 17v.01"],
+  store:["M4 9l1.5-5h13L20 9","M4 9h16v11H4z","M9 20v-6h6v6"], edit:["M4 20h4L19 9l-4-4L4 16z"], bolt:"M13 3L5 13h6l-1 8 8-10h-6z",
+  coin:["M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z","M9 9h6M9 13h6M12 7v10"],
+};
+function Ic({n,s=18,w=1.9}){ const d=[].concat(P[n]); return html`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=${w} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style=${{flex:"none"}}>${d.map((p,i)=>html`<path key=${i} d=${p}/>`)}</svg>`; }
+
+/* ---------- 示例数据 ---------- */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const r=rng(20261020); const pick=a=>a[Math.floor(r()*a.length)];
+const ALBUMS=[["Boz Scaggs","Silk Degrees","ボズ・スキャッグス","シルク・ディグリーズ","SICP"],["Tatsuro Yamashita","For You","山下達郎","FOR YOU","WPCL"],["Mariya Takeuchi","Variety","竹内まりや","VARIETY","WPCL"],["Anri","Timely!!","杏里","Timely!!","FLCF"],["Miki Matsubara","Pocket Park","松原みき","POCKET PARK","PCCA"],["Taeko Ohnuki","Sunshower","大貫妙子","SUNSHOWER","MHCL"],["Toshiki Kadomatsu","Sea Is A Lady","角松敏生","SEA IS A LADY","BVCR"],["Yellow Magic Orchestra","Solid State Survivor","イエロー・マジック・オーケストラ","ソリッド・ステイト・サヴァイヴァー","MHCL"],["Haruomi Hosono","Hosono House","細野晴臣","HOSONO HOUSE","VICL"],["Casiopea","Mint Jams","カシオペア","MINT JAMS","VICL"],["Eiichi Ohtaki","A Long Vacation","大滝詠一","A LONG VACATION","SRCL"],["Junko Ohashi","Magical","大橋純子","MAGICAL","UPCY"],["Steely Dan","Aja","スティーリー・ダン","彩（エイジャ）","UICY"],["Hiroshi Sato","Awakening","佐藤博","AWAKENING","TOCT"],["Tomoko Aran","Fuyu-kukan","亜蘭知子","浮遊空間","VICL"],["Momoko Kikuchi","Adventure","菊池桃子","ADVENTURE","VPCC"]];
+const EDITIONS=["SHM-CD","Blu-spec CD2","2023 Remaster","Limited Edition","Paper Sleeve"];
+const SELLERS=["Amazon.co.jp","タワーレコード","HMV&BOOKS","ディスクユニオン","ネオウィング","ブックオフ"];
+const SKINS=[["#F2681D","#111827"],["#111827","#F2681D"],["#2E2A4F","#FFC49A"],["#7A2E12","#F4E9DC"],["#1E5B4F","#F2681D"],["#E9E3D8","#111827"],["#4A3AA8","#FF8A3D"],["#B9470A","#FFF0E6"]];
+const LIGHT=["#E9E3D8","#F4E9DC","#FFF0E6","#FFC49A"];
+const FX=150,SHIP=14,FIXED=.30,FEE=.149;
+const calc=(jpy,profit=8)=>Math.ceil(((jpy/FX+SHIP+FIXED+profit)/(1-FEE))*100)/100;
+const asin=()=>{let s="B0";const c="ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";for(let i=0;i<8;i++)s+=c[Math.floor(r()*c.length)];return s};
+const walk=(b,n=30)=>{let v=b,a=[];for(let i=0;i<n;i++){v=Math.max(b*.7,Math.min(b*1.35,v*(1+(r()-.5)*.08)));a.push(Math.round(v/10)*10)}return a};
+const offersFor=b=>Array.from({length:2+Math.floor(r()*3)},(_,k)=>({id:"o"+k,seller:SELLERS[(k*2+Math.floor(r()*6))%6],cond:k===0?"新品":pick(["新品","中古 - 非常に良い","中古 - 良い"]),ship:pick(["Amazon 配送","出品者配送"]),jpy:Math.round(b*(.85+r()*.4)/10)*10,avail:pick(["在庫あり","在庫あり","残り2点"])}));
+const LISTINGS=Array.from({length:137},(_,i)=>{
+  const a=ALBUMS[i%ALBUMS.length],ed=EDITIONS[(i*7)%EDITIONS.length],m=i%10;
+  const link=m<6?"pending":m===6?"confirmed":m<9?"bound":"skipped";
+  const jpy=1800+Math.floor(r()*24)*100,offers=offersFor(jpy),bound=link==="bound"?offers[0]:null;
+  const source=link!=="bound"?null:(i%23===7?"unknown":i%31===8?"out":"in");
+  const maint=link!=="bound"?"off":(i===7||i===17||i===27?"pilot":i===37?"paused":"off");
+  return {key:i,artist:a[0],album:a[1],artistJp:a[2],albumJp:a[3],edition:ed,cat:`${a[4]}-${String(10000+Math.floor(r()*89999))}`,skin:SKINS[i%SKINS.length],
+    itemId:"3983"+String(54975589+i*7919).slice(-8),titleEn:`${a[0]} ${a[1]} Japan CD ${ed} w/ OBI`,titleJp:`${a[3]}【${ed}】`,
+    usd:Math.round((calc(jpy)+(r()*6-3))*100)/100,qty:1+Math.floor(r()*3),cond:pick(["New","New","Used - Like New"]),
+    link,source,maint,sync:i%41!==5,asin:asin(),jan:"45"+String(Math.floor(r()*1e11)).padStart(11,"0"),offers,bound,jpy,hist:walk(jpy),
+    observed:`${1+Math.floor(r()*5)} 小时前`,ai:pick(["match","match","match","unsure","mismatch"]),
+    synced:`10-${String(14+i%6).padStart(2,"0")} ${String(8+i%12).padStart(2,"0")}:${String((i*13)%60).padStart(2,"0")}`};
+});
+const RESEARCH=Array.from({length:50},(_,i)=>{const a=ALBUMS[(i*5+3)%ALBUMS.length],jpy=1500+Math.floor(r()*30)*100,ed=EDITIONS[i%EDITIONS.length];
+  return {key:"r"+i,artist:a[0],album:a[1],artistJp:a[2],albumJp:a[3],edition:ed,skin:SKINS[(i+3)%SKINS.length],cat:`${a[4]}-${String(20000+i*137)}`,
+  titleJp:`${a[3]}【${ed}】`,titleEn:`${a[0]} ${a[1]}`,asin:asin(),jpy,hist:walk(jpy),rank:1200+Math.floor(r()*90000),sold30:Math.floor(r()*40),est:calc(jpy),dup:i%9===4,stage:i<6?"candidate":i<8?"ready":"pool"};});
+const LINK={pending:["待核对",""],confirmed:["待选报价","or"],bound:["已绑定","ok"],skipped:["暂不绑定",""]};
+const SRC={in:["有货","ok"],out:["缺货","bad"],unknown:["状态未知","warn"]};
+const AIV={match:["像","ok"],mismatch:["不像","no"],unsure:["无法判断","q"]};
+
+/* ---------- hooks ---------- */
+function useCount(target,dur=900){ const [v,setV]=useState(REDUCED?target:0); const prev=useRef(0);
+  useEffect(()=>{ if(REDUCED){setV(target);return;} const from=prev.current,t0=performance.now(); let raf;
+    const step=t=>{ const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,4); setV(from+(target-from)*e); if(p<1) raf=requestAnimationFrame(step); else prev.current=target; };
+    raf=requestAnimationFrame(step); return ()=>{cancelAnimationFrame(raf);prev.current=target;}; },[target]); return v; }
+function Count({v}){ return html`${Math.round(useCount(v))}`; }
+function Price({v}){ return html`$${useCount(v,500).toFixed(2)}`; }
+const spotMove=e=>{ const el=e.currentTarget, b=el.getBoundingClientRect(); el.style.setProperty("--mx",(e.clientX-b.left)+"px"); el.style.setProperty("--my",(e.clientY-b.top)+"px"); };
+
+/* ---------- 小部件 ---------- */
+function Cover({it,size=44}){ const [bg,obi]=it.skin; const ini=it.artist.split(/[\s-]/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  return html`<div class="cover" style=${{width:size,height:size,background:`linear-gradient(150deg,${bg},color-mix(in srgb,${bg} 62%,#000))`}} aria-hidden="true">
+    <div class="disc"></div><div class="obi" style=${{background:obi,color:LIGHT.includes(obi)?"#111827":"#fff",fontSize:Math.max(5,size/14)}}>${size>=64?it.cat:""}</div>
+    <div class="ini" style=${{fontSize:size*.34,color:LIGHT.includes(bg)?"#111827":undefined}}>${ini}</div></div>`; }
+function Spark({data,w=92,h=28,color="var(--or)",fill,cls="mini",draw}){ const mn=Math.min(...data),mx=Math.max(...data),sx=w/(data.length-1),sy=v=>h-3-(v-mn)/((mx-mn)||1)*(h-6);
+  const d=data.map((v,i)=>(i?"L":"M")+(i*sx).toFixed(1)+" "+sy(v).toFixed(1)).join("");
+  return html`<svg class=${cls} viewBox=${`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true">
+    ${fill&&html`<path d=${d+`L${w} ${h}L0 ${h}Z`} fill=${color} opacity=".12"/>`}
+    <path class=${draw?"draw":""} pathLength=${draw?100:undefined} style=${draw?{"--len":100}:null} d=${d} fill="none" stroke=${color} stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`; }
+const Pill=({tone,children,plain,pulse})=>html`<span class=${"pill "+(tone||"")+(plain?" plain":"")+(pulse?" pulse":"")}>${children}</span>`;
+const LinkPill=({s})=>html`<${Pill} tone=${LINK[s][1]}>${LINK[s][0]}<//>`;
+const SrcPill=({s})=>s?html`<span title=${s==="unknown"?"最近一次读取失败或已过期；不会当作缺货处理":""}><${Pill} tone=${SRC[s][1]} pulse=${s!=="in"}>${SRC[s][0]}<//></span>`:html`<span class="faint">—</span>`;
+function MaintPill({it}){ if(!it.sync) return html`<${Pill} plain>不同步<//>`; if(it.maint==="pilot") return html`<${Pill} tone="or" pulse>试点维护<//>`;
+  if(it.maint==="paused") return html`<${Pill} tone="bad">人工暂停<//>`; return html`<span class="faint">未维护</span>`; }
+function Btn({kind,sm,icon,children,onClick,disabled,title,kbd:k}){ return html`<button class=${"btn "+(kind||"")+(sm?" sm":"")} onClick=${disabled?undefined:onClick} aria-disabled=${disabled?"true":undefined} title=${title}>${icon&&html`<${Ic} n=${icon} s=${16}/>`}${children}${k&&html`<kbd>${k}</kbd>`}</button>`; }
+const Switch=({on,set,label,big})=>html`<button class=${"switch"+(big?" big":"")} role="switch" aria-checked=${on?"true":"false"} aria-label=${label} onClick=${()=>set(!on)}></button>`;
+const TitleCell=({it,jp})=>html`<div class="tc"><${Cover} it=${it} size=${44}/><div class="tt"><div class="t1" lang=${jp?"ja":"en"}>${jp?it.titleJp:it.titleEn}</div><div class="t2 mono">${jp?it.asin:"#"+it.itemId} · ${it.cat}</div></div></div>`;
+const Head=({eyebrow,title,desc,actions})=>html`<header class="ph"><div>${eyebrow&&html`<p class="eyebrow">${eyebrow}</p>`}<h1>${title}</h1>${desc&&html`<p>${desc}</p>`}</div>${actions&&html`<div class="actions">${actions}</div>`}</header>`;
+
+let toastSet=null; const toast=t=>toastSet&&toastSet({t,k:Date.now()});
+function Toast(){ const [t,setT]=useState(null); toastSet=setT; useEffect(()=>{ if(!t) return; const h=setTimeout(()=>setT(null),2600); return ()=>clearTimeout(h); },[t]);
+  return t?html`<div class="toast" role="status" key=${t.k}><span class="i"><${Ic} n="ok" s=${13} w=${3}/></span>${t.t}</div>`:null; }
+function Modal({title,onClose,children,footer,width,cls,head}){
+  useEffect(()=>{ const h=e=>{ if(e.key==="Escape"){e.stopPropagation();onClose();} }; window.addEventListener("keydown",h,true); const o=document.body.style.overflow; document.body.style.overflow="hidden";
+    return ()=>{window.removeEventListener("keydown",h,true);document.body.style.overflow=o;}; },[onClose]);
+  return html`<div class="overlay" onMouseDown=${e=>{if(e.target===e.currentTarget)onClose()}}>
+    <div class=${"modal "+(cls||"")} role="dialog" aria-modal="true" aria-label=${typeof title==="string"?title:"详情"} style=${width?{maxWidth:width}:null}>
+      ${head!==false&&html`<div class="modal-h"><h3>${title}</h3>${head}<button class="btn quiet sm x" aria-label="关闭" onClick=${onClose}><${Ic} n="x" s=${16}/></button></div>`}
+      ${children}${footer&&html`<div class="modal-f">${footer}</div>`}</div></div>`; }
+function Pager({page,set,total,size=20}){ const pages=Math.max(1,Math.ceil(total/size)),a=total?(page-1)*size+1:0,b=Math.min(page*size,total),list=[];
+  for(let p=1;p<=pages;p++){ if(p===1||p===pages||Math.abs(p-page)<=1) list.push(p); else if(list[list.length-1]!=="…") list.push("…"); }
+  return html`<div class="tfoot"><span>第 <span class="mono">${a}–${b}</span> 条，共 <span class="mono">${total}</span> 条</span><div class="pager">
+    <button disabled=${page<=1} onClick=${()=>set(page-1)} aria-label="上一页"><${Ic} n="left" s=${14}/></button>
+    ${list.map((p,i)=>p==="…"?html`<span key=${"e"+i} class="faint">…</span>`:html`<button key=${p} aria-current=${p===page?"page":undefined} onClick=${()=>set(p)}>${p}</button>`)}
+    <button disabled=${page>=pages} onClick=${()=>set(page+1)} aria-label="下一页"><${Ic} n="right" s=${14}/></button></div></div>`; }
+
+/* ---------- eBay / Amazon 对照 ---------- */
+const EbaySleeve=({it})=>html`<section class="sleeve ebay" lang="en"><div class="src">EBAY.COM · 美国站</div><div class="body"><${Cover} it=${it} size=${108}/><div style=${{minWidth:0}}>
+  <p class="ttl">${it.titleEn}</p><div class="price">US $${it.usd.toFixed(2)}</div><div class="sub">${it.cond} · ${it.qty} available</div></div></div>
+  <dl class="kv"><dt>Item ID</dt><dd class="mono">${it.itemId}</dd><dt>品番</dt><dd class="mono">${it.cat}</dd><dt>最近同步</dt><dd class="mono">${it.synced}</dd></dl></section>`;
+const AmazonSleeve=({it,offer})=>html`<section class="sleeve" lang="ja"><div class="src">AMAZON.CO.JP · 来源</div><div class="body"><${Cover} it=${it} size=${108}/><div style=${{minWidth:0,flex:1}}>
+  <p class="ttl">${it.titleJp}<br/><span class="sub">${it.artistJp}</span></p>
+  ${offer?html`<div class="price">￥${offer.jpy.toLocaleString()}</div><div class="sub">${offer.seller} · ${offer.cond} · ${offer.ship}</div>`:html`<div class="sub">还没有选定卖家报价</div>`}
+  <div style=${{marginTop:12}}><div class="faint" style=${{fontSize:11,marginBottom:4}}>近 30 天 Amazon 价格</div><${Spark} data=${it.hist} w=${200} h=${36} fill=${true} cls="spark" draw=${true}/></div></div></div>
+  <dl class="kv"><dt>ASIN</dt><dd class="mono">${it.asin}</dd><dt>JAN</dt><dd class="mono">${it.jan}</dd>${offer&&html`<dt>观察</dt><dd>${it.observed} · <${SrcPill} s=${it.source}/></dd>`}</dl></section>`;
+const Sleeves=({it})=>html`<div class="sleeves"><${EbaySleeve} it=${it}/><div class=${"joint"+(it.link==="bound"?" on":"")}><span><${Ic} n=${it.link==="bound"?"link":"unlink"} s=${17}/></span></div><${AmazonSleeve} it=${it} offer=${it.bound}/></div>`;
+
+function ProductModal({it,onClose,go,update}){
+  const [offer,setOffer]=useState(null); const price=it.bound?calc(it.bound.jpy):null;
+  return html`<${Modal} title=${it.artist+" · "+it.album} onClose=${onClose} head=${html`<${LinkPill} s=${it.link}/>`}><div class="modal-b">
+    <${Sleeves} it=${it}/>
+    ${it.link==="pending"&&html`<div class="note or"><${Ic} n="check"/><div><b>这条对应关系还没核对</b>先确认两边是同一张 CD，再选具体卖家的报价。</div><div class="act"><${Btn} kind="primary" onClick=${()=>{onClose();go("review",it.key)}}>去核对<//></div></div>`}
+    ${it.link==="skipped"&&html`<div class="note"><${Ic} n="unlink"/><div><b>你标记了暂不绑定</b>这条不参与定价和维护。</div><div class="act"><${Btn} onClick=${()=>{onClose();go("review",it.key)}}>重新核对<//></div></div>`}
+    ${it.link==="confirmed"&&html`<div class="card"><h2>选一个卖家报价 <span class="faint" style=${{fontWeight:400}}>· 系统不会替你选最低价</span></h2>
+      <div style=${{display:"flex",flexDirection:"column",gap:10}} role="radiogroup">
+      ${it.offers.map(o=>html`<div key=${o.id} class="offer" role="radio" tabindex="0" aria-checked=${offer===o.id?"true":"false"} onClick=${()=>setOffer(o.id)} onKeyDown=${e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();setOffer(o.id)}}}>
+        <span class="radio"></span><div style=${{minWidth:0}} lang="ja"><div style=${{fontWeight:500}}>${o.seller}</div><div class="sub">${o.cond} · ${o.ship} · ${o.avail}</div></div><div class="price" style=${{fontSize:20}}>￥${o.jpy.toLocaleString()}</div></div>`)}</div>
+      <div style=${{display:"flex",justifyContent:"flex-end",marginTop:16}}><${Btn} kind="primary" icon="link" disabled=${!offer} title=${offer?"":"先选一个卖家报价"} onClick=${()=>{update(it.key,{link:"bound",bound:it.offers.find(o=>o.id===offer),source:"in"});toast("报价已绑定")}}>确认绑定<//></div></div>`}
+    ${it.link==="bound"&&html`<div class="grid2">
+      <div class="card"><h2><${Ic} n="tag" s=${15}/>按「日版 CD 标准」算出的售价</h2><div class="receipt">
+        <span>采购价 ￥${it.bound.jpy.toLocaleString()} ÷ 汇率 ${FX}</span><span class="mono">$${(it.bound.jpy/FX).toFixed(2)}</span>
+        <span>国际运费 + 固定费</span><span class="mono">$${(SHIP+FIXED).toFixed(2)}</span><span>目标利润</span><span class="mono">$8.00</span>
+        <span>反推 eBay 费用 ${(FEE*100).toFixed(1)}%</span><span class="mono">÷ ${(1-FEE).toFixed(3)}</span>
+        <span class="tot">建议售价</span><span class="tot mono"><${Price} v=${price}/></span><span class="faint">当前售价</span><span class="faint mono">$${it.usd.toFixed(2)}</span></div>
+        ${it.source!=="in"&&html`<div class="note warn" style=${{marginTop:16}}><${Ic} n="alert"/><div><b>这次不会改价</b>来源${it.source==="out"?"确认缺货":"状态未知"}，维护会跳过这条。</div></div>`}</div>
+      <div class="card"><h2><${Ic} n="shield" s=${15}/>维护</h2>
+        <div class="perm"><span>同步这条刊登</span><${Switch} on=${it.sync} set=${v=>update(it.key,{sync:v})} label="同步这条刊登"/></div>
+        <div class="perm"><div><div>人工暂停维护</div><div class="sub">暂停后只有你手动关掉才恢复</div></div><${Switch} on=${it.maint==="paused"} set=${v=>update(it.key,{maint:v?"paused":"off"})} label="人工暂停维护"/></div>
+        <div class="perm"><span>当前状态</span><${MaintPill} it=${it}/></div>
+        <div style=${{marginTop:12}}><${Btn} sm onClick=${()=>{onClose();go("maintenance")}}>查看维护记录<//></div></div></div>`}
+  </div><//>`;
+}
+
+/* ---------- 工作台 ---------- */
+function Donut({segs,total,go}){ const R=42,C=2*Math.PI*R; const [on,setOn]=useState(REDUCED); useEffect(()=>{const t=setTimeout(()=>setOn(true),120);return ()=>clearTimeout(t)},[]);
+  let acc=0; const ready=segs.filter(s=>s[3]==="bound"||s[3]==="pilot").reduce((a,s)=>a+s[1],0);
+  return html`<div class="donut-wrap"><svg class="donut" viewBox="0 0 100 100" role="img" aria-label=${`已能定价 ${ready} / ${total}`}>
+    <circle cx="50" cy="50" r=${R} stroke="rgba(255,255,255,.06)"/>
+    ${segs.map(s=>{ const len=s[1]/total*C, el=html`<circle key=${s[0]} cx="50" cy="50" r=${R} stroke=${s[2]} transform="rotate(-90 50 50)" style=${{strokeDasharray:on?`${Math.max(0,len-1.2)} ${C}`:`0 ${C}`,strokeDashoffset:-acc}}/>`; acc+=len; return el; })}
+    <text x="50" y="49" text-anchor="middle" fill="#fff" style=${{font:"700 19px 'Plus Jakarta Sans',sans-serif"}}><${Count} v=${Math.round(ready/total*100)}/>%</text>
+    <text x="50" y="61" text-anchor="middle" fill="#9AA0AD" style=${{font:"500 6px 'Noto Sans SC',sans-serif"}}>已能定价</text></svg>
+    <div class="dl">${segs.map(s=>html`<button key=${s[0]} onClick=${()=>go("products",s[3])}><span class="sw" style=${{background:s[2]}}></span><span>${s[0]}</span><span class="v"><${Count} v=${s[1]}/></span></button>`)}</div></div>`; }
+function Workspace({data,go}){
+  const cnt=f=>data.filter(f).length;
+  const segs=[["已绑定",cnt(x=>x.link==="bound"&&x.maint!=="pilot"),"#F2681D","bound"],["试点维护",cnt(x=>x.maint==="pilot"),"#FFC49A","pilot"],["待选报价",cnt(x=>x.link==="confirmed"),"#9B8CFF","confirmed"],["待核对",cnt(x=>x.link==="pending"),"#3A3F4C","pending"],["暂不绑定",cnt(x=>x.link==="skipped"),"#5F6573","skipped"]];
+  const pend=cnt(x=>x.link==="pending"), cand=RESEARCH.filter(x=>x.stage==="candidate").length;
+  const next=[{n:pend,h:"核对对应关系",d:"确认 eBay 与 Amazon 是同一张；AI 已给出提示",a:"开始核对",to:()=>go("review"),p:1-pend/data.length,primary:true},
+    {n:cnt(x=>x.link==="confirmed"),h:"选卖家报价",d:"身份已确认，还差选定具体卖家",a:"去选",to:()=>go("products","confirmed")},
+    {n:cnt(x=>x.source==="out")+cnt(x=>x.source==="unknown"),h:"来源异常",d:"缺货或状态未知；状态未知不会被当作缺货",a:"查看",to:()=>go("products","issue")},
+    {n:cand,h:"审批选品候选",d:"AI 已写好英文标题和描述",a:"去审批",to:()=>go("sourcing","candidate")},
+    {n:0,h:"维护失败",d:"改动后读回的结果和预期不一致",a:"查看",to:()=>go("maintenance")}];
+  const kpis=[["disc","在售刊登",data.length,"条","eBay 美国 · demo-store-jp",[130,131,131,133,134,134,135,136,135,136,137,137,137,137,137],"#F2681D"],["link","已绑定来源",cnt(x=>x.link==="bound"),"条","近 15 天逐步增加",[1,1,2,4,6,9,11,13,15,17,19,21,23,24,26],"#6D5BD0"],["coin","Keepa 本月",62,"/ 180","还剩 118",[5,9,14,18,25,31,36,40,44,49,52,55,58,60,62],"#15885A"],["spark","AI 改写与比对",144,"次","本月累计",[4,10,18,25,40,52,61,77,88,96,110,118,129,137,144],"#B9470A"]];
+  return html`<div class="stagger">
+    <section class="hero">
+      <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="grid-bg"></span>
+      <div><span class="live-tag"><span class="live"></span>10 月 20 日 星期二 · 21:40 已同步</span>
+        <h2>晚上好，Alex。<br/>还有 <em><${Count} v=${pend}/> 条</em>等你核对。</h2>
+        <p>核对完、选好卖家报价，这些商品就能按规则定价，接着进入维护试点。</p>
+        <div class="cta"><${Btn} kind="primary" icon="bolt" onClick=${()=>go("review")}>开始核对<//><${Btn} kind="glass" onClick=${()=>go("products")}>查看全部商品<//></div></div>
+      <${Donut} segs=${segs} total=${data.length} go=${go}/>
+    </section>
+    <div class="kpis">${kpis.map(k=>html`<section key=${k[1]} class="card hover spot kpi" onMouseMove=${spotMove}><div class="k"><${Ic} n=${k[0]} s=${15}/>${k[1]}</div><div class="v"><${Count} v=${k[2]}/><small>${k[3]}</small></div><div class="d">${k[4]}</div><${Spark} data=${k[5]} w=${220} h=${46} color=${k[6]} fill=${true} cls="spark" draw=${true}/></section>`)}</div>
+    <div class="grid-main">
+      <section class="card"><h2>按顺序处理<span class="r faint" style=${{fontSize:12}}>点右侧按钮直达</span></h2><div>
+        ${next.map(x=>html`<div key=${x.h} class=${"next-row"+(x.n===0?" zero":"")}><span class="n"><${Count} v=${x.n}/></span>
+          <div><div class="h">${x.h}</div><div class="d">${x.d}</div>${x.p!=null&&html`<div class="bar"><i style=${{width:(x.p*100)+"%"}}></i></div>`}</div>
+          <${Btn} kind=${x.primary&&x.n?"primary":""} sm onClick=${x.to}>${x.a} <${Ic} n="arrow" s=${14}/><//></div>`)}</div></section>
+      <div style=${{display:"flex",flexDirection:"column",gap:18,minWidth:0}}>
+        <section class="card"><h2><${Ic} n="store" s=${15}/>demo-store-jp · eBay 美国</h2>
+          <div class="perm"><span>读取刊登</span><${Pill} tone="ok">正常<//></div>
+          <div class="perm"><span>改价改库存</span><${Pill} tone="warn" pulse>未授权<//></div>
+          <div class="perm"><span>自动维护</span><span class="muted">关闭 · 试点 <span class="mono">${cnt(x=>x.maint==="pilot")}/3</span></span></div>
+          <div style=${{marginTop:12}}><${Btn} sm onClick=${()=>go("settings")}>重新授权<//></div></section>
+        <section class="card"><h2>最近发生</h2><ul class="feed">
+          ${[["21:40","同步完成：137 条刊登，没有读取失败"],["20:12","你确认了 Boz Scaggs · Silk Degrees 是同一张"],["18:05","选品「城市流行 70–80s」跑完一次，50 件进研究池"],["09:00","汇率更新为 1 美元 = 150 日元"]].map(x=>html`<li key=${x[0]}><span class="tm">${x[0]}</span>${x[1]}</li>`)}</ul></section>
+      </div></div></div>`;
+}
+
+/* ---------- 商品 ---------- */
+const FILTERS=[["all","全部",()=>true],["pending","待核对",x=>x.link==="pending"],["confirmed","待选报价",x=>x.link==="confirmed"],["bound","已绑定",x=>x.link==="bound"],["issue","来源异常",x=>x.source==="out"||x.source==="unknown"],["pilot","试点维护",x=>x.maint==="pilot"],["paused","人工暂停",x=>x.maint==="paused"],["nosync","不同步",x=>!x.sync],["skipped","暂不绑定",x=>x.link==="skipped"]];
+function Products({data,open,arg}){
+  const [f,setF]=useState(arg||"all"); const [q,setQ]=useState(""); const [page,setPage]=useState(1);
+  useEffect(()=>{ if(arg){setF(arg);setPage(1);} },[arg]);
+  const fn=(FILTERS.find(x=>x[0]===f)||FILTERS[0])[2];
+  const rows=data.filter(fn).filter(x=>!q||(x.titleEn+x.itemId+x.asin+x.cat).toLowerCase().includes(q.toLowerCase())), shown=rows.slice((page-1)*20,page*20);
+  return html`<div>
+    <${Head} eyebrow="Catalog" title="商品" desc="店里的 eBay 刊登。点一行查看两边对照、绑定报价和维护设置。" actions=${html`<${Btn} icon="refresh" onClick=${()=>toast("已开始同步，完成后这里会更新")}>立即同步<//>`}/>
+    <div style=${{display:"flex",flexWrap:"wrap",gap:12,alignItems:"center",marginBottom:16}}>
+      <div class="chips" role="group" aria-label="按状态筛选">${FILTERS.map(x=>html`<button key=${x[0]} class="chip" aria-pressed=${f===x[0]?"true":"false"} onClick=${()=>{setF(x[0]);setPage(1)}}>${x[1]}<span class="c">${data.filter(x[2]).length}</span></button>`)}</div>
+      <div style=${{flex:"1 1 240px",minWidth:0,position:"relative"}}><span style=${{position:"absolute",left:14,top:11,color:"var(--ink-3)"}}><${Ic} n="search" s=${17}/></span>
+        <input id="product-search" class="input" style=${{paddingLeft:40}} placeholder="标题、Item ID、ASIN 或品番" value=${q} onInput=${e=>{setQ(e.target.value);setPage(1)}}/></div></div>
+    <div class="tablewrap"><div class="tablescroll"><table class="t"><thead><tr><th>商品</th><th class="r">售价</th><th class="r">数量</th><th>Amazon 30 天</th><th>对应</th><th>来源</th><th>维护</th><th>最近同步</th></tr></thead>
+      <tbody key=${f+page+q}>${shown.map((x,i)=>html`<tr key=${x.key} style=${{animationDelay:(i*18)+"ms"}} onClick=${()=>open(x.key)} tabindex="0" onKeyDown=${e=>{if(e.key==="Enter")open(x.key)}}>
+        <td><${TitleCell} it=${x}/></td><td class="r mono" style=${{fontWeight:500}}>$${x.usd.toFixed(2)}</td><td class="r mono">${x.qty}</td>
+        <td><${Spark} data=${x.hist} color=${x.hist[29]>=x.hist[0]?"var(--bad)":"var(--ok)"}/></td>
+        <td><${LinkPill} s=${x.link}/></td><td><${SrcPill} s=${x.source}/></td><td><${MaintPill} it=${x}/></td><td class="mono faint" style=${{fontSize:12,whiteSpace:"nowrap"}}>${x.synced}</td></tr>`)}
+      </tbody></table>${shown.length===0&&html`<div class="empty"><b>没有符合条件的商品</b>换个筛选或搜索词试试。</div>`}</div>
+      <${Pager} page=${page} set=${setPage} total=${rows.length}/></div></div>`;
+}
+
+/* ---------- 核对 ---------- */
+const cmpRows=it=>[["艺人",it.artist,it.artistJp+"（"+it.artist+"）",1],["专辑",it.album,it.albumJp,1],["版本",it.edition,it.ai==="unsure"?"通常盘":it.edition,it.ai!=="unsure"],["品番",it.cat,it.cat,1],["JAN",it.ai==="unsure"?"图中看不到":it.jan,it.jan,it.ai!=="unsure"],["碟数","1 CD",it.ai==="mismatch"?"2 CD（豪华版）":"1 CD",it.ai!=="mismatch"]];
+function Review({data,update,arg,active}){
+  const [f,setF]=useState("all"); const [pos,setPos]=useState(0); const [editing,setEditing]=useState(false); const [stamp,setStamp]=useState(null);
+  const queue=data.filter(x=>x.link==="pending"&&(f==="all"||x.ai===f));
+  useEffect(()=>{ if(arg!=null){ const i=data.filter(x=>x.link==="pending").findIndex(x=>x.key===arg); if(i>=0){setF("all");setPos(i);} } },[arg]);
+  const it=queue[Math.min(pos,queue.length-1)]; const done=data.filter(x=>x.link!=="pending").length;
+  const decide=useCallback(link=>{ if(!it||stamp) return; setStamp(link); setTimeout(()=>{ update(it.key,{link}); setStamp(null); setEditing(false); toast(link==="confirmed"?"已确认，可以去选报价了":"已标记暂不绑定"); },REDUCED?0:700); },[it,stamp]);
+  useEffect(()=>{ if(!active) return; const h=e=>{ if(e.target.closest("input,textarea")||document.querySelector(".overlay")) return;
+    if(e.key==="ArrowRight"||e.key==="j") setPos(p=>Math.min(p+1,queue.length-1)); else if(e.key==="ArrowLeft"||e.key==="k") setPos(p=>Math.max(p-1,0)); else if(e.key==="y") decide("confirmed"); else if(e.key==="n") decide("skipped"); };
+    window.addEventListener("keydown",h); return ()=>window.removeEventListener("keydown",h); },[active,queue.length,decide]);
+  const cnt=v=>data.filter(x=>x.link==="pending"&&(v==="all"||x.ai===v)).length;
+  const V=it?AIV[it.ai]:null;
+  return html`<div>
+    <${Head} eyebrow="Review" title="逐条核对" desc="确认两边是不是同一张 CD。这里只确认身份，不会自动绑定报价，也不会开始维护。"
+      actions=${html`<div style=${{minWidth:240}}><div style=${{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--ink-2)",marginBottom:8}}><span>已处理</span><span class="mono">${done} / ${data.length}</span></div><div class="meter"><i style=${{width:(done/data.length*100)+"%",transition:"width .6s var(--out)",animation:"none"}}></i></div></div>`}/>
+    <div style=${{marginBottom:18}}><div class="seg" role="group" aria-label="按 AI 提示筛选">${[["all","全部"],["mismatch","AI 说不像"],["unsure","AI 无法判断"],["match","AI 说像"]].map(x=>html`<button key=${x[0]} aria-pressed=${f===x[0]?"true":"false"} onClick=${()=>{setF(x[0]);setPos(0)}}>${x[1]} <span class="mono faint">${cnt(x[0])}</span></button>`)}</div></div>
+    ${!it?html`<div class="card empty"><b>这一组都核对完了</b>换个筛选，或者去商品页给已确认的选报价。</div>`:html`<div>
+      <div class="booth" key=${it.key}><span class="blob b1"></span><span class="blob b2"></span><span class="grid-bg"></span>
+        <div class="lb" lang="en"><span class="tag">EBAY 刊登</span><div class="jacket"><span class="cd"></span><${Cover} it=${it} size=${210}/></div><div class="ttl">${it.titleEn}</div><div class="mono" style=${{fontSize:11,color:"#9AA0AD"}}>#${it.itemId}</div></div>
+        <div class=${"verdict "+it.ai}><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="5"/><circle class="ring" cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+          <g transform="translate(32 32) scale(1.5)">${[].concat(P[V[1]]).map((d,i)=>html`<path key=${i} d=${d} fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`)}</g></svg>
+          <div class="lbl">AI：${V[0]}</div><div style=${{fontSize:11.5,color:"#9AA0AD"}}>仅供参考 · 由你确认</div></div>
+        <div class="lb" lang="ja"><span class="tag">AMAZON.CO.JP 候选</span><div class="jacket l"><span class="cd"></span><${Cover} it=${it.ai==="mismatch"?Object.assign({},it,{skin:SKINS[(it.key+3)%SKINS.length]}):it} size=${210}/></div><div class="ttl">${it.titleJp} / ${it.artistJp}</div><div class="mono" style=${{fontSize:11,color:"#9AA0AD"}}>${it.asin}</div></div>
+        ${stamp&&html`<div class=${"stamp"+(stamp==="skipped"?" skip":"")}><span>${stamp==="confirmed"?"確認":"保留"}</span></div>`}
+      </div>
+      <div class="tablewrap" style=${{marginTop:18}}><div class="tablescroll"><table class="cmp"><thead><tr><th></th><th>eBay</th><th class="mk"></th><th>Amazon</th></tr></thead><tbody>
+        ${cmpRows(it).map(rw=>html`<tr key=${rw[0]} class=${rw[3]?"":"diff"}><th>${rw[0]}</th><td lang="en">${rw[1]}</td><td class="mk" style=${{color:rw[3]?"var(--ok)":"var(--warn)"}}><${Ic} n=${rw[3]?"ok":"alert"} s=${16}/></td><td lang="ja">${rw[2]}</td></tr>`)}</tbody></table></div></div>
+      ${editing&&html`<div class="card" style=${{marginTop:18}}><h2>换成另一个 Amazon 商品</h2><div style=${{display:"flex",gap:8,maxWidth:460}}><input id="new-asin" class="input mono" placeholder="B0GY1XTGDK"/><${Btn} kind="primary" onClick=${()=>{toast("已找到商品，请再对照一遍");setEditing(false)}}>查找<//></div></div>`}
+      <div class="actionbar">
+        <div style=${{display:"flex",gap:8,alignItems:"center"}}><${Btn} sm icon="left" disabled=${pos===0} onClick=${()=>setPos(pos-1)}>上一条<//><span class="mono faint" style=${{fontSize:12}}>${pos+1} / ${queue.length}</span><${Btn} sm disabled=${pos>=queue.length-1} onClick=${()=>setPos(pos+1)}>下一条 <${Ic} n="right" s=${14}/><//></div>
+        <div style=${{display:"flex",gap:8,flexWrap:"wrap"}}><${Btn} onClick=${()=>decide("skipped")} kbd="N">暂不绑定<//><${Btn} onClick=${()=>setEditing(!editing)}>不是这张<//><${Btn} kind="primary" icon="ok" onClick=${()=>decide("confirmed")} kbd="Y">是同一张<//></div>
+      </div></div>`}
+  </div>`;
+}
+
+/* ---------- 选品 ---------- */
+function Approval({it,onClose}){
+  const [title,setTitle]=useState(`${it.artist} ${it.album} Japan CD ${it.edition} w/ OBI New Sealed`); const pct=Math.min(100,title.length/80*100), over=title.length>80;
+  return html`<${Modal} title="审批候选" onClose=${onClose} head=${html`<span class="ai-badge"><${Ic} n="spark" s=${13}/>AI 草稿</span>`} footer=${html`<${Btn} kind="quiet" onClick=${onClose}>退回研究池<//><${Btn} icon="spark" onClick=${()=>toast("AI 正在重写")}>让 AI 重写<//><${Btn} kind="primary" disabled=${over} title=${over?"标题超过 80 个字符":""} onClick=${()=>{toast("已批准，进入待上架");onClose()}}>批准<//>`}>
+  <div class="modal-b"><div class="grid2">
+    <section class="sleeve" lang="ja"><div class="src">AMAZON.CO.JP · 原始资料</div><div class="body"><${Cover} it=${it} size=${108}/><div style=${{minWidth:0,flex:1}}><p class="ttl">${it.titleJp}<br/><span class="sub">${it.artistJp}</span></p><div class="price">￥${it.jpy.toLocaleString()}</div><div class="sub">Amazon.co.jp · 新品 · Amazon 配送</div><${Spark} data=${it.hist} w=${200} h=${34} fill=${true} cls="spark" draw=${true}/></div></div>
+      <dl class="kv"><dt>ASIN</dt><dd class="mono">${it.asin}</dd><dt>品番</dt><dd class="mono">${it.cat}</dd><dt>销量排名</dt><dd class="mono">${it.rank.toLocaleString()}</dd><dt>近 30 天</dt><dd>约 <span class="mono">${it.sold30}</span> 件售出</dd></dl></section>
+    <section class="sleeve" lang="en"><div class="src"><${Ic} n="spark" s=${14}/>EBAY 刊登草稿 · 可直接修改</div>
+      <div style=${{display:"flex",flexDirection:"column",gap:14}}>
+        <label class="field">标题<input id="draft-title" class="input" value=${title} onInput=${e=>setTitle(e.target.value)}/>
+          <span class="titlemeter"><span class="meter"><i style=${{width:pct+"%",background:over?"var(--bad)":undefined}}></i></span><span class="mono" style=${{color:over?"var(--bad)":"var(--ink-3)"}}>${title.length}/80</span></span></label>
+        <div class="fields"><label class="field">Artist<input id="spec-artist" class="input" defaultValue=${it.artist}/></label><label class="field">Format<input id="spec-format" class="input" defaultValue="CD"/></label>
+          <label class="field">Edition<input id="spec-edition" class="input" defaultValue=${it.edition}/></label><label class="field">Catalog No.<input id="spec-cat" class="input mono" defaultValue=${it.cat}/></label></div>
+        <label class="field">描述<textarea id="draft-desc" class="input" rows="3" defaultValue=${`Brand new Japanese pressing of "${it.album}" by ${it.artist} (${it.edition}). Includes the original OBI strip. Ships from Japan with tracking.`}></textarea></label></div></section></div>
+    <div class="card"><h2><${Ic} n="tag" s=${15}/>首次售价 · 规则「日版 CD 标准」</h2><div class="formula"><span>￥${it.jpy.toLocaleString()} ÷ ${FX}</span><i>+</i><span>$14.30 运费固定费</span><i>+</i><span>$8.00 利润</span><i>÷</i><span>(1 − 14.9%)</span><i>=</i><span style=${{background:"linear-gradient(135deg,var(--or-hi),var(--or-deep))",color:"#fff",fontWeight:500}}>$${it.est.toFixed(2)}</span></div></div>
+  </div><//>`;
+}
+function Sourcing({arg}){
+  const [st,setSt]=useState(arg||"strategy"); const [appr,setAppr]=useState(null); const [page,setPage]=useState(1);
+  useEffect(()=>{ if(arg) setSt(arg); },[arg]);
+  const c=s=>RESEARCH.filter(x=>x.stage===s).length;
+  const steps=[["strategy","01 策略",2,"找什么"],["pool","02 研究池",c("pool"),"挑出值得卖的"],["candidate","03 待审批",c("candidate"),"AI 写好刊登"],["ready","04 待上架",c("ready"),"已批准"],["live","05 已上架",0,"自动纳管"]];
+  const rows=RESEARCH.filter(x=>x.stage===st), shown=rows.slice((page-1)*20,page*20);
+  const action=x=>st==="pool"?html`<${Btn} sm onClick=${e=>{e.stopPropagation();toast("已加入候选，AI 开始写刊登草稿")}}>加入候选<//>`:st==="candidate"?html`<${Btn} sm kind="primary" onClick=${e=>{e.stopPropagation();setAppr(x)}}>审批<//>`:html`<${Btn} sm disabled title="店铺还没授权改价改库存，先到设置里重新授权">上架<//>`;
+  return html`<div>
+    <${Head} eyebrow="Sourcing" title="选品" desc="按策略找商品，挑进候选后 AI 写好英文刊登，你审批后才会上架。"/>
+    <div class="funnel" role="group" aria-label="选品阶段">${steps.map(s=>html`<button key=${s[0]} aria-pressed=${st===s[0]?"true":"false"} onClick=${()=>{setSt(s[0]);setPage(1)}}><span class="fs mono">${s[1]}</span><span class="fv"><${Count} v=${s[2]}/></span><span class="fl">${s[3]}</span><span class="flowbar"></span></button>`)}</div>
+    <div class="enter" key=${st}>
+    ${st==="strategy"&&html`<div class="strat stagger">${[["城市流行 70–80s","Music › CDs · 新品 · ￥1,500–4,000 · 近 30 天有销量","10-20 18:05","50 件进研究池"],["日本爵士再版","Music › CDs · 新品 · ￥2,000–5,000","还没跑过","—"]].map(s=>html`<section class="card hover spot" key=${s[0]} onMouseMove=${spotMove}>
+      <div style=${{fontWeight:700,fontSize:20}}>${s[0]}</div><div class="sub" style=${{marginTop:4}}>${s[1]}</div>
+      <dl class="kv"><dt>上次运行</dt><dd>${s[2]}</dd><dt>结果</dt><dd>${s[3]}</dd><dt>每次上限</dt><dd>50 件 · Keepa 预算 80</dd></dl>
+      <div style=${{display:"flex",gap:8,marginTop:18}}><${Btn} kind="primary" sm icon="play" onClick=${()=>toast("已开始运行，结果会进研究池")}>执行一次<//><${Btn} sm icon="edit">编辑<//></div></section>`)}
+      <button class="dash-add"><span style=${{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}><${Ic} n="plus" s=${24}/>新建策略</span></button></div>`}
+    ${st==="live"&&html`<div class="card empty"><b>还没有从选品上架的商品</b>审批通过、店铺授权写入后，就能从「待上架」上架。</div>`}
+    ${st!=="strategy"&&st!=="live"&&html`<div class="tablewrap"><div class="tablescroll"><table class="t"><thead><tr><th>商品</th><th class="r">采购价</th><th>30 天走势</th><th class="r">预估售价</th><th class="r">近 30 天售出</th><th></th><th></th></tr></thead><tbody>
+      ${shown.map((x,i)=>html`<tr key=${x.key} style=${{animationDelay:(i*18)+"ms"}} onClick=${()=>st==="candidate"&&setAppr(x)}><td><${TitleCell} it=${x} jp=${true}/></td><td class="r mono">￥${x.jpy.toLocaleString()}</td><td><${Spark} data=${x.hist}/></td><td class="r mono" style=${{fontWeight:500}}>$${x.est.toFixed(2)}</td><td class="r mono">${x.sold30}</td>
+        <td>${x.dup&&html`<span title="店里已有同一个 ASIN 的刊登"><${Pill} tone="warn">疑似重复<//></span>`}</td><td class="r">${action(x)}</td></tr>`)}</tbody></table></div>
+      <${Pager} page=${page} set=${setPage} total=${rows.length}/></div>`}
+    </div>
+    ${appr&&html`<${Approval} it=${appr} onClose=${()=>setAppr(null)}/>`}
+  </div>`;
+}
+
+/* ---------- 定价 ---------- */
+function Pricing({data}){
+  const [edit,setEdit]=useState(false); const [profit,setProfit]=useState(8); const [min,setMin]=useState(18);
+  const bound=data.filter(x=>x.link==="bound"), ok=bound.filter(x=>x.source==="in"), blk=bound.length-ok.length;
+  return html`<div>
+    <${Head} eyebrow="Pricing" title="定价规则" desc="按类别和店铺定规则。启用前先预演，看每条商品会改成多少。" actions=${html`<${Btn} kind="primary" icon="plus" onClick=${()=>setEdit(true)}>新建规则<//>`}/>
+    <section class="card hover spot" style=${{cursor:"pointer"}} onClick=${()=>setEdit(true)} onMouseMove=${spotMove}>
+      <div style=${{display:"flex",flexWrap:"wrap",alignItems:"center",gap:12,marginBottom:16}}><div style=${{fontWeight:700,fontSize:22}}>日版 CD 标准</div><${Pill}>草稿<//><span class="sub">Music › CDs · 全部店铺 · 命中 <span class="mono">${bound.length}</span> 条</span><span style=${{marginLeft:"auto"}}><${Btn} sm icon="edit">编辑与预演<//></span></div>
+      <div class="formula"><span>采购价 ÷ ${FX}</span><i>+</i><span>运费 $14.00</span><i>+</i><span>固定费 $0.30</span><i>+</i><span>利润 $${profit.toFixed(2)}</span><i>÷</i><span>(1 − eBay 费 14.9%)</span><i>→</i><span>限在 $${min} – $120</span><i>·</i><span>单次变动 ≤ 15%</span></div></section>
+    ${edit&&html`<${Modal} title="日版 CD 标准" onClose=${()=>setEdit(false)} footer=${html`<${Btn} kind="quiet" onClick=${()=>setEdit(false)}>取消<//><${Btn} onClick=${()=>{toast("已存为草稿");setEdit(false)}}>存为草稿<//><${Btn} kind="primary" onClick=${()=>{toast("规则已启用");setEdit(false)}}>启用<//>`}>
+      <div class="modal-b"><div class="grid2" style=${{alignItems:"start"}}>
+        <section class="card"><h2>参数</h2><div class="fields">
+          <label class="field">适用类别<select id="rule-cat" class="input"><option>Music › CDs</option></select></label><label class="field">适用店铺<select id="rule-store" class="input"><option>全部店铺</option><option>demo-store-jp</option></select></label>
+          <label class="field">目标利润（$）<input id="rule-profit" class="input mono" type="number" step="0.5" value=${profit} onInput=${e=>setProfit(Math.max(0,+e.target.value||0))}/></label>
+          <label class="field">售价下限（$）<input id="rule-min" class="input mono" type="number" value=${min} onInput=${e=>setMin(+e.target.value||0)}/></label>
+          <label class="field">国际运费（$）<input id="rule-ship" class="input mono" defaultValue="14"/></label><label class="field">eBay 费率（%）<input id="rule-fee" class="input mono" defaultValue="14.9"/></label>
+          <label class="field">汇率（¥/$）<input id="rule-fx" class="input mono" defaultValue="150"/></label><label class="field">单次最大变动（%）<input id="rule-step" class="input mono" defaultValue="15"/></label></div></section>
+        <section class="card"><h2>预演 <span class="faint" style=${{fontWeight:400}}>· 改参数立刻重算</span></h2>
+          <div class="stat-row" style=${{marginBottom:16}}><div class="stat"><div class="v">${bound.length}</div><div class="k">命中</div></div><div class="stat"><div class="v" style=${{color:"var(--or)"}}>${ok.length}</div><div class="k">会改价</div></div><div class="stat"><div class="v" style=${{color:blk?"var(--warn)":""}}>${blk}</div><div class="k">被拦下</div></div></div>
+          ${blk>0&&html`<div class="note warn" style=${{marginBottom:12}}><${Ic} n="alert"/><div><b>${blk} 条来源缺货或状态未知</b>这些这次不会改价。</div></div>`}
+          <div>${bound.slice(0,8).map(x=>{const np=Math.max(min,calc(x.bound.jpy,profit)); return html`<div key=${x.key} style=${{display:"grid",gridTemplateColumns:"minmax(0,1fr) auto",gap:12,alignItems:"center",padding:"10px 0",borderTop:"1px solid var(--line)"}}>
+            <${TitleCell} it=${x}/><div class="mono" style=${{textAlign:"right",fontSize:12.5,whiteSpace:"nowrap"}}>${x.source==="in"?html`<span class="faint">$${x.usd.toFixed(2)} → </span><b style=${{color:np>x.usd?"var(--ok)":"var(--bad)"}}><${Price} v=${np}/></b>`:html`<${SrcPill} s=${x.source}/>`}</div></div>`;})}</div></section>
+      </div></div><//>`}
+  </div>`;
+}
+
+/* ---------- 维护 ---------- */
+function Maintenance({data,open}){
+  const [on,setOn]=useState(false); const [ask,setAsk]=useState(false);
+  const pilot=data.filter(x=>x.maint==="pilot"), paused=data.filter(x=>x.maint==="paused");
+  const runs=[["10-20 21:05",[[pilot[0],"改价 $31.40 → $29.90","ok","已从 eBay 读回确认"],[pilot[1],"价格已在目标，未改动","skip",""],[pilot[2],"跳过","skip","来源状态未知，不当作缺货"]]],["10-20 20:05",[[pilot[0],"库存保持 2","skip",""],[pilot[1],"改价 $27.10 → $28.40","ok","已从 eBay 读回确认"]]]];
+  const ecg="M0 30 H110 L122 30 L130 8 L140 52 L150 30 H250 L262 30 L270 4 L280 56 L290 30 H400";
+  return html`<div>
+    <${Head} eyebrow="Automation" title="维护" desc="按规则自动调价，来源确认缺货时把库存归零。先只在你指定的 3 个商品上试点。"/>
+    <div class="safety stagger">
+      <section class=${"card power"+(on?" on":"")}><span class="halo"></span><h2 style=${{color:"#9AA0AD"}}><${Ic} n="shield" s=${15}/>自动维护</h2>
+        <div style=${{display:"flex",alignItems:"center",gap:20}}><${Switch} big on=${on} set=${v=>v?setAsk(true):setOn(false)} label="自动维护总开关"/><div><div class="state">${on?"运行中":"已关闭"}</div><div class="sub">${on?"每小时一次 · 只处理试点商品":"关闭时只能手动执行单次"}</div></div></div>
+        <svg class="pulse" viewBox="0 0 400 60" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="30" x2="400" y2="30" stroke="rgba(255,255,255,.08)"/>
+          ${on?html`<path d=${ecg} fill="none" stroke="rgba(255,138,61,.35)" stroke-width="2"/><path class="beat" pathLength="600" d=${ecg} fill="none" stroke="#FF8A3D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`:html`<path d="M0 30 H400" fill="none" stroke="#5F6573" stroke-width="2" stroke-dasharray="4 6"/>`}</svg>
+        <div style=${{marginTop:12,display:"flex",gap:8,flexWrap:"wrap"}}><${Btn} kind="glass" icon="play" onClick=${()=>toast("已对 3 个试点商品执行一次")}>手动执行一次<//></div>
+        <p class="sub" style=${{marginBottom:0,fontSize:12}}>每次改动都先预演、再执行、再从 eBay 读回确认；读回不一致就记为失败，并停下这一条。</p></section>
+      <section class="card"><h2>试点位 <span class="mono faint">${pilot.length}/3</span></h2>
+        <div class="slots">${[0,1,2].map(i=>pilot[i]?html`<button key=${i} class="slot" onClick=${()=>open(pilot[i].key)}><span class="n">0${i+1}</span><${Cover} it=${pilot[i]} size=${64}/><div style=${{minWidth:0,width:"100%"}}><div class="s1">${pilot[i].artist}</div><div class="sub" style=${{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>${pilot[i].album}</div></div><${Pill} tone="or" pulse>试点中<//></button>`:html`<button key=${i} class="slot empty"><${Ic} n="plus"/>指定商品</button>`)}</div>
+        <p class="sub" style=${{marginBottom:0}}>要换试点商品，在商品详情里移出后再指定新的。</p></section></div>
+    <div class="tabs" style=${{marginTop:28}} role="tablist"><button role="tab" aria-selected="true">执行记录</button><button role="tab" aria-selected="false">人工暂停 <span class="mono faint">${paused.length}</span></button><button role="tab" aria-selected="false">需要处理 <span class="mono faint">0</span></button></div>
+    <section class="card">${runs.map(rn=>html`<div class="run" key=${rn[0]}><div class="rt">${rn[0]}<div class="faint" style=${{fontSize:11,marginTop:2}}>${rn[1].length} 个商品</div></div><ul>
+      ${rn[1].map((e,i)=>html`<li key=${i}><div class="tc"><${Cover} it=${e[0]} size=${36}/><div class="tt"><div class="t1" style=${{maxWidth:380}}>${e[1]}</div><div class="t2">${e[0].artist} · ${e[0].album}${e[3]?" · "+e[3]:""}</div></div></div>
+        ${e[2]==="ok"?html`<${Pill} tone="ok">成功<//>`:e[2]==="fail"?html`<${Pill} tone="bad">失败<//>`:html`<${Pill}>未改动<//>`}</li>`)}</ul></div>`)}</section>
+    ${ask&&html`<${Modal} title="开启自动维护？" width=${500} onClose=${()=>setAsk(false)} footer=${html`<${Btn} kind="quiet" onClick=${()=>setAsk(false)}>先不开<//><${Btn} kind="primary" icon="bolt" onClick=${()=>{setOn(true);setAsk(false);toast("自动维护已开启")}}>开启<//>`}>
+      <div class="modal-b"><p style=${{margin:0}}>开启后，系统每小时会对 <b>${pilot.length}</b> 个试点商品按规则调价；来源确认缺货时把库存归零。</p>
+      <div class="note"><${Ic} n="shield"/><div>来源状态未知时不会动库存；人工暂停的商品不会被自动恢复。</div></div></div><//>`}
+  </div>`;
+}
+
+/* ---------- 设置 ---------- */
+function Settings(){
+  const [tab,setTab]=useState("store"); const [inv,setInv]=useState(false);
+  return html`<div>
+    <${Head} eyebrow="Settings" title="设置"/>
+    <div class="tabs" role="tablist">${[["store","店铺"],["users","用户与邀请"],["usage","用量"]].map(t=>html`<button key=${t[0]} role="tab" aria-selected=${tab===t[0]?"true":"false"} onClick=${()=>setTab(t[0])}>${t[1]}</button>`)}</div>
+    <div class="enter" key=${tab}>
+    ${tab==="store"&&html`<div class="strat">
+      <section class="card hover spot" onMouseMove=${spotMove}><div style=${{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><span class="avatar"><${Ic} n="store" s=${16}/></span><div><div style=${{fontWeight:700}}>demo-store-jp</div><div class="sub">eBay 美国 · 经 openec.ai 连接</div></div></div>
+        <div class="perm"><span>读取刊登</span><${Pill} tone="ok">已授权<//></div><div class="perm"><span>改价、改库存、上架</span><${Pill} tone="warn" pulse>未授权<//></div><div class="perm"><span>同步频率</span><span class="muted">每天 1 次</span></div>
+        <div style=${{display:"flex",gap:8,marginTop:18,flexWrap:"wrap"}}><${Btn} kind="primary" sm onClick=${()=>toast("将跳转到 eBay 授权页")}>重新授权，加上写入权限<//><${Btn} sm>同步设置<//></div></section>
+      <button class="dash-add"><span style=${{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}><${Ic} n="plus" s=${24}/>连接新店铺</span></button></div>`}
+    ${tab==="users"&&html`<div><div style=${{display:"flex",justifyContent:"flex-end",marginBottom:14}}><${Btn} kind="primary" icon="plus" onClick=${()=>setInv(true)}>邀请用户<//></div>
+      <div class="tablewrap"><div class="tablescroll"><table class="t" style=${{minWidth:560}}><thead><tr><th>用户</th><th>客户</th><th>角色</th><th>状态</th></tr></thead><tbody>
+        <tr><td><div class="tc"><span class="avatar">A</span><div><div style=${{fontWeight:500}}>Alex</div><div class="t2">alex@…</div></div></div></td><td>Demo Trading</td><td>管理员</td><td><${Pill} tone="ok">正常<//></td></tr>
+        <tr><td><div class="tc"><span class="avatar" style=${{background:"var(--line-2)",color:"var(--ink-2)"}}>?</span><div><div style=${{fontWeight:500}}>partner@…</div><div class="t2">10-20 发出</div></div></div></td><td>新客户</td><td>客户管理员</td><td><${Pill} pulse>邀请待接受<//></td></tr></tbody></table></div></div></div>`}
+    ${tab==="usage"&&html`<div class="strat">${[["Keepa · 本月",62,"/ 180",34],["AI 改写与比对 · 本月",144,"次",22]].map(u=>html`<section class="card" key=${u[0]}><h2>${u[0]}</h2><div class="stat"><div class="v"><${Count} v=${u[1]}/> <span class="faint" style=${{fontSize:16}}>${u[2]}</span></div></div><div class="meter" style=${{marginTop:14}}><i style=${{width:u[3]+"%"}}></i></div></section>`)}</div>`}
+    </div>
+    ${inv&&html`<${Modal} title="邀请用户" width=${500} onClose=${()=>setInv(false)} footer=${html`<${Btn} kind="quiet" onClick=${()=>setInv(false)}>取消<//><${Btn} kind="primary" onClick=${()=>{toast("已生成一次性邀请链接");setInv(false)}}>生成邀请链接<//>`}>
+      <div class="modal-b"><label class="field">邮箱<input id="invite-email" class="input" placeholder="name@example.com"/></label>
+      <label class="field">加入哪个客户<select id="invite-tenant" class="input"><option>新建客户（数据完全独立）</option><option>Demo Trading（和我共用）</option></select></label></div><//>`}
+  </div>`;
+}
+
+/* ---------- 命令面板 ---------- */
+function Cmdk({onClose,go,open,data}){
+  const [q,setQ]=useState(""); const [i,setI]=useState(0); const ref=useRef(null); useEffect(()=>{ ref.current&&ref.current.focus(); },[]);
+  const pages=NAV.filter(n=>!q||n.label.includes(q)).map(n=>({grp:"页面",label:n.label,icon:n.icon,run:()=>go(n.key)}));
+  const items=q?data.filter(x=>(x.titleEn+x.itemId+x.asin+x.cat).toLowerCase().includes(q.toLowerCase())).slice(0,6).map(x=>({grp:"商品",label:x.titleEn,sub:"#"+x.itemId,it:x,run:()=>open(x.key)})):[];
+  const all=pages.concat(items), run=k=>{ const a=all[k]; if(!a) return; onClose(); a.run(); };
+  return html`<${Modal} onClose=${onClose} head=${false} cls="cmdk" width=${640}>
+    <input id="cmdk-input" ref=${ref} placeholder="搜商品、跳转页面…" value=${q} onInput=${e=>{setQ(e.target.value);setI(0)}} onKeyDown=${e=>{ if(e.key==="ArrowDown"){e.preventDefault();setI(Math.min(i+1,all.length-1))} else if(e.key==="ArrowUp"){e.preventDefault();setI(Math.max(i-1,0))} else if(e.key==="Enter") run(i); }}/>
+    <ul>${all.map((a,k)=>html`${(k===0||all[k-1].grp!==a.grp)&&html`<li key=${"g"+k} class="grp">${a.grp}</li>`}<li key=${k}><button data-active=${k===i?"true":"false"} onMouseEnter=${()=>setI(k)} onClick=${()=>run(k)}>
+      ${a.it?html`<${Cover} it=${a.it} size=${30}/>`:html`<${Ic} n=${a.icon}/>`}<span style=${{minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>${a.label}</span>${a.sub&&html`<span class="mono faint" style=${{marginLeft:"auto",fontSize:11}}>${a.sub}</span>`}</button></li>`)}
+      ${all.length===0&&html`<li class="empty" style=${{padding:24}}>没有找到</li>`}</ul><//>`;
+}
+
+/* ---------- 外壳 ---------- */
+const NAV=[{key:"workspace",label:"工作台",icon:"home"},{key:"products",label:"商品",icon:"disc"},{key:"review",label:"核对",icon:"check"},{key:"sourcing",label:"选品",icon:"search"},{key:"pricing",label:"定价",icon:"tag"},{key:"maintenance",label:"维护",icon:"shield"},{key:"settings",label:"设置",icon:"sliders"}];
+function Nav({page,go,badge}){
+  const ref=useRef(null); const [y,setY]=useState(null);
+  useLayoutEffect(()=>{ const nav=ref.current; if(!nav) return; const m=()=>{ const el=nav.querySelector('[aria-current="page"]'); if(el) setY(el.offsetTop); };
+    m(); const ro=new ResizeObserver(m); ro.observe(nav); document.fonts&&document.fonts.ready.then(m); return ()=>ro.disconnect(); },[page]);
+  const item=n=>html`<button key=${n.key} aria-current=${page===n.key?"page":undefined} onClick=${()=>go(n.key)}><${Ic} n=${n.icon}/>${n.label}${badge[n.key]?html`<span class="badge">${badge[n.key]}</span>`:null}</button>`;
+  return html`<nav class="nav" aria-label="主导航" ref=${ref}>${y!=null&&html`<span class="nav-ind" style=${{top:0,transform:`translateY(${y}px)`}}></span>`}
+    <div class="nav-label">日常</div>${NAV.slice(0,3).map(item)}<div class="nav-label">经营</div>${NAV.slice(3).map(item)}</nav>`;
+}
+function App(){
+  const init=(location.hash||"").slice(1);
+  const [page,setPage]=useState(NAV.some(n=>n.key===init)?init:"workspace"); const [arg,setArg]=useState(null);
+  const [data,setData]=useState(LISTINGS); const [openKey,setOpenKey]=useState(null); const [cmd,setCmd]=useState(false);
+  const update=(k,p)=>setData(d=>d.map(x=>x.key===k?Object.assign({},x,p):x));
+  const go=(p,a)=>{ setPage(p); setArg(a==null?null:a); try{history.replaceState(null,"","#"+p)}catch(e){} window.scrollTo(0,0); };
+  useEffect(()=>{ const h=e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();setCmd(c=>!c);} }; window.addEventListener("keydown",h); return ()=>window.removeEventListener("keydown",h); },[]);
+  const it=openKey==null?null:data.find(x=>x.key===openKey);
+  const badge={review:data.filter(x=>x.link==="pending").length,sourcing:RESEARCH.filter(x=>x.stage==="candidate").length};
+  const views={workspace:html`<${Workspace} data=${data} go=${go}/>`,products:html`<${Products} data=${data} open=${setOpenKey} arg=${page==="products"?arg:null}/>`,
+    review:html`<${Review} data=${data} update=${update} arg=${page==="review"?arg:null} active=${page==="review"}/>`,sourcing:html`<${Sourcing} arg=${page==="sourcing"?arg:null}/>`,
+    pricing:html`<${Pricing} data=${data}/>`,maintenance:html`<${Maintenance} data=${data} open=${setOpenKey}/>`,settings:html`<${Settings}/>`};
+  return html`<div class="app">
+    <aside class="rail">
+      <img class="logo" src=${WORDMARK} alt="OpenEC"/>
+      <div class="proto">原型 · 示例数据</div>
+      <button class="store" title="切换店铺"><span class="live"></span><span style=${{minWidth:0}}><b style=${{fontWeight:500}}>demo-store-jp</b><small>eBay 美国 · 137 条</small></span></button>
+      <button class="search-btn" onClick=${()=>setCmd(true)}><${Ic} n="search" s=${15}/>搜索商品或页面<kbd>⌘K</kbd></button>
+      <${Nav} page=${page} go=${go} badge=${badge}/>
+      <div class="rail-foot"><span class="avatar">A</span><div style=${{minWidth:0}}><div style=${{fontWeight:500}}>Alex</div><div class="faint" style=${{fontSize:11}}>管理员 · Demo Trading</div></div></div>
+    </aside>
+    <main><div class="page enter" key=${page+(arg==null?"":String(arg))}>${views[page]}</div></main>
+    ${it&&html`<${ProductModal} key=${it.key} it=${it} onClose=${()=>setOpenKey(null)} go=${go} update=${update}/>`}
+    ${cmd&&html`<${Cmdk} onClose=${()=>setCmd(false)} go=${go} open=${setOpenKey} data=${data}/>`}
+    <${Toast}/>
+  </div>`;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App}/>`);
+})();
+</script>
+
+</body>
+</html>

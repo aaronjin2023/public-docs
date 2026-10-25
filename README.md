@@ -9,8 +9,11 @@
 ## 已公开资料
 
 - [OpenEC 功能介绍](https://docs.myakuraku.com/projects/openec/)：含 3D 滚动场景和定价交互的完整 HTML 导览。[下载 HTML](projects/openec/index.html)。
+- [OpenEC 界面原型](https://docs.myakuraku.com/projects/openec-prototype/)：工作区、商品页和定价规则编辑页，使用演示数据，不连接真实店铺。[下载原始 ZIP](downloads/openec-prototype.zip)。
 
 介绍页按提供的原始文件完整发布；Google Fonts 和 Three.js 使用其原有外部 CDN，离线下载后这些资源仍需网络连接。首页预览图取自该介绍页的实际 3D 场景。
+
+原型包的四个 HTML 文件同样按原始字节发布，页面间的相对链接保留；原型使用原有 Google Fonts、React、ReactDOM 和 htm CDN，运行时需要网络连接。原型预览图来自其实际工作区页面。
 
 ## 上传资料
 

@@ -1,0 +1,1177 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenEC 定价规则编辑页原型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* 以下基础样式原样取自 prototype/index.html（颜色变量、字体、按钮、表格、弹窗、提示），保证与定稿同一套语言 */
+:root{
+  --canvas:#FAF9F6; --surface:#FFFFFF; --sunk:#F3F1EC; --ink:#111827; --ink-2:#4B5160; --ink-3:#8C909B; --line:#ECEAE4; --line-2:#DEDBD3;
+  --or:#F2681D; --or-hi:#FF8A3D; --or-deep:#B9470A; --or-soft:#FFF0E6; --or-ink:#9A3505; --on-or:#FFFFFF;
+  --screen:#12151C; --screen-2:#1B1F29; --screen-ink:#F4F1EC; --screen-mute:#9AA0AD; --screen-line:#2A2F3B;
+  --ok:#15885A; --ok-soft:#E3F5EC; --warn:#B26A00; --warn-soft:#FFF3DB; --bad:#C8372D; --bad-soft:#FDE8E6; --mute-soft:#F1F0EC; --violet:#6D5BD0;
+  --shadow:0 1px 2px rgba(17,24,39,.05),0 10px 30px -12px rgba(17,24,39,.18);
+  --glow:0 10px 30px -8px rgba(242,104,29,.55);
+  --font-display:"Plus Jakarta Sans","Noto Sans SC",sans-serif;
+  --font-body:"Noto Sans SC",-apple-system,BlinkMacSystemFont,"Helvetica Neue","Hiragino Sans",Arial,sans-serif;
+  --font-jp:"Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --spring:cubic-bezier(.34,1.56,.64,1); --out:cubic-bezier(.16,1,.3,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --canvas:#0C0D10; --surface:#15171C; --sunk:#1C1F26; --ink:#F3F1EC; --ink-2:#AEB2BC; --ink-3:#757A86; --line:#23262E; --line-2:#30343E;
+  --or:#FF7A2E; --or-hi:#FF9A55; --or-deep:#E05A12; --or-soft:#3A2114; --or-ink:#FFB27F; --on-or:#160A03;
+  --screen:#07080B; --screen-2:#12141A; --screen-line:#22252E;
+  --ok:#3CCB8A; --ok-soft:#10291F; --warn:#F2B347; --warn-soft:#33260E; --bad:#FF7468; --bad-soft:#3A1715; --mute-soft:#1E2128; --violet:#9B8CFF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -12px rgba(0,0,0,.6); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --canvas:#0C0D10; --surface:#15171C; --sunk:#1C1F26; --ink:#F3F1EC; --ink-2:#AEB2BC; --ink-3:#757A86; --line:#23262E; --line-2:#30343E;
+  --or:#FF7A2E; --or-hi:#FF9A55; --or-deep:#E05A12; --or-soft:#3A2114; --or-ink:#FFB27F; --on-or:#160A03;
+  --screen:#07080B; --screen-2:#12141A; --screen-line:#22252E;
+  --ok:#3CCB8A; --ok-soft:#10291F; --warn:#F2B347; --warn-soft:#33260E; --bad:#FF7468; --bad-soft:#3A1715; --mute-soft:#1E2128; --violet:#9B8CFF;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -12px rgba(0,0,0,.6); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--canvas);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.7;letter-spacing:.01em;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--or);outline-offset:2px}
+::selection{background:var(--or);color:#fff}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:0}
+.muted{color:var(--ink-2)} .faint{color:var(--ink-3)}
+[lang="ja"]{font-family:var(--font-jp)}
+
+/* 外壳 */
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100%}
+.rail{background:var(--surface);border-right:1px solid var(--line);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:22px 14px calc(16px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));z-index:20}
+.logo{display:block;height:30px;width:auto;margin:0 10px 22px;align-self:flex-start}
+.store{margin:0 2px 14px;padding:12px;border-radius:14px;background:var(--sunk);display:flex;align-items:center;gap:10px;border:0;text-align:left;cursor:pointer;width:calc(100% - 4px)}
+.store small{display:block;color:var(--ink-3);font-size:11px}
+.live{position:relative;width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+.live::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--ok);animation:ping 1.8s var(--out) infinite}
+@keyframes ping{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.8);opacity:0}}
+.search-btn{margin:0 2px 8px;display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink-3);cursor:pointer;font-size:13px;transition:border-color .2s}
+.search-btn:hover{border-color:var(--or);color:var(--ink)}
+.search-btn kbd{margin-left:auto}
+.nav{position:relative;display:flex;flex-direction:column;gap:2px}
+.nav-ind{position:absolute;left:0;right:0;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--or-hi),var(--or) 50%,var(--or-deep));box-shadow:var(--glow);transition:transform .45s var(--spring);z-index:0}
+.nav-label{font-size:10.5px;letter-spacing:.18em;color:var(--ink-3);padding:16px 14px 6px}
+.nav button{position:relative;z-index:1;display:flex;align-items:center;gap:12px;height:42px;padding:0 14px;border-radius:12px;border:0;background:transparent;color:var(--ink-2);cursor:pointer;text-align:left;font-size:14px;transition:color .25s}
+.nav button:hover:not([aria-current]){background:var(--sunk);color:var(--ink)}
+.nav button[aria-current="page"]{color:#fff;font-weight:500}
+.nav .badge{margin-left:auto;font-family:var(--font-mono);font-size:11px;padding:1px 8px;border-radius:999px;background:var(--or-soft);color:var(--or-ink);transition:background .25s,color .25s}
+.nav button[aria-current="page"] .badge{background:rgba(255,255,255,.22);color:#fff}
+.rail-foot{margin-top:auto;padding:14px 10px 0;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;font-size:13px}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--or-hi),var(--or-deep));color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+main{min-width:0}
+.page{max-width:1340px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (min-width:901px){.page{padding-left:40px;padding-right:max(40px,env(safe-area-inset-right,0px))}}
+.enter{animation:pageIn .55s var(--out) both}
+@keyframes pageIn{from{opacity:.25;transform:translateY(14px);filter:blur(4px)}}
+.stagger>*{animation:rise .6s var(--out) both}
+.stagger>*:nth-child(2){animation-delay:.06s}.stagger>*:nth-child(3){animation-delay:.12s}.stagger>*:nth-child(4){animation-delay:.18s}.stagger>*:nth-child(5){animation-delay:.24s}
+@keyframes rise{from{opacity:.2;transform:translateY(16px)}}
+.ph{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:24px}
+.eyebrow{font-family:var(--font-display);font-size:12px;letter-spacing:.18em;color:var(--or);font-weight:700;text-transform:uppercase;margin:0 0 8px}
+.ph h1{font-weight:700;font-size:32px;line-height:1.3;letter-spacing:.01em;margin:0;text-wrap:balance}
+.ph p{margin:8px 0 0;color:var(--ink-2);max-width:62ch}
+.ph .actions{display:flex;gap:10px;flex-wrap:wrap}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .rail{position:sticky;top:0;height:auto;flex-direction:row;align-items:center;gap:6px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));padding-top:calc(10px + env(safe-area-inset-top,0px));overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .logo{height:22px;margin:0 6px 0 0;align-self:center}
+  .store,.rail-foot,.nav-label,.search-btn,.nav-ind,.proto{display:none}
+  .nav{flex-direction:row} .nav button{white-space:nowrap;height:36px;padding:0 12px} .nav .badge{display:none}
+  .nav button[aria-current="page"]{background:var(--or);color:#fff}
+  .ph h1{font-size:26px}
+}
+
+/* 控件 */
+.btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;border-radius:11px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;font-weight:500;font-size:14px;white-space:nowrap;transition:transform .2s var(--spring),border-color .2s,box-shadow .2s,background .2s}
+.btn:hover{border-color:var(--ink-3);transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn.primary{background:linear-gradient(135deg,var(--or-hi),var(--or) 45%,var(--or-deep));border-color:transparent;color:#fff;box-shadow:var(--glow)}
+.btn.primary::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);animation:shine 3.6s ease-in-out infinite}
+@keyframes shine{0%,60%{left:-60%}100%{left:130%}}
+.btn.quiet{border-color:transparent;background:transparent;color:var(--ink-2)} .btn.quiet:hover{background:var(--sunk);color:var(--ink)}
+.btn.glass{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#fff;backdrop-filter:blur(8px)} .btn.glass:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.32)}
+.btn.sm{height:32px;padding:0 12px;font-size:13px;border-radius:9px}
+.btn[aria-disabled="true"]{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none} .btn[aria-disabled="true"]::after{display:none}
+kbd{font-family:var(--font-mono);font-size:10.5px;line-height:1;padding:3px 6px;border-radius:5px;border:1px solid currentColor;opacity:.65}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;background:var(--mute-soft);color:var(--ink-2)}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.plain::before{display:none}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.or{background:var(--or-soft);color:var(--or-ink)}
+.pill.pulse::before{animation:blink 1.4s ease-in-out infinite} @keyframes blink{50%{opacity:.25}}
+.card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px;min-width:0;transition:transform .35s var(--out),box-shadow .35s,border-color .35s}
+.card.hover:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--line-2)}
+.spot::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(242,104,29,.1),transparent 45%);opacity:0;transition:opacity .3s}
+.spot:hover::before{opacity:1}
+.card h2{font-size:13px;font-weight:500;color:var(--ink-2);margin:0 0 16px;display:flex;align-items:center;gap:8px}
+.card h2 .r{margin-left:auto}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.grid-main{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:18px}
+@media (max-width:1060px){.grid-main{grid-template-columns:1fr}}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.input{height:40px;border-radius:11px;border:1px solid var(--line-2);background:var(--surface);padding:0 14px;font:inherit;color:var(--ink);width:100%;min-width:0;transition:border-color .2s,box-shadow .2s}
+.input:focus{outline:none;border-color:var(--or);box-shadow:0 0 0 4px var(--or-soft)}
+textarea.input{height:auto;padding:10px 14px;resize:vertical;line-height:1.5}
+label.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2);min-width:0}
+.switch{width:46px;height:28px;border-radius:999px;border:0;background:var(--line-2);position:relative;cursor:pointer;flex:none;transition:background .3s,box-shadow .3s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:transform .45s var(--spring)}
+.switch[aria-checked="true"]{background:var(--or);box-shadow:var(--glow)} .switch[aria-checked="true"]::after{transform:translateX(18px)}
+.switch.big{width:84px;height:46px;background:#3A3F4C} .switch.big::after{width:38px;height:38px;top:4px;left:4px} .switch.big[aria-checked="true"]{background:var(--or)} .switch.big[aria-checked="true"]::after{transform:translateX(38px)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);transition:all .25s var(--out)}
+.chip .c{font-family:var(--font-mono);font-size:11px;color:var(--ink-3)}
+.chip:hover{border-color:var(--or);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--canvas);transform:scale(1.03)} .chip[aria-pressed="true"] .c{color:var(--or-hi)}
+.seg{display:inline-flex;padding:4px;border-radius:13px;background:var(--sunk);gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;height:32px;padding:0 14px;border-radius:9px;cursor:pointer;font-size:13px;color:var(--ink-2);transition:all .25s}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 2px 8px -2px rgba(17,24,39,.2)}
+.tabs{display:flex;gap:26px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+.tabs button{border:0;background:none;padding:12px 0;cursor:pointer;color:var(--ink-2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .2s}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--or);font-weight:500}
+/* 表格 */
+.tablewrap{background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.tablescroll{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;min-width:960px}
+.t th{text-align:left;font-weight:500;font-size:11.5px;color:var(--ink-3);letter-spacing:.06em;padding:13px 18px;border-bottom:1px solid var(--line);white-space:nowrap}
+.t td{padding:12px 18px;border-bottom:1px solid var(--line);vertical-align:middle}
+.t tbody tr:last-child td{border-bottom:0}
+.t tbody tr{cursor:pointer;transition:background .2s;animation:rowIn .5s var(--out) both}
+.t tbody tr:hover{background:linear-gradient(90deg,var(--or-soft),transparent 70%)}
+.t tbody tr:hover .cover{transform:rotate(-5deg) scale(1.1)}
+@keyframes rowIn{from{opacity:.2;transform:translateX(-10px)}}
+.t .r{text-align:right}
+.tfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-top:1px solid var(--line);flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.pager{display:flex;gap:4px;align-items:center}
+.pager button{min-width:32px;height:32px;border-radius:9px;border:0;background:transparent;cursor:pointer;font-family:var(--font-mono);font-size:12px;color:var(--ink-2);transition:all .2s}
+.pager button:hover{background:var(--sunk)} .pager button[aria-current="page"]{background:var(--ink);color:var(--canvas)}
+.pager button:disabled{opacity:.3;cursor:default}
+.tc{display:flex;gap:14px;align-items:center;min-width:0}
+.tc .tt{min-width:0}
+.tc .t1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:380px;font-weight:500}
+.tc .t2{font-size:11px;color:var(--ink-3);margin-top:2px}
+svg.mini{display:block;width:92px;height:28px;overflow:visible}
+
+/* 封面：日版 CD + 帯 */
+.cover{position:relative;flex:none;border-radius:5px;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.08),0 6px 14px -6px rgba(17,24,39,.45);transition:transform .45s var(--spring)}
+.cover .disc{position:absolute;border-radius:50%;right:-18%;top:12%;width:76%;aspect-ratio:1;background:radial-gradient(circle,rgba(0,0,0,.35) 0 9%,transparent 10% 30%,rgba(255,255,255,.18) 31% 32%,transparent 33%),conic-gradient(from 30deg,rgba(255,255,255,.25),rgba(255,255,255,0) 30%,rgba(255,255,255,.2) 55%,rgba(255,255,255,0) 80%)}
+.cover .ini{position:absolute;left:26%;bottom:9%;font-family:var(--font-display);font-weight:700;color:rgba(255,255,255,.94);letter-spacing:0;line-height:1.1}
+.cover .obi{position:absolute;left:0;top:0;bottom:0;width:20%;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;font-family:var(--font-mono);letter-spacing:.06em;overflow:hidden}
+
+/* 弹窗 */
+.overlay{position:fixed;inset:0;background:rgba(10,11,15,.42);backdrop-filter:blur(10px) saturate(1.2);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:calc(5vh + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) calc(5vh + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));overflow-y:auto;animation:fade .2s ease-out}
+.modal{background:var(--canvas);border-radius:26px;width:100%;max-width:1060px;box-shadow:0 40px 100px -20px rgba(0,0,0,.5);animation:pop .45s var(--spring);min-width:0;border:1px solid var(--line)}
+.modal-h{display:flex;align-items:center;gap:12px;padding:20px 24px;border-bottom:1px solid var(--line)}
+.modal-h h3{margin:0;font-size:18px;font-weight:600;letter-spacing:.01em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-h .x{margin-left:auto}
+.modal-b{padding:24px;display:flex;flex-direction:column;gap:18px}
+.modal-f{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;padding:16px 24px;border-top:1px solid var(--line)}
+@keyframes fade{from{opacity:0}} @keyframes pop{from{transform:translateY(24px) scale(.96);opacity:0}}
+.toast{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:80;background:var(--screen);color:#fff;padding:14px 18px;border-radius:14px;font-size:13px;box-shadow:0 20px 40px -10px rgba(0,0,0,.5);display:flex;gap:10px;align-items:center;animation:toastIn .5s var(--spring);max-width:calc(100vw - 48px)}
+.toast .i{width:22px;height:22px;border-radius:50%;background:var(--or);display:grid;place-items:center;flex:none}
+@keyframes toastIn{from{transform:translateY(30px) scale(.9);opacity:0}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.draw{stroke-dashoffset:0}.verdict .ring{stroke-dashoffset:0}}
+
+/* ===== 规则编辑页 ===== */
+/*<shared-css-1>*/
+.field,div.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-2);min-width:0}
+.field .flab{font-size:12.5px;color:var(--ink-2)}
+.field .h{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+.field .err{font-size:11.5px;color:var(--bad);line-height:1.5}
+.input.bad,.pf.bad{border-color:var(--bad)}
+select.input{appearance:none;-webkit-appearance:none;padding-right:34px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238C909B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.btn.danger{color:var(--bad)} .btn.danger:hover{background:var(--bad-soft);color:var(--bad)}
+.btn.primary.danger{color:#fff;background:var(--bad);box-shadow:none} .btn.primary.danger::after{display:none}
+
+/*</shared-css-1>*/
+/* 头部：与规则列表页同一个 .ph，只把眉标换成可点的面包屑 */
+.crumb{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:0;cursor:pointer;font-family:var(--font-display);font-size:12px;letter-spacing:.18em;color:var(--or);font-weight:700;margin:0 0 8px;transition:color .2s,gap .25s var(--out)}
+.crumb:hover{color:var(--or-deep);gap:9px}
+.crumb .sep{color:var(--ink-3);letter-spacing:0;font-weight:500}
+.crumb .cur{color:var(--ink-3);font-weight:500}
+.ttl-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0}
+.ph h1.rname{display:flex;min-width:0}
+.name-btn{all:unset;cursor:text;display:inline-flex;align-items:center;gap:10px;border-bottom:2px dashed transparent;transition:border-color .2s;max-width:100%}
+.name-btn:hover{border-bottom-color:var(--line-2)}
+.name-btn:focus-visible{outline:2px solid var(--or);outline-offset:4px;border-radius:4px}
+.name-btn .pen{color:var(--ink-3);opacity:0;transform:translateX(-4px);transition:all .25s var(--out);display:inline-flex}
+.name-btn:hover .pen,.name-btn:focus-visible .pen{opacity:1;transform:none}
+.name-in{font:inherit;font-weight:700;font-size:32px;line-height:1.3;letter-spacing:.01em;border:0;border-bottom:2px solid var(--or);background:transparent;color:var(--ink);padding:0;outline:none;min-width:4em;max-width:100%}
+.ph .actions{align-items:center}
+
+/* 滚过头部后出现的细条，保留规则名和操作 */
+.sbar{position:fixed;top:0;left:240px;right:0;z-index:30;background:color-mix(in srgb,var(--canvas) 84%,transparent);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);border-bottom:1px solid var(--line);transform:translateY(-102%);transition:transform .4s var(--out)}
+.sbar.on{transform:none}
+.sbar-in{max-width:1340px;margin:0 auto;padding:10px 40px;display:flex;align-items:center;gap:12px}
+.sbar-in b{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.sbar-in .r{margin-left:auto;display:flex;gap:8px;align-items:center;flex:none}
+
+/* 参数：五张摘要卡，点开就地编辑 */
+.sec-h{display:flex;align-items:baseline;gap:10px;margin:0 0 10px}
+.sec-h h2{margin:0;font-size:15px;font-weight:600}
+.sec-h span{font-size:12.5px;color:var(--ink-3)}
+.pstrip{display:grid;grid-template-columns:1.45fr 1.15fr 1fr 1fr 1.3fr;gap:10px}
+.ptile{position:relative;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:11px 14px 12px;cursor:pointer;min-width:0;display:flex;flex-direction:column;gap:1px;transition:border-color .2s,box-shadow .3s,transform .3s var(--out)}
+.ptile:hover{border-color:var(--line-2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.ptile[aria-expanded="true"]{border-color:var(--or);box-shadow:0 0 0 4px var(--or-soft);transform:none}
+.ptile .pl{font-size:12px;color:var(--ink-3);display:flex;align-items:center;gap:6px;line-height:1.6}
+.ptile .ed{margin-left:auto;display:inline-flex;opacity:.0;transition:opacity .2s,transform .3s var(--out);color:var(--or)}
+.ptile:hover .ed,.ptile[aria-expanded="true"] .ed{opacity:1}
+.ptile[aria-expanded="true"] .ed{transform:rotate(180deg)}
+.ptile .p1{font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.ptile .p2{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--or);flex:none}
+.dot.bad{background:var(--bad)}
+.epanel{margin-top:10px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px 20px 18px;animation:panelIn .35s var(--out)}
+@keyframes panelIn{from{opacity:0;transform:translateY(-6px)}}
+.ep-h{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.ep-h h3{margin:0;font-size:15px;font-weight:600}
+.ep-h p{margin:0;font-size:12.5px;color:var(--ink-3)}
+.ep-h .r{margin-left:auto;display:flex;gap:6px}
+.fgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px 16px;align-items:start}
+.s2{grid-column:span 2}.s3{grid-column:span 3}.s4{grid-column:span 4}.s5{grid-column:span 5}.s6{grid-column:span 6}.s7{grid-column:span 7}.s12{grid-column:1/-1}
+.fgrid .input{height:38px}
+.affix{position:relative;display:flex;align-items:center}
+.affix .input{padding-right:34px}
+.affix .u{position:absolute;right:12px;color:var(--ink-3);font-size:12.5px;pointer-events:none;font-family:var(--font-mono)}
+.affix.pre .u{left:12px;right:auto}
+.affix.pre .input{padding-left:28px;padding-right:12px}
+.fgrid .seg{display:flex} .fgrid .seg button{flex:1}
+.effect{display:flex;gap:10px;align-items:flex-start;margin:12px 0 24px;padding:10px 14px;border-radius:14px;background:var(--sunk);font-size:13px;color:var(--ink-2);line-height:1.65}
+.effect b{color:var(--ink);font-weight:500}
+.effect>svg{color:var(--or);margin-top:3px}
+.effect .lbl{flex:none;color:var(--ink);font-weight:500}
+
+/*<shared-css-2>*/
+/* 选择器（店铺 / 类别 / 包装 / 标签） */
+.pick{position:relative}
+.pf{min-height:38px;border-radius:11px;border:1px solid var(--line-2);background:var(--surface);padding:4px 34px 4px 5px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;cursor:pointer;position:relative;transition:border-color .2s,box-shadow .2s}
+.pf:hover{border-color:var(--ink-3)}
+.pf.open,.pf:focus-visible{border-color:var(--or);box-shadow:0 0 0 4px var(--or-soft);outline:none}
+.pf .ph0{color:var(--ink-3);font-size:13px;padding-left:8px}
+.pf .chev{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--ink-3);display:inline-flex;transition:transform .25s var(--out)}
+.pf.open .chev{transform:translateY(-50%) rotate(180deg)}
+.ptag{display:inline-flex;align-items:center;gap:6px;max-width:100%;height:28px;padding:0 3px 0 9px;border-radius:8px;background:var(--sunk);font-size:12.5px;color:var(--ink);min-width:0;animation:tagIn .3s var(--spring)}
+@keyframes tagIn{from{transform:scale(.85);opacity:0}}
+.ptag .tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:360px}
+.ptag .tx i{font-style:normal;color:var(--ink-3);padding:0 3px}
+.ptag .n{font-family:var(--font-mono);font-size:11px;color:var(--ink-3)}
+.ptag .whole{font-size:10.5px;color:var(--or-ink);background:var(--or-soft);padding:0 6px;border-radius:5px;line-height:18px;white-space:nowrap}
+.ptag button{border:0;background:transparent;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;cursor:pointer;color:var(--ink-3);flex:none}
+.ptag button:hover{background:var(--line-2);color:var(--ink)}
+.more{font-size:12px;color:var(--ink-2);padding:0 6px;font-family:var(--font-mono)}
+.pop{position:absolute;z-index:40;top:calc(100% + 6px);left:0;width:max(100%,320px);background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px -18px rgba(17,24,39,.35),0 1px 2px rgba(17,24,39,.06);animation:popIn .22s var(--out);overflow:hidden}
+.pop.wide{width:640px;max-width:calc(100vw - 300px)}
+@keyframes popIn{from{opacity:0;transform:translateY(-4px) scale(.99)}}
+.pop-s{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);color:var(--ink-3)}
+.pop-s input{border:0;outline:none;background:transparent;font:inherit;color:var(--ink);flex:1;min-width:0;height:30px}
+.pop-s .btn{flex:none}
+.pop-tip{padding:8px 14px;font-size:12px;color:var(--ink-2);background:var(--sunk);line-height:1.6;display:flex;gap:8px}
+.pop-tip svg{color:var(--or);flex:none;margin-top:2px}
+.pop-l{max-height:340px;overflow-y:auto;padding:6px;list-style:none;margin:0;overscroll-behavior:contain}
+.pop-f{display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-2)}
+.pop-f .r{margin-left:auto;display:flex;gap:6px}
+.pop-l .none{padding:24px 12px;text-align:center;color:var(--ink-3);font-size:13px}
+.pop-l .cap{font-size:10.5px;letter-spacing:.14em;color:var(--ink-3);padding:8px 10px 4px}
+.opt{display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:34px;padding:0 10px;border-radius:9px;cursor:pointer;font-size:13px;user-select:none}
+.opt:hover,.opt:focus-visible{background:var(--sunk);outline:none}
+.opt .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opt .n,.tr .n{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3)}
+.cb{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--line-2);background:var(--surface);display:grid;place-items:center;transition:background .15s,border-color .15s;color:#fff;flex:none}
+.cb[data-s="true"]{background:var(--or);border-color:var(--or)}
+.cb[data-s="true"][data-inh]{background:color-mix(in srgb,var(--or) 45%,var(--surface));border-color:transparent}
+.cb[data-s="mixed"]{border-color:var(--or)}
+.cb[data-s="mixed"]::after{content:"";width:8px;height:2px;border-radius:1px;background:var(--or)}
+mark{background:var(--or-soft);color:var(--or-ink);border-radius:3px;padding:0 1px}
+.tr{display:flex;align-items:center;gap:4px;min-height:34px;padding-right:10px;border-radius:9px;font-size:13px;position:relative}
+.tr:hover{background:var(--sunk)}
+.tr .tw{width:24px;height:24px;border:0;background:transparent;border-radius:6px;display:grid;place-items:center;cursor:pointer;color:var(--ink-3);flex:none}
+.tr .tw:hover{background:var(--line-2);color:var(--ink)}
+.tr .tw svg{transition:transform .25s var(--out)}
+.tr .tw[aria-expanded="true"] svg{transform:rotate(90deg)}
+.tr .tw.leaf{visibility:hidden}
+.tr .lab{display:flex;align-items:center;gap:9px;flex:1;min-width:0;cursor:pointer;min-height:34px;border-radius:7px;outline-offset:0}
+.tr .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr .sub{font-size:11px;color:var(--ink-3);white-space:nowrap}
+.tr .n{margin-left:auto;padding-left:10px}
+.tr.top>.lab .nm{font-weight:500}
+.tr .guide{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.sr .lab{padding:5px 0 5px 10px;align-items:flex-start}
+.sr .cb{margin-top:3px}
+.sr .sp{display:flex;flex-direction:column;min-width:0}
+.sr .path{font-size:11.5px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr .n{margin-top:2px}
+
+/*</shared-css-2>*/
+/* 预演 */
+.pv{padding:0;overflow:hidden}
+.pv-bar{position:absolute;left:0;right:0;top:0;height:3px;overflow:hidden;opacity:0;transition:opacity .25s;pointer-events:none}
+.pv.busy .pv-bar{opacity:1}
+.pv-bar i{position:absolute;top:0;bottom:0;width:38%;background:linear-gradient(90deg,transparent,var(--or-hi),var(--or),transparent);animation:sweep 1.1s ease-in-out infinite}
+@keyframes sweep{from{left:-40%}to{left:102%}}
+.fade{transition:opacity .3s var(--out),filter .3s}
+.pv.busy .fade{opacity:.42}
+.pv.stale .fade{opacity:.55;filter:grayscale(.6)}
+.pv-h{display:flex;align-items:center;gap:12px;padding:18px 22px 0;flex-wrap:wrap}
+.pv-h h2{margin:0;font-size:18px;font-weight:600;color:var(--ink)}
+.pv-h .s{font-size:12.5px;color:var(--ink-3)}
+.pv-st{margin-left:auto;min-width:200px;height:24px;display:inline-flex;justify-content:flex-end;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.pv-st .okc{color:var(--ok);display:inline-flex}
+.pv-st.warn{color:var(--warn)}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--or-soft);border-top-color:var(--or);animation:rot .8s linear infinite;flex:none}
+@keyframes rot{to{transform:rotate(1turn)}}
+.pv-fx{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;padding:4px 22px 14px;font-size:12.5px;color:var(--ink-2)}
+.pv-fx .mono{color:var(--ink)}
+.pv-fx .sep{color:var(--line-2)}
+.gwrap{display:flex;gap:10px;margin:0 22px}
+.gset{display:flex;flex-direction:column;min-width:min-content}
+.gset.need{flex:2 1 0}
+.gset.rest{flex:4 1 0}
+.gcap{font-size:11px;letter-spacing:.12em;color:var(--ink-3);margin:0 0 6px 6px;display:flex;align-items:center;gap:6px;font-weight:500;line-height:1.4}
+.gset.need .gcap{color:var(--or)}
+.gseg{display:flex;gap:2px;padding:4px;background:var(--sunk);border-radius:14px}
+.gc{flex:1 1 auto;border:0;background:transparent;border-radius:10px;padding:7px 12px 8px;text-align:left;cursor:pointer;min-width:0;display:flex;flex-direction:column;gap:0;transition:background .2s,box-shadow .25s;position:relative}
+.gc:hover{background:color-mix(in srgb,var(--surface) 60%,transparent)}
+.gc[aria-selected="true"]{background:var(--surface);box-shadow:0 2px 8px -2px rgba(17,24,39,.18)}
+.gc .l1{display:flex;align-items:baseline;gap:7px;white-space:nowrap}
+.gc .num{font-family:var(--font-display);font-weight:700;font-size:20px;line-height:1.3;font-variant-numeric:tabular-nums;letter-spacing:0;display:inline-block;animation:numIn .45s var(--out)}
+@keyframes numIn{from{opacity:0;transform:translateY(5px)}}
+.gc .nm{font-size:13px;font-weight:500;color:var(--ink)}
+.gc .nt{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;width:0;min-width:100%}
+.gc .num{color:var(--gc)}
+.gc .nm::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gc);margin-right:6px;vertical-align:2px}
+.gc.zero .num{color:var(--ink-3)}
+.gc[aria-selected="true"]::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:2px;border-radius:2px;background:var(--gc)}
+/*<shared-css-3>*/
+:root{--slate:#56657E;--slate-soft:#EBEEF3}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--slate:#93A3BD;--slate-soft:#1D2330}}
+:root[data-theme="dark"]{--slate:#93A3BD;--slate-soft:#1D2330}
+.pill.slate{background:var(--slate-soft);color:var(--slate)}
+.tdot{width:7px;height:7px;border-radius:50%;flex:none;display:inline-block}
+.mini-seg{display:inline-flex;background:var(--sunk);border-radius:7px;padding:2px;flex:none}
+.mini-seg button{border:0;background:transparent;font-size:11px;padding:0 8px;height:22px;border-radius:5px;cursor:pointer;color:var(--ink-3)}
+.mini-seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(17,24,39,.12)}
+.sumgrid{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;font-size:13px;padding:14px 16px;border-radius:14px;background:var(--sunk);margin:0}
+.sumgrid dt{color:var(--ink-3)} .sumgrid dd{margin:0;min-width:0}
+.conf{border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);background:var(--warn-soft);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-size:13px}
+.conf-h{display:flex;gap:10px;align-items:flex-start;color:var(--ink-2)} .conf-h svg{color:var(--warn);margin-top:2px} .conf-h b{color:var(--ink)}
+.conf .seg{display:flex;background:var(--surface)} .conf .seg button{flex:1}
+.conf-l{list-style:none;margin:0;padding:0;max-height:200px;overflow-y:auto;background:var(--surface);border-radius:10px}
+.conf-l li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 10px;border-top:1px solid var(--line)}
+.conf-l li:first-child{border-top:0}
+.conf-l .t1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px} .conf-l .t2{font-size:11px;color:var(--ink-3)}
+/*</shared-css-3>*/
+.guide-note{display:flex;gap:14px;align-items:center;margin:14px 22px 0;padding:12px 16px;border-radius:14px;border:1px dashed color-mix(in srgb,var(--slate) 45%,transparent);font-size:13px;color:var(--ink-2)}
+.guide-note b{color:var(--ink);font-weight:600}
+.guide-note>svg{color:var(--slate)}
+.guide-note .act2{margin-left:auto;display:flex;gap:8px;flex:none}
+.step{font-size:11px;letter-spacing:.12em;color:var(--ink-3)}
+.srcs{display:flex;flex-direction:column;gap:8px}
+.src-row{display:grid;grid-template-columns:minmax(0,1fr) 140px 56px;gap:12px;align-items:center;font-size:13px}
+.src-row .bar{height:6px;border-radius:999px;background:var(--sunk);overflow:hidden}
+.src-row .bar i{display:block;height:100%;border-radius:inherit;background:var(--slate);transform-origin:left;animation:grow .8s var(--out) both}
+@keyframes grow{from{transform:scaleX(0)}}
+.src-row .mono{text-align:right}
+.samples{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.samples .smp{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 14px;border-top:1px solid var(--line);font-size:13px}
+.samples .smp:first-child{border-top:0}
+.samples .smp .t1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.samples .smp .t2{font-size:11.5px;color:var(--ink-3)}
+.samples .more2{padding:8px 14px;font-size:12px;color:var(--ink-3);border-top:1px solid var(--line);background:var(--sunk)}
+.after{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--or-soft);color:var(--or-ink);font-size:13px}
+.after b{color:var(--ink)}
+.gb{padding:18px 22px 0}
+.gb-h{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.gb-h h3{margin:0;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+.gb-h p{margin:2px 0 0;font-size:12.5px;color:var(--ink-2)}
+.gb-h .r{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.gb-h .bulk-note{font-size:11.5px;color:var(--ink-3);width:100%;text-align:right;margin-top:-2px}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0 12px;min-height:36px}
+.tools .chip{height:30px;padding:0 12px;font-size:12.5px}
+.tools .lbl{font-size:12px;color:var(--ink-3);margin-right:2px}
+.sbox{position:relative;margin-left:auto;width:300px;max-width:100%}
+.sbox .input{padding-left:36px;height:36px;font-size:13px}
+.sbox svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-3)}
+.rows{list-style:none;margin:0;padding:0}
+.row{display:grid;grid-template-columns:44px minmax(0,1fr) 196px 152px;gap:16px;align-items:center;padding:12px 22px;border-top:1px solid var(--line);transition:background .2s}
+.row:hover{background:linear-gradient(90deg,var(--or-soft),transparent 70%)}
+.row:hover .cover{transform:rotate(-5deg) scale(1.08)}
+.row .t1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.row .t2{font-size:11.5px;color:var(--ink-3);font-family:var(--font-mono);letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .tips{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.row .tips .pill{height:22px;font-size:11.5px}
+.pr{text-align:right;font-family:var(--font-mono);font-size:13px;white-space:nowrap;letter-spacing:0}
+.pr .now{color:var(--ink-3)}
+.pr .to{font-weight:600;color:var(--or-ink)}
+.pr .arr{color:var(--ink-3);padding:0 4px}
+.pr .d{font-size:11.5px;color:var(--ink-3)}
+.pr .d.up{color:var(--ok)} .pr .d.dn{color:var(--bad)}
+.act{display:flex;justify-content:flex-end;align-items:center;gap:4px}
+.done{display:inline-flex;align-items:center;gap:5px;color:var(--ok);font-size:12.5px;font-weight:500;white-space:nowrap}
+.stray{display:flex;gap:8px;align-items:center;margin:10px 22px 0;font-size:12.5px;color:var(--ink-2)} .stray svg{color:var(--warn)}
+.gb-h h3 .tdot{width:8px;height:8px}
+.rows-empty{padding:44px 22px;text-align:center;color:var(--ink-3);border-top:1px solid var(--line);font-size:13px}
+.rows-empty b{display:block;color:var(--ink);font-size:15px;margin-bottom:2px}
+.pv .tfoot{margin-top:0}
+
+/* 弹窗内容 */
+.mlist{display:grid;grid-template-columns:1fr auto;gap:8px 18px;font-size:13px;padding:14px 16px;border-radius:14px;background:var(--sunk)}
+.mlist .mono{text-align:right}
+.mlist .tot{border-top:1px solid var(--line-2);padding-top:8px;font-weight:600}
+
+/* 原型控制（只在原型里出现） */
+.proto-panel{position:fixed;left:256px;bottom:16px;z-index:45;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);font-size:12px;width:268px;overflow:hidden}
+.pp-h{display:flex;align-items:center;gap:8px;width:100%;border:0;background:var(--screen);color:var(--screen-ink);padding:9px 14px;cursor:pointer;font-size:12px;letter-spacing:.06em}
+.pp-h .faint{margin-left:auto;color:var(--screen-mute)}
+.pp-b{padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px}
+.pp-b p{margin:0;color:var(--ink-3);line-height:1.6}
+.pp-b .seg{display:flex} .pp-b .seg button{flex:1;padding:0 8px;font-size:12px}
+@media (max-width:1100px){.pstrip{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<script>
+(function(){
+const {useState,useEffect,useRef,useMemo,useLayoutEffect} = React;
+const html = htm.bind(React.createElement);
+const WORDMARK = "data:image/png;base64,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";
+const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/*<shared-js-1>*/
+/* ---------- 图标（与定稿同一套线性图标） ---------- */
+const P = {
+  home:"M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
+  disc:["M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z","M12 9.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5z"],
+  check:["M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z","M8 12l3 3 5-6"],
+  search:["M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14z","M20 20l-4-4"],
+  tag:["M3 12V4h8l10 10-8 8z","M7.5 6.5a1 1 0 1 0 0 2a1 1 0 1 0 0-2z"],
+  shield:["M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z","M9 12l2 2 4-4"],
+  sliders:["M4 7h9","M17 7h3","M15 5v4","M4 17h3","M11 17h9","M9 15v4","M4 12h13","M19 10v4"],
+  refresh:["M20 11a8 8 0 0 0-14.7-4.3L4 8","M4 4v4h4","M4 13a8 8 0 0 0 14.7 4.3L20 16","M20 20v-4h-4"],
+  plus:["M12 5v14","M5 12h14"], x:["M6 6l12 12","M18 6L6 18"], left:"M15 6l-6 6 6 6", right:"M9 6l6 6-6 6", down:"M6 9l6 6 6-6", arrow:["M5 12h14","M13 6l6 6-6 6"],
+  spark:["M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z","M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"],
+  alert:["M12 3l10 18H2z","M12 10v5","M12 18v.01"], ok:"M5 12l5 5 9-11", edit:["M4 20h4L19 9l-4-4L4 16z"],
+  trash:["M4 7h16","M9 7V4h6v3","M6 7l1 13h10l1-13"], power:["M12 3v8","M6.3 6.3a8 8 0 1 0 11.4 0"],
+  box:["M3 7l9-4 9 4v10l-9 4-9-4z","M3 7l9 4 9-4","M12 11v10"], undo:["M9 14L4 9l5-5","M4 9h10a6 6 0 0 1 0 12h-3"],
+  link:["M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1","M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"],
+  move:["M4 12h12","M12 8l4 4-4 4","M20 5v14"], tree:["M5 4v16","M5 8h6","M5 16h6","M14 6h6v4h-6z","M14 14h6v4h-6z"],
+};
+function Ic({n,s=18,w=1.9}){ const d=[].concat(P[n]); return html`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=${w} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style=${{flex:"none"}}>${d.map((p,i)=>html`<path key=${i} d=${p}/>`)}</svg>`; }
+
+/* ---------- 示例数据 ---------- */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const SEP=":";
+// 开发库里的真实类别与条数
+const FEW_CATS=[
+  ["Music:CDs",93],
+  ["Health & Beauty:Nail Care, Manicure & Pedicure:Nail Care Tools:Manicure & Pedicure Tools & Kits",19],
+  ["Business & Industrial:Office:Office Supplies:Pens, Pencils & Markers:Mechanical Pencils",12],
+  ["Collectibles:Pens & Writing Instruments:Pencils:Mechanical",10],
+  ["Movies & TV:DVDs & Blu-ray Discs",10],
+  ["Music:Other Formats",2],
+  ["Business & Industrial:Office:Office Supplies:Desk Accessories:Staplers",1],
+];
+// "类别很多"演示：按 eBay 美国站的真实层级补的叶子类别
+const EXTRA_CATS=`Music:Vinyl Records
+Music:Cassettes
+Music:Music Memorabilia:Rock & Pop:Posters
+Music:Music Memorabilia:Rock & Pop:Ticket Stubs
+Music:Music Memorabilia:Rock & Pop:Photographs
+Movies & TV:Laserdiscs
+Movies & TV:VHS Tapes
+Movies & TV:Movie Memorabilia:Posters:Originals-International
+Movies & TV:Movie Memorabilia:Pressbooks
+Movies & TV:Movie Memorabilia:Lobby Cards
+Video Games & Consoles:Video Games
+Video Games & Consoles:Video Game Consoles
+Video Games & Consoles:Video Game Accessories:Controllers & Attachments
+Video Game & Consoles:Video Game Accessories:Memory Cards
+Video Games & Consoles:Video Game Accessories:Cables & Adapters
+Video Games & Consoles:Video Game Strategy Guides & Manuals
+Video Games & Consoles:Video Game Merchandise
+Toys & Hobbies:Action Figures & Accessories:Action Figures
+Toys & Hobbies:Action Figures & Accessories:Action Figure Accessories
+Toys & Hobbies:Models & Kits:Automotive
+Toys & Hobbies:Models & Kits:Robots & Mecha
+Toys & Hobbies:Models & Kits:Aircraft
+Toys & Hobbies:Models & Kits:Military
+Toys & Hobbies:Diecast & Toy Vehicles:Cars, Trucks & Vans
+Toys & Hobbies:Diecast & Toy Vehicles:Trains
+Toys & Hobbies:Collectible Card Games:CCG Individual Cards
+Toys & Hobbies:Collectible Card Games:CCG Sealed Booster Packs
+Toys & Hobbies:Collectible Card Games:CCG Sealed Decks & Kits
+Toys & Hobbies:Puzzles:Jigsaw Puzzles
+Toys & Hobbies:Radio Control & Control Line:RC Model Vehicles & Kits
+Toys & Hobbies:Vintage & Antique Toys:Tin Toys
+Collectibles:Pens & Writing Instruments:Pens:Fountain Pens
+Collectibles:Pens & Writing Instruments:Pens:Ballpoint Pens
+Collectibles:Pens & Writing Instruments:Pencils:Wood-Cased
+Collectibles:Pens & Writing Instruments:Inks
+Collectibles:Pens & Writing Instruments:Pen Cases
+Collectibles:Animation Art & Merchandise:Animation Merchandise:Keychains
+Collectibles:Animation Art & Merchandise:Animation Merchandise:Figures
+Collectibles:Animation Art & Merchandise:Animation Merchandise:Posters
+Collectibles:Animation Art & Merchandise:Animation Art:Production Cels
+Collectibles:Cultures & Ethnicities:Asian:Japanese
+Collectibles:Kitchen & Home:Kitchenware:Teapots
+Collectibles:Comic Books & Memorabilia:Comics:Manga
+Business & Industrial:Office:Office Supplies:Pens, Pencils & Markers:Ballpoint Pens
+Business & Industrial:Office:Office Supplies:Pens, Pencils & Markers:Gel Pens
+Business & Industrial:Office:Office Supplies:Pens, Pencils & Markers:Highlighters
+Business & Industrial:Office:Office Supplies:Pens, Pencils & Markers:Erasers
+Business & Industrial:Office:Office Supplies:Pens, Pencils & Markers:Pencil Leads
+Business & Industrial:Office:Office Supplies:Desk Accessories:Tape Dispensers
+Business & Industrial:Office:Office Supplies:Desk Accessories:Paper Clips
+Business & Industrial:Office:Office Supplies:Desk Accessories:Hole Punches
+Business & Industrial:Office:Office Supplies:Notebooks & Writing Pads
+Business & Industrial:Office:Office Supplies:Correction Tape
+Business & Industrial:Office:Office Equipment:Calculators
+Business & Industrial:Office:Office Equipment:Label Makers
+Health & Beauty:Nail Care, Manicure & Pedicure:Nail Care Tools:Nail Clippers
+Health & Beauty:Nail Care, Manicure & Pedicure:Nail Care Tools:Nail Files & Buffers
+Health & Beauty:Nail Care, Manicure & Pedicure:Nail Care Tools:Cuticle Pushers
+Health & Beauty:Nail Care, Manicure & Pedicure:Nail Polish
+Health & Beauty:Nail Care, Manicure & Pedicure:Nail Art Accessories
+Health & Beauty:Skin Care:Face:Moisturizers
+Health & Beauty:Skin Care:Face:Cleansers
+Health & Beauty:Skin Care:Face:Masks
+Health & Beauty:Skin Care:Sunscreen
+Health & Beauty:Makeup:Eyes:Eyeliner
+Health & Beauty:Makeup:Eyes:Mascara
+Health & Beauty:Makeup:Lips:Lipstick
+Health & Beauty:Makeup:Makeup Tools & Accessories:Brushes
+Health & Beauty:Fragrances
+Health & Beauty:Shaving & Hair Removal:Razors
+Health & Beauty:Oral Care:Toothbrushes
+Health & Beauty:Hair Care & Styling:Hair Brushes & Combs
+Home & Garden:Kitchen, Dining & Bar:Flatware, Knives & Cutlery:Kitchen Knives
+Home & Garden:Kitchen, Dining & Bar:Flatware, Knives & Cutlery:Knife Sharpeners
+Home & Garden:Kitchen, Dining & Bar:Dinnerware & Serveware:Bowls
+Home & Garden:Kitchen, Dining & Bar:Dinnerware & Serveware:Chopsticks
+Home & Garden:Kitchen, Dining & Bar:Bar Tools & Accessories
+Home & Garden:Kitchen, Dining & Bar:Teapots & Tea Kettles
+Home & Garden:Home Décor:Wind Chimes
+Home & Garden:Home Décor:Noren Curtains
+Home & Garden:Household Supplies & Cleaning
+Books & Magazines:Books
+Books & Magazines:Magazines
+Books & Magazines:Textbooks, Education & Reference
+Cameras & Photo:Lenses & Filters:Lenses
+Cameras & Photo:Lenses & Filters:Lens Caps
+Cameras & Photo:Film Photography:Film Cameras
+Cameras & Photo:Film Photography:Film
+Cameras & Photo:Digital Cameras
+Cameras & Photo:Camera & Photo Accessories:Straps & Hand Grips
+Consumer Electronics:Portable Audio & Headphones:Headphones
+Consumer Electronics:Portable Audio & Headphones:Portable Cassette Players
+Consumer Electronics:Portable Audio & Headphones:MiniDisc Players
+Consumer Electronics:Vintage Electronics:Vintage Audio & Video:Vintage Amplifiers & Preamps
+Consumer Electronics:Vintage Electronics:Vintage Audio & Video:Vintage Turntables
+Consumer Electronics:Home Audio:Speakers
+Sporting Goods:Fishing:Fishing Lures & Flies:Hard Baits
+Sporting Goods:Fishing:Fishing Lures & Flies:Soft Baits
+Sporting Goods:Fishing:Fishing Reels
+Sporting Goods:Golf:Golf Clubs:Drivers
+Sporting Goods:Golf:Golf Balls
+Sporting Goods:Outdoor Sports:Camping & Hiking:Camping Cookware
+Clothing, Shoes & Accessories:Men:Men's Accessories:Wallets
+Clothing, Shoes & Accessories:Women:Women's Accessories:Hair Accessories
+Clothing, Shoes & Accessories:Specialty:Traditional & Cultural Wear:Kimonos
+Jewelry & Watches:Watches, Parts & Accessories:Watches:Wristwatches
+Jewelry & Watches:Watches, Parts & Accessories:Watch Accessories:Watch Bands
+Crafts:Sewing:Sewing Tools & Supplies
+Crafts:Art Supplies:Drawing & Lettering Supplies:Pens & Markers
+Crafts:Art Supplies:Painting Supplies:Paint Brushes
+Crafts:Art Supplies:Painting Supplies:Watercolor Paint
+Crafts:Scrapbooking & Paper Crafts:Stamping & Embossing:Stamps
+Crafts:Scrapbooking & Paper Crafts:Washi Tape
+Musical Instruments & Gear:Guitars & Basses:Electric Guitars
+Musical Instruments & Gear:Guitars & Basses:Parts & Accessories:Picks
+Musical Instruments & Gear:Pro Audio Equipment:Effects Pedals
+Pet Supplies:Dog Supplies:Collars & Tags
+Pet Supplies:Cat Supplies:Toys
+Antiques:Asian Antiques:Japan:Netsuke
+Antiques:Asian Antiques:Japan:Lacquerware`.split("\n").map(s=>s.trim().replace(/^Video Game & Consoles/,"Video Games & Consoles"));
+
+const FEW_STORES=["Synthetic Records","demo-store-jp"];
+const MANY_STORES=[...FEW_STORES,"tokyo-finds","kansai-select","nippon-stationery-lab","retro-media-jp","osaka-beauty-supply","hokkaido-outdoors","kyoto-kitchen-goods","showa-toybox"];
+const FEW_PKGS=["CD 纸箱","CD 气泡袋","DVD 纸箱","小件文具袋","美甲工具盒"];
+const MANY_PKGS=[...FEW_PKGS,"黑胶硬纸箱","中号纸箱 30×20×10","大号纸箱 40×30×20","防震泡棉盒","化妆品小盒","厨刀专用盒","相机镜头盒","模型手办盒","平信信封"];
+const FEW_TAGS=["日版","帯付","初回限定","二手","送礼"];
+const MANY_TAGS=[...FEW_TAGS,"绝版","签名","生产完了","未开封","美品","有瑕疵","限定色","联名款","季节限定","重量超 1kg","易碎","含电池","液体","高价值","低价走量","新品试卖","复购款","节日促销","黑五","清仓","主推","测试中","慢销","爆款","待涨价","竞品低价","无竞品","需报关说明","尺寸超标","仅美国","国际可发","广告投放中","广告暂停","批量采购","单件采购","供应商 A","供应商 B","乐天来源","骏河屋来源","亚马逊直营"];
+const SKINS=[["#F2681D","#111827"],["#111827","#F2681D"],["#2E2A4F","#FFC49A"],["#7A2E12","#F4E9DC"],["#1E5B4F","#F2681D"],["#E9E3D8","#B9470A"],["#3B4B6B","#FFF0E6"],["#9A3505","#FFC49A"]];
+const LIGHT=["#E9E3D8","#F4E9DC","#FFF0E6","#FFC49A"];
+const POOL={
+  music:["City Pop Collection","Showa Kayo Best Selection","Anime Song Memorial","Jazz Café Tokyo","Shibuya-kei Classics","Original Soundtrack","Idol Single Collection","Enka Masters","Synthetic Album"],
+  movie:["Studio Classics Blu-ray Box","Tokusatsu Series DVD","Anime Movie Blu-ray","Drama Complete DVD-BOX","Kaiju Collection Blu-ray"],
+  pencil:["Pentel Orenz 0.3mm Mechanical Pencil","Uni Kuru Toga Advance 0.5mm","Pilot Dr. Grip CL 0.5mm","Zebra DelGuard 0.5mm","Rotring 600 0.7mm","Pentel Graph 1000 for Pro","Uni Shift 0.5mm Pipe Lock"],
+  stapler:["Max Vaimo 11 Flat-Clinch Stapler","Plus Papery Compact Stapler","Kokuyo Harinacs Staple-Free Stapler"],
+  nail:["Green Bell Takumi no Waza Nail Clipper","Kai Seki Magoroku Nail Care Set","Suwada Classic Nail Nipper","Stainless Cuticle Pusher Set","Glass Nail File Japan"],
+};
+const segs=k=>k.split(SEP);
+const pathText=k=>segs(k).join(" › ");
+const anc=k=>{ const s=segs(k); return s.slice(0,-1).map((_,i)=>s.slice(0,i+1).join(SEP)); };
+const isDesc=(k,a)=>k.startsWith(a+SEP);
+const covered=(sel,k)=>sel.includes(k)||anc(k).some(a=>sel.includes(a));
+const catLabel=k=>{ const s=segs(k); return s.length<=3?s.join(" › "):s[0]+" › … › "+s.slice(-2).join(" › "); };
+
+function buildTree(cats){
+  const map=new Map(), roots=[];
+  for(const [path,n] of cats){ const s=segs(path); let parent=null;
+    s.forEach((name,i)=>{ const key=s.slice(0,i+1).join(SEP); let nd=map.get(key);
+      if(!nd){ nd={key,name,depth:i,children:[],count:0,leaves:0,parent:parent?parent.key:null}; map.set(key,nd); (parent?parent.children:roots).push(nd); }
+      nd.count+=n; if(i===s.length-1) nd.leaf=true; parent=nd; });
+    anc(path).concat(path).forEach(k=>map.get(k).leaves++);
+  }
+  const sort=a=>{ a.sort((x,y)=>y.count-x.count||x.name.localeCompare(y.name)); a.forEach(c=>sort(c.children)); }; sort(roots);
+  return {roots,map};
+}
+function titleFor(path,r,i){ const pk=a=>a[Math.floor(r()*a.length)]; const leaf=segs(path).slice(-1)[0];
+  if(/^Music:CDs/.test(path)) return pk(POOL.music)+" Vol."+(1+i%12)+" Japan CD w/ OBI";
+  if(/^Music/.test(path)) return pk(POOL.music)+" "+pk(["8cm CD Single","MiniDisc","Cassette","LP"])+" Japan";
+  if(/^Movies/.test(path)) return pk(POOL.movie)+" Japan Ver. Region A";
+  if(/Mechanical/.test(leaf)) return pk(POOL.pencil)+" Japan";
+  if(/Stapler/.test(leaf)) return pk(POOL.stapler);
+  if(/Nail|Manicure|Cuticle/.test(path)) return pk(POOL.nail);
+  return "Japanese "+leaf.replace(/s$/,"")+" · Import #"+(100+i);
+}
+function pkgFor(path,pkgs,r){ const pk=a=>a[Math.floor(r()*a.length)];
+  if(/CDs|Other Formats|Cassettes/.test(path)) return pk(["CD 纸箱","CD 气泡袋"]);
+  if(/DVD|Laserdisc|VHS/.test(path)) return "DVD 纸箱";
+  if(/Pencil|Pens|Stapler|Office|Writing/.test(path)) return "小件文具袋";
+  if(/Nail/.test(path)) return "美甲工具盒";
+  return pk(pkgs);
+}
+/*</shared-js-1>*/
+function makeData(mode){
+  const r=rng(mode==="few"?20261025:20261026);
+  const many=mode==="many";
+  const cats=many?[...FEW_CATS,...EXTRA_CATS.map(p=>[p,1+Math.floor(Math.pow(r(),2.4)*70)])]:FEW_CATS;
+  const stores=many?MANY_STORES:FEW_STORES, pkgs=many?MANY_PKGS:FEW_PKGS, tags=many?MANY_TAGS:FEW_TAGS;
+  const listings=[]; let seq=0;
+  for(const [path,n] of cats){ for(let i=0;i<n;i++){ const id=seq++;
+    const title=titleFor(path,r,i); const cost=900+Math.floor(r()*44)*100;
+    const base=(cost/150+10+1000/150)/(1-.1535); const f=r()<.08?.55+r()*.2:.86+r()*.52;
+    const price=Math.max(5.99,Math.ceil(base*f-.99)+.99);
+    const store=many?stores[Math.min(stores.length-1,Math.floor(Math.pow(r(),1.8)*stores.length))]:(r()<.8?stores[0]:stores[1]);
+    // 明确登入才属于规则：mine = 已登入本规则；rules = 还登入了哪些其他规则（自由定价是内置的，人人都在）
+    const mine=/^(Music|Movies & TV:DVDs)/.test(path)&&r()<.62; const rules=[];
+    if(/^Music/.test(path)){ if(r()<.14) rules.push("日版 CD 促销"); if(!mine&&r()<.25) rules.push("日版 CD 新品"); }
+    if(/^Movies/.test(path)&&r()<.3) rules.push("DVD 清仓"); if(/Pencil|Pens|Stapler/.test(path)&&r()<.6) rules.push("文具通用"); if(/Nail|Makeup|Skin/.test(path)&&r()<.5) rules.push("美妆小件");
+    const tg=[]; for(let k=0;k<3;k++){ if(r()<.45){ const t=tags[Math.floor(Math.pow(r(),1.5)*tags.length)]; if(!tg.includes(t)) tg.push(t); } }
+    const words=title.split(/[\s.-]+/).filter(w=>/^[A-Za-z]/.test(w));
+    listings.push({id,title,cat:path,store,cost,price,mine,rules,tags:tg,bound:r()>.07,idOk:r()>.03,pkg:r()<.05?null:pkgFor(path,pkgs,r),
+      sku:"SR-"+segs(path)[0].replace(/[^A-Z]/g,"").slice(0,3)+"-"+String(1000+id),itemId:"2856"+String(Math.floor(r()*1e8)).padStart(8,"0"),
+      skin:SKINS[Math.floor(r()*SKINS.length)],ini:(words[0]||"J")[0].toUpperCase()+((words[1]||"")[0]||"").toUpperCase(),disc:/^(Music|Movies)/.test(path)});
+  } }
+  const cnt=(key,all)=>{ const m={}; all.forEach(v=>m[v]=0); listings.forEach(L=>[].concat(L[key]).forEach(v=>{ if(v!=null) m[v]=(m[v]||0)+1; })); return m; };
+  return {mode,cats,stores,pkgs,tags,listings,tree:buildTree(cats),storeN:cnt("store",stores),pkgN:cnt("pkg",pkgs),tagN:cnt("tags",tags)};
+}
+
+/* ---------- 规则参数 ---------- */
+const INIT={stores:["Synthetic Records"],cats:["Music","Movies & TV:DVDs & Blu-ray Discs"],pkgs:[],tags:[],prio:"normal",
+  mode:"amount",target:"1000",market:"both",lower:"80",
+  comm:"12",over:"1.35",ad:"2",disc:"100",
+  shipMode:"fixed",shipUS:"10",shipTier:"cd",svcUS:"US Express",svcIntl:"World Post",
+  min:"10",max:"100",minUsd:"1",minPct:"3",alert:"15",tail:".99"};
+const PRIO={top:"最高",high:"高",normal:"普通",low:"低",bottom:"最低"};
+const PRIO_NOTE={top:"专门规则用，例如某个限定系列",high:"比通用规则更具体的规则",normal:"大多数规则用这一档",low:"兜底的通用规则",bottom:"最后才考虑，例如清仓"};
+const PRIO_HINT="一条刊登可登入多条规则，由优先级最高的定价；同一优先级只能登入一条。";
+const PG=[
+  {k:"filter",name:"筛选",desc:"筛选只决定候选范围，不会自动加入；在预演里登入本规则后才属于本规则。不符合筛选的刊登不是候选，预演里不列出。",keys:["stores","cats","pkgs","tags","prio"]},
+  {k:"target",name:"目标与区间",desc:"利润低于下限才涨回目标；高于目标不自动降，只提示降价空间。",keys:["mode","target","market","lower"]},
+  {k:"fees",name:"费用",desc:"按售价扣的比例，都以百分比填写。",keys:["comm","over","ad","disc"]},
+  {k:"ship",name:"运费",desc:"美国按固定金额或售价分档；非美国只选物流服务。",keys:["shipMode","shipUS","shipTier","svcUS","svcIntl"]},
+  {k:"bounds",name:"价格边界",desc:"算出的目标售价最后会被限在这些边界里，差额太小的不改。",keys:["min","max","minUsd","minPct","alert","tail"]},
+];
+const MARKET={both:"两个市场均满足",us:"只看美国",intl:"只看非美国"};
+const TAIL={".99":".99",".49":".49",".00":".00",none:"不调整"};
+const SVC_US=["US Express","US Standard","SpeedPAK Economy","Japan Post EMS"], SVC_INTL=["World Post","EMS","SpeedPAK Economy","国际 e 包裹"];
+const N=v=>v===""||v==null||isNaN(+v)?null:+v;
+const yen=v=>"¥"+Math.round(v).toLocaleString("en-US");
+const usd=v=>"$"+(+v).toFixed(2);
+const trimNum=v=>String(+(+v).toFixed(2));
+
+function validate(p){ const e={}; const n=k=>N(p[k]);
+  if(!p.stores.length) e.stores="至少选一个店铺";
+  if(!p.cats.length) e.cats="至少选一个类别";
+  if(!(n("target")>0)) e.target="目标要大于 0";
+  if(p.lower!==""&&!(n("lower")>0&&n("lower")<=100)) e.lower="填 1–100，或留空";
+  ["comm","over","ad"].forEach(k=>{ if(n(k)==null||n(k)>=100) e[k]="填 0–99.99"; });
+  if(!(n("disc")>0&&n("disc")<=100)) e.disc="填 1–100";
+  if(p.shipMode==="fixed"&&n("shipUS")==null) e.shipUS="请填写美国固定运费";
+  if(n("min")!=null&&n("max")!=null&&n("min")>=n("max")) e.max="上限要大于下限";
+  if(p.alert!==""&&!(n("alert")>0)) e.alert="填大于 0 的数，或留空";
+  return e; }
+
+function summary(k,p,D){ const n=k=>N(p[k]);
+  if(k==="filter"){ const st=p.stores.length===1?p.stores[0]:p.stores.length?p.stores.length+" 个店铺":"未选店铺";
+    const c=p.cats.length?(p.cats.length===1?catLabel(p.cats[0]):segs(p.cats[0]).slice(-1)[0]+" 等 "+p.cats.length+" 项"):"未选类别";
+    return [st+" · "+c,"包装"+(p.pkgs.length?" "+p.pkgs.length+" 种":"不限")+" · 标签"+(p.tags.length?" "+p.tags.length+" 个":"不限")+" · 优先级"+PRIO[p.prio]]; }
+  if(k==="target") return [(p.mode==="amount"?"利润额 "+yen(n("target")||0):"成本回报率 "+(p.target||"—")+"%")+" · "+MARKET[p.market],p.lower?"低于目标的 "+p.lower+"% 才涨价":"低于目标就涨价"];
+  if(k==="fees"){ const t=(n("comm")||0)+(n("over")||0)+(n("ad")||0); return ["佣金 "+p.comm+"% · 海外 "+p.over+"% · 广告 "+p.ad+"%","合计 "+trimNum(t)+"% · 售价折扣 "+p.disc+"%"]; }
+  if(k==="ship") return [(p.shipMode==="fixed"?"美国固定 "+(p.shipUS?usd(p.shipUS):"—"):"美国按售价分档")+" · "+p.svcUS,"非美国 "+p.svcIntl];
+  const mm=[p.minUsd&&"<$"+p.minUsd,p.minPct&&"<"+p.minPct+"%"].filter(Boolean).join(" 且 ");
+  return [(p.min?"$"+p.min:"不限")+" – "+(p.max?"$"+p.max:"不限")+" · 尾数 "+TAIL[p.tail],(mm?"差额 "+mm+" 不改":"有差额就改")+(p.alert?" · 提醒线 "+p.alert+"%":"")];
+}
+function effectText(p){ const n=k=>N(p[k]);
+  const tgt=p.mode==="amount"?"利润 "+yen(n("target")||0):"成本回报率 "+(p.target||"—")+"%";
+  const low=p.lower?html`利润低于目标的 <b>${p.lower}%</b>${p.mode==="amount"&&n("target")?"（"+yen(n("target")*n("lower")/100)+"）":""}时涨到 <b>${tgt}</b>`:html`利润低于 <b>${tgt}</b> 就涨到目标`;
+  const mm=[p.minUsd&&"小于 $"+p.minUsd,p.minPct&&"小于 "+p.minPct+"%"].filter(Boolean).join(" 且 ");
+  return html`${low}；高于目标<b>只提示降价空间</b>，不自动降；${mm?html`差额<b>${mm}</b>不改；`:"有差额就改；"}售价限在 <b>${p.min?"$"+p.min:"不限"} – ${p.max?"$"+p.max:"不限"}</b>，尾数 ${TAIL[p.tail]}${p.alert?html`；单次变动超过 <b>${p.alert}%</b> 会标出来提醒`:""}。`;
+}
+
+/* ---------- 规则归属与预演计算（原型里在浏览器算，真实系统由后端算） ---------- */
+// 一条刊登可登入多条规则，由优先级最高的那条定价；同一优先级只能登入一条；内置「自由定价」在五档之下，人人都在
+const PR={top:0,high:1,normal:2,low:3,bottom:4};
+const OTHER_RULES={"日版 CD 促销":"high","日版 CD 新品":"normal","DVD 清仓":"low","文具通用":"normal","美妆小件":"normal"};
+const FREE="自由定价";
+const rank=r=>PR[OTHER_RULES[r]||"normal"];
+const topOf=rs=>rs.slice().sort((a,b)=>rank(a)-rank(b))[0]||null;
+const ruleLabel=r=>r?"规则「"+r+"」":"自由定价";
+const EMPTY_OVR={added:[],removed:[],replaced:{},pkg:{}};
+function rulesOf(L,ovr,kind){ const rep=ovr.replaced[L.id]||[]; const others=L.rules.filter(r=>!rep.includes(r)).concat(kind==="free"&&L.mine?["日版 CD 标准"]:[]);
+  const inThis=kind==="free"||((ovr.added.includes(L.id)||(kind==="edit"&&L.mine))&&!ovr.removed.includes(L.id)); return {others,inThis}; }
+function isCand(p,L,pkg){ return p.stores.includes(L.store)&&covered(p.cats,L.cat)&&(!p.pkgs.length||p.pkgs.includes(pkg))&&(!p.tags.length||L.tags.some(t=>p.tags.includes(t))); }
+function compute(p,D,ovr,kind){
+  const n=k=>N(p[k]); const fx=150; const my=PR[p.prio];
+  const fees=((n("comm")||0)+(n("over")||0)+(n("ad")||0))/100, disc=(n("disc")||100)/100;
+  const tailF=p.tail==="none"?null:+p.tail;
+  const G={eff:[],off:[],unb:[],stray:[]};
+  for(const L of D.listings){
+    const pkg=ovr.pkg[L.id]!==undefined?ovr.pkg[L.id]:L.pkg;
+    const {others,inThis}=rulesOf(L,ovr,kind);
+    if(kind==="free"){ const top=topOf(others);
+      if(top) G.off.push({L,over:top,reasons:[{k:"over:"+top,t:"规则「"+top+"」优先级更高，正在生效"}]});
+      else G.eff.push({L,reasons:[],sug:L.price,target:L.price,diff:0,pct:0,free:true});
+      continue; }
+    if(!isCand(p,L,pkg)){ if(inThis) G.stray.push(L.id); continue; }   // 不符合筛选的不是候选，不显示
+    if(!inThis){ const top=topOf(others); G.off.push({L,out:true,top,conf:others.filter(r=>rank(r)===my),reasons:[{k:"out:"+(top||FREE),t:"未登入 · 现在按"+ruleLabel(top)}]}); continue; }
+    const higher=topOf(others.filter(r=>rank(r)<my)), same=others.find(r=>rank(r)===my);
+    if(higher){ G.off.push({L,over:higher,reasons:[{k:"over:"+higher,t:"已登入 · 规则「"+higher+"」优先级更高"}]}); continue; }
+    if(same){ G.off.push({L,over:same,reasons:[{k:"same",t:"与规则「"+same+"」同优先级，需二选一"}]}); continue; }
+    const rs=[]; if(!L.bound) rs.push({k:"bind",t:"还没绑定采购报价"}); if(!L.idOk) rs.push({k:"id",t:"商品身份未确认"}); if(!pkg) rs.push({k:"pkg",t:"这条刊登还没设置包装"});
+    if(rs.length){ G.unb.push({L,reasons:rs}); continue; }
+    const ship=p.shipMode==="fixed"?(n("shipUS")||0):(L.price<30?8:12);
+    const tJ=p.mode==="amount"?(n("target")||0):(L.cost+ship*fx)*(n("target")||0)/100;
+    let sug=(L.cost/fx+ship+tJ/fx)/((1-fees)*disc);
+    sug=tailF==null?Math.round(sug*100)/100:Math.ceil(sug-tailF)+tailF;
+    if(n("min")!=null&&sug<n("min")) sug=n("min"); if(n("max")!=null&&sug>n("max")) sug=n("max");
+    sug=Math.round(sug*100)/100;
+    const prof=x=>(x*disc*(1-fees)-ship-L.cost/fx)*fx;
+    const cur=L.price, cp=prof(cur), floor=n("lower")==null?tJ:tJ*n("lower")/100;
+    const diff=Math.round((sug-cur)*100)/100, pct=diff/cur*100;
+    const mu=n("minUsd"), mp=n("minPct");
+    const small=(mu!=null||mp!=null)&&(mu==null||Math.abs(diff)<mu)&&(mp==null||Math.abs(pct)<mp);
+    const e={L,reasons:[],sug,diff,pct,cp,tJ,floor,target:cur};
+    if(cp<floor&&diff>0&&!small){ e.target=sug; e.loss=cp<0; e.alert=n("alert")!=null&&Math.abs(pct)>n("alert"); }
+    else if(cp>tJ&&cur>sug) e.room=Math.round((cur-sug)*100)/100; else if(small&&diff!==0) e.small=true;
+    G.eff.push(e);
+  }
+  G.eff.sort((a,b)=>(b.target!==b.L.price)-(a.target!==a.L.price)||(b.loss?1:0)-(a.loss?1:0)||Math.abs(b.pct)-Math.abs(a.pct));
+  return G;
+}
+// 通用语义色：绿=在生效，蓝灰=别人在管或还没登入，琥珀=待补
+const GROUPS=[
+  {k:"eff",name:"生效",note:"在本规则里，且本规则是它优先级最高的规则",c:"var(--ok)"},
+  {k:"off",name:"不生效",note:"符合筛选但未登入，或有更高优先级的规则在生效",c:"var(--slate)"},
+  {k:"unb",name:"未绑定",note:"在本规则里，但绑定、身份或包装没弄好，算不出价",c:"var(--warn)"},
+];
+const FREE_GROUPS=[
+  {k:"eff",name:"生效",note:"没有登入其他规则，按 eBay 现价，不调价",c:"var(--ok)"},
+  {k:"off",name:"不生效",note:"还登入了其他规则，由那条规则定价",c:"var(--slate)"},
+];
+/*<shared-js-2>*/
+/* ---------- 小组件 ---------- */
+const Pill=({tone,children,plain,pulse})=>html`<span class=${"pill "+(tone||"")+(plain?" plain":"")+(pulse?" pulse":"")}>${children}</span>`;
+function Btn({kind,sm,icon,children,onClick,disabled,title}){ return html`<button class=${"btn "+(kind||"")+(sm?" sm":"")} onClick=${disabled?undefined:onClick} aria-disabled=${disabled?"true":undefined} title=${title}>${icon&&html`<${Ic} n=${icon} s=${sm?15:16}/>`}${children}</button>`; }
+const Cb=({s,inh})=>html`<span class="cb" data-s=${String(s)} data-inh=${inh?"":undefined} aria-hidden="true">${s===true?html`<${Ic} n="ok" s=${11} w=${3.2}/>`:null}</span>`;
+const hl=(t,q)=>{ const s=(q||"").trim(); if(!s) return t; const i=t.toLowerCase().indexOf(s.toLowerCase()); if(i<0) return t; return html`${t.slice(0,i)}<mark>${t.slice(i,i+s.length)}</mark>${t.slice(i+s.length)}`; };
+function Cover({it,size=44}){ const [bg,obi]=it.skin;
+  return html`<div class="cover" style=${{width:size,height:size,background:`linear-gradient(150deg,${bg},color-mix(in srgb,${bg} 62%,#000))`}} aria-hidden="true">
+    ${it.disc&&html`<div class="disc"></div>`}<div class="obi" style=${{background:obi}}></div>
+    <div class="ini" style=${{fontSize:size*.32,color:LIGHT.includes(bg)?"#111827":undefined}}>${it.ini}</div></div>`; }
+let toastSet=null; const toast=t=>toastSet&&toastSet({t,k:Date.now()});
+function Toast(){ const [t,setT]=useState(null); toastSet=setT; useEffect(()=>{ if(!t) return; const h=setTimeout(()=>setT(null),2800); return ()=>clearTimeout(h); },[t]);
+  return t?html`<div class="toast" role="status" key=${t.k}><span class="i"><${Ic} n="ok" s=${13} w=${3}/></span>${t.t}</div>`:null; }
+function Modal({title,onClose,children,footer,width=560}){
+  useEffect(()=>{ const h=e=>{ if(e.key==="Escape"){e.stopPropagation();onClose();} }; window.addEventListener("keydown",h,true); const o=document.body.style.overflow; document.body.style.overflow="hidden";
+    return ()=>{window.removeEventListener("keydown",h,true);document.body.style.overflow=o;}; },[onClose]);
+  return html`<div class="overlay" onMouseDown=${e=>{if(e.target===e.currentTarget)onClose()}}>
+    <div class="modal" role="dialog" aria-modal="true" aria-label=${title} style=${{maxWidth:width}}>
+      <div class="modal-h"><h3>${title}</h3><button class="btn quiet sm x" aria-label="关闭" onClick=${onClose}><${Ic} n="x" s=${16}/></button></div>
+      <div class="modal-b">${children}</div>${footer&&html`<div class="modal-f">${footer}</div>`}</div></div>`; }
+function Pager({page,set,total,size}){ const pages=Math.max(1,Math.ceil(total/size)),a=total?(page-1)*size+1:0,b=Math.min(page*size,total),list=[];
+  for(let p=1;p<=pages;p++){ if(p===1||p===pages||Math.abs(p-page)<=1) list.push(p); else if(list[list.length-1]!=="…") list.push("…"); }
+  return html`<div class="tfoot"><span>第 <span class="mono">${a}–${b}</span> 条，共 <span class="mono">${total}</span> 条</span><div class="pager">
+    <button disabled=${page<=1} onClick=${()=>set(page-1)} aria-label="上一页"><${Ic} n="left" s=${14}/></button>
+    ${list.map((p,i)=>p==="…"?html`<span key=${"e"+i} class="faint">…</span>`:html`<button key=${p} aria-current=${p===page?"page":undefined} onClick=${()=>set(p)}>${p}</button>`)}
+    <button disabled=${page>=pages} onClick=${()=>set(page+1)} aria-label="下一页"><${Ic} n="right" s=${14}/></button></div></div>`; }
+function usePop(){ const [open,setOpen]=useState(false); const ref=useRef(null);
+  useEffect(()=>{ if(!open) return; const h=e=>{ if(ref.current&&!ref.current.contains(e.target)) setOpen(false); }; const k=e=>{ if(e.key==="Escape"){ setOpen(false); const f=ref.current&&ref.current.querySelector(".pf"); f&&f.focus(); } };
+    document.addEventListener("mousedown",h); document.addEventListener("keydown",k); return ()=>{document.removeEventListener("mousedown",h);document.removeEventListener("keydown",k);}; },[open]);
+  return [open,setOpen,ref]; }
+const keyAct=fn=>e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fn(); } };
+
+/* 通用多选：店铺 / 包装 / 标签。选项多时可搜索，字段里只露前几个 */
+function MultiPick({label,opts,counts,value,onChange,empty,err,limit=4}){
+  const [open,setOpen,ref]=usePop(); const [q,setQ]=useState("");
+  const ql=q.trim().toLowerCase(); const list=opts.filter(o=>o.toLowerCase().includes(ql));
+  const tog=o=>onChange(value.includes(o)?value.filter(x=>x!==o):[...value,o]);
+  return html`<div class="pick" ref=${ref}>
+    <div class=${"pf"+(open?" open":"")+(err?" bad":"")} role="button" tabIndex="0" aria-haspopup="listbox" aria-expanded=${open} aria-label=${label+"，已选 "+value.length+" 项"} onClick=${()=>setOpen(!open)} onKeyDown=${keyAct(()=>setOpen(!open))}>
+      ${value.length?value.slice(0,limit).map(v=>html`<span class="ptag" key=${v}><span class="tx">${v}</span><span class="n">${counts[v]||0}</span><button aria-label=${"移除 "+v} onClick=${e=>{e.stopPropagation();tog(v)}}><${Ic} n="x" s=${12}/></button></span>`):html`<span class="ph0">${empty}</span>`}
+      ${value.length>limit&&html`<span class="more">+${value.length-limit}</span>`}
+      <span class="chev"><${Ic} n="down" s=${16}/></span></div>
+    ${open&&html`<div class="pop" role="dialog" aria-label=${"选择"+label}>
+      ${opts.length>8&&html`<div class="pop-s"><${Ic} n="search" s=${15}/><input autoFocus placeholder=${"搜索"+label+"（共 "+opts.length+" 个）"} value=${q} onInput=${e=>setQ(e.target.value)}/></div>`}
+      <ul class="pop-l" role="listbox" aria-multiselectable="true" aria-label=${label}>
+        ${list.map(o=>{ const on=value.includes(o); return html`<li key=${o} class="opt" role="option" tabIndex="0" aria-selected=${on} onClick=${()=>tog(o)} onKeyDown=${keyAct(()=>tog(o))}><${Cb} s=${on}/><span class="nm">${hl(o,q)}</span><span class="n">${counts[o]||0}</span></li>`; })}
+        ${!list.length&&html`<li class="none">没有匹配的${label}</li>`}</ul>
+      <div class="pop-f">已选 <span class="mono">${value.length}</span> / ${opts.length}<span class="r">${value.length>0&&html`<button class="btn quiet sm" onClick=${()=>onChange([])}>清空</button>`}${ql&&list.length>0&&html`<button class="btn quiet sm" onClick=${()=>onChange([...new Set([...value,...list])])}>全选结果</button>`}<button class="btn sm" onClick=${()=>setOpen(false)}>完成</button></span></div></div>`}
+  </div>`;
+}
+
+/* 类别树：勾上级 = 含全部子类（以后新出现的也算）；在已选上级里取消某个子类 = 改为逐个勾选其余子类 */
+function toggleCat(sel,nd,map){
+  if(sel.includes(nd.key)) return sel.filter(x=>x!==nd.key);
+  const a=anc(nd.key).find(x=>sel.includes(x));
+  if(a){ const out=sel.filter(x=>x!==a); const path=[...anc(nd.key).filter(x=>x===a||isDesc(x,a)),nd.key];
+    for(let i=0;i<path.length-1;i++) map.get(path[i]).children.forEach(c=>{ if(c.key!==path[i+1]) out.push(c.key); });
+    return out; }
+  return [...sel.filter(x=>!isDesc(x,nd.key)),nd.key];
+}
+function CatPick({tree,value,onChange,err}){
+  const [open,setOpen,ref]=usePop(); const [q,setQ]=useState(""); const [exp,setExp]=useState(()=>new Set());
+  const small=tree.map.size<=30;
+  useEffect(()=>{ if(!open) return; setExp(()=>{ const s=new Set(); if(small) tree.map.forEach(nd=>nd.children.length&&s.add(nd.key)); else value.forEach(k=>anc(k).forEach(a=>s.add(a))); return s; }); },[open,tree]);
+  const st=nd=>covered(value,nd.key)?true:value.some(s=>isDesc(s,nd.key))?"mixed":false;
+  const tog=nd=>onChange(toggleCat(value,nd,tree.map));
+  const tx=k=>setExp(e=>{ const s=new Set(e); s.has(k)?s.delete(k):s.add(k); return s; });
+  const cover=value.reduce((s,k)=>s+((tree.map.get(k)||{}).count||0),0);
+  const rows=[]; const walk=a=>a.forEach(nd=>{ rows.push(nd); if(nd.children.length&&exp.has(nd.key)) walk(nd.children); }); walk(tree.roots);
+  const ql=q.trim().toLowerCase();
+  const hits=ql?[...tree.map.values()].filter(nd=>nd.name.toLowerCase().includes(ql)).sort((a,b)=>a.depth-b.depth||b.count-a.count):null;
+  const allOpen=exp.size>0&&[...tree.map.values()].every(nd=>!nd.children.length||exp.has(nd.key));
+  const label=k=>{ const nd=tree.map.get(k); const s=segs(k); const short=s.length<=3?s:[s[0],"…",...s.slice(-2)];
+    return html`<span class="ptag" key=${k} title=${pathText(k)+(nd&&!nd.leaf?"（整类，含以后新出现的子类别）":"")}><span class="tx">${short.map((x,i)=>html`${i?html`<i>›</i>`:""}${x}`)}</span>${nd&&!nd.leaf&&html`<span class="whole">整类</span>`}<span class="n">${nd?nd.count:0}</span><button aria-label=${"移除 "+pathText(k)} onClick=${e=>{e.stopPropagation();onChange(value.filter(x=>x!==k))}}><${Ic} n="x" s=${12}/></button></span>`; };
+  const row=nd=>{ const s=st(nd), inh=s===true&&!value.includes(nd.key), ex=exp.has(nd.key);
+    return html`<li key=${nd.key} class=${"tr"+(nd.depth===0?" top":"")} role="treeitem" aria-level=${nd.depth+1} aria-expanded=${nd.children.length?ex:undefined} aria-selected=${s===true} style=${{paddingLeft:4+nd.depth*22}}>
+      ${Array.from({length:nd.depth},(_,i)=>html`<span key=${i} class="guide" style=${{left:16+i*22}}></span>`)}
+      <button class=${"tw"+(nd.children.length?"":" leaf")} tabIndex=${nd.children.length?0:-1} aria-expanded=${ex} aria-label=${(ex?"收起 ":"展开 ")+nd.name} onClick=${()=>tx(nd.key)}><${Ic} n="right" s=${14}/></button>
+      <div class="lab" role="checkbox" tabIndex="0" aria-checked=${s==="mixed"?"mixed":String(s)} title=${inh?"上级已整类勾选；取消这里会改为逐个勾选其余子类":pathText(nd.key)}
+        onClick=${()=>tog(nd)} onKeyDown=${e=>{ if(e.key==="ArrowRight"&&nd.children.length&&!ex){e.preventDefault();tx(nd.key);} else if(e.key==="ArrowLeft"&&ex){e.preventDefault();tx(nd.key);} else keyAct(()=>tog(nd))(e); }}>
+        <${Cb} s=${s} inh=${inh}/><span class="nm">${nd.name}</span>${nd.children.length?html`<span class="sub">${nd.leaves} 个子类</span>`:null}<span class="n">${nd.count}</span></div></li>`; };
+  const hit=nd=>{ const s=st(nd), inh=s===true&&!value.includes(nd.key);
+    return html`<li key=${nd.key} class="tr sr" role="treeitem" aria-level="1" aria-selected=${s===true}>
+      <div class="lab" role="checkbox" tabIndex="0" aria-checked=${s==="mixed"?"mixed":String(s)} onClick=${()=>tog(nd)} onKeyDown=${keyAct(()=>tog(nd))}>
+        <${Cb} s=${s} inh=${inh}/><span class="sp"><span class="nm">${hl(nd.name,q)}${nd.children.length?html` <span class="sub">· ${nd.leaves} 个子类</span>`:null}</span><span class="path" title=${pathText(nd.key)}>${nd.depth?anc(nd.key).map(a=>tree.map.get(a).name).join(" › "):"顶级类别"}</span></span><span class="n">${nd.count}</span></div></li>`; };
+  return html`<div class="pick" ref=${ref}>
+    <div class=${"pf"+(open?" open":"")+(err?" bad":"")} role="button" tabIndex="0" aria-haspopup="tree" aria-expanded=${open} aria-label=${"类别，已选 "+value.length+" 项"} onClick=${()=>setOpen(!open)} onKeyDown=${keyAct(()=>setOpen(!open))}>
+      ${value.length?value.slice(0,4).map(label):html`<span class="ph0">选择类别（支持搜索，可多选）</span>`}
+      ${value.length>4&&html`<span class="more">+${value.length-4}</span>`}
+      <span class="chev"><${Ic} n="down" s=${16}/></span></div>
+    ${open&&html`<div class="pop wide" role="dialog" aria-label="选择类别">
+      <div class="pop-s"><${Ic} n="search" s=${15}/><input autoFocus placeholder=${"搜索类别名，例如 pencil、CD（共 "+tree.map.size+" 个节点）"} value=${q} onInput=${e=>setQ(e.target.value)}/>
+        ${!ql&&html`<button class="btn quiet sm" onClick=${()=>setExp(allOpen?new Set():new Set([...tree.map.values()].filter(nd=>nd.children.length).map(nd=>nd.key)))}>${allOpen?"全部收起":"全部展开"}</button>`}</div>
+      <div class="pop-tip"><${Ic} n="tree" s=${14}/><span>勾上级 = 包含它下面全部子类别，<b>以后新出现的子类别也自动包含</b>。数字是该类别下的刊登条数。</span></div>
+      <ul class="pop-l" role="tree" aria-multiselectable="true" aria-label="eBay 类别">
+        ${hits?(hits.length?[html`<li class="cap" key="cap">找到 ${hits.length} 个类别${hits.length>80?"，只显示前 80 个，请再输入几个字":""}</li>`,...hits.slice(0,80).map(hit)]:html`<li class="none">没有包含「${q}」的类别</li>`):rows.map(row)}</ul>
+      <div class="pop-f">已选 <span class="mono">${value.length}</span> 项 · 覆盖 <span class="mono">${cover}</span> 条刊登<span class="r">${value.length>0&&html`<button class="btn quiet sm" onClick=${()=>onChange([])}>清空</button>`}<button class="btn sm" onClick=${()=>setOpen(false)}>完成</button></span></div></div>`}
+    ${value.length>4&&!open&&html`<div class="h" style=${{marginTop:6}}>${value.slice(4).map(k=>catLabel(k)).join("；")}</div>`}
+  </div>`;
+}
+
+/*</shared-js-2>*/
+/* 表单零件 */
+const F=({label,hint,err,cls,children})=>html`<div class=${"field "+(cls||"")}><span class="flab">${label}</span>${children}${err?html`<span class="err" role="alert">${err}</span>`:hint?html`<span class="h">${hint}</span>`:null}</div>`;
+const Num=({k,u,pre,p,set,err,placeholder,label,disabled})=>html`<div class=${"affix"+(pre?" pre":"")}><input class=${"input mono"+(err?" bad":"")} inputMode="decimal" aria-label=${label} disabled=${disabled} value=${p[k]} placeholder=${placeholder||""} onInput=${e=>set(k,e.target.value.replace(/[^\d.]/g,""))}/><span class="u">${u}</span></div>`;
+const Seg=({opts,v,on,label})=>html`<div class="seg" role="radiogroup" aria-label=${label}>${opts.map(([k,t])=>html`<button key=${k} role="radio" aria-checked=${v===k} aria-pressed=${v===k} onClick=${()=>on(k)}>${t}</button>`)}</div>`;
+const Sel=({k,opts,p,set,label})=>html`<select class="input" aria-label=${label} value=${p[k]} onChange=${e=>set(k,e.target.value)}>${opts.map(o=>html`<option key=${o[0]} value=${o[0]}>${o[1]}</option>`)}</select>`;
+
+function EditPanel({g,p,set,D,errs,dirty,reset,close}){
+  const E=errs, nu=(k,u,label,extra)=>html`<${Num} k=${k} u=${u} p=${p} set=${set} err=${E[k]} label=${label} ...${extra||{}}/>`;
+  let body;
+  if(g.k==="filter") body=html`
+    <${F} label="类别" cls="s7" err=${E.cats} hint="eBay 类别是多级的。勾上级 = 整类（含以后新出现的子类）。"><${CatPick} tree=${D.tree} value=${p.cats} onChange=${v=>set("cats",v)} err=${E.cats}/><//>
+    <${F} label="适用店铺" cls="s5" err=${E.stores}><${MultiPick} label="店铺" opts=${D.stores} counts=${D.storeN} value=${p.stores} onChange=${v=>set("stores",v)} empty="选择店铺" err=${E.stores} limit=${2}/><//>
+    <${F} label="包装 · 留空不限" cls="s5"><${MultiPick} label="包装" opts=${D.pkgs} counts=${D.pkgN} value=${p.pkgs} onChange=${v=>set("pkgs",v)} empty="不限包装"/><//>
+    <${F} label="标签 · 留空不限" cls="s5" hint="有其中任一标签即算符合"><${MultiPick} label="标签" opts=${D.tags} counts=${D.tagN} value=${p.tags} onChange=${v=>set("tags",v)} empty="不限标签"/><//>
+    <${F} label="优先级" cls="s2" hint=${PRIO_NOTE[p.prio]+"。"+PRIO_HINT}><select class="input" aria-label="优先级" value=${p.prio} onChange=${e=>set("prio",e.target.value)}>${Object.entries(PRIO).map(([k,t])=>html`<option key=${k} value=${k}>${t}</option>`)}<option disabled>最低（内置）· 自由定价专用</option></select><//>`;
+  else if(g.k==="target") body=html`
+    <${F} label="目标方式" cls="s4" hint=${p.mode==="roi"?"成本回报率 = 利润 ÷（进货价 + 运费）":"每卖出一件要赚到的日元利润"}><${Seg} label="目标方式" v=${p.mode} on=${v=>set("mode",v)} opts=${[["amount","利润额 ¥"],["roi","成本回报率 %"]]}/><//>
+    <${F} label=${p.mode==="amount"?"目标利润额":"目标成本回报率"} cls="s3" err=${E.target}>${p.mode==="amount"?nu("target","¥","目标",{pre:true}):nu("target","%","目标")}<//>
+    <${F} label="市场选择" cls="s3" hint="按哪个市场的运费判断是否达到目标"><${Sel} k="market" p=${p} set=${set} label="市场选择" opts=${Object.entries(MARKET)}/><//>
+    <${F} label="下限（目标的百分比）" cls="s2" err=${E.lower} hint="利润低于它才涨价；留空 = 等于目标">${nu("lower","%","下限")}<//>`;
+  else if(g.k==="fees") body=html`
+    <${F} label="佣金率" cls="s3" err=${E.comm}>${nu("comm","%","佣金率")}<//>
+    <${F} label="海外手续费率" cls="s3" err=${E.over}>${nu("over","%","海外手续费率")}<//>
+    <${F} label="广告费率" cls="s3" err=${E.ad}>${nu("ad","%","广告费率")}<//>
+    <${F} label="售价折扣" cls="s3" err=${E.disc} hint="100% 为原价">${nu("disc","%","售价折扣")}<//>`;
+  else if(g.k==="ship") body=html`
+    <${F} label="美国运费方式" cls="s3"><${Seg} label="美国运费方式" v=${p.shipMode} on=${v=>set("shipMode",v)} opts=${[["fixed","固定"],["tier","按售价分档"]]}/><//>
+    ${p.shipMode==="fixed"?html`<${F} label="美国固定运费" cls="s3" err=${E.shipUS}>${nu("shipUS","$","美国固定运费",{pre:true})}<//>`
+      :html`<${F} label="美国运费档位" cls="s3" hint="档位在定价的「运费」页维护"><${Sel} k="shipTier" p=${p} set=${set} label="美国运费档位" opts=${[["cd","CD 档：<$30 收 $8，≥$30 收 $12"],["small","小件档：<$20 收 $6，≥$20 收 $9"]]}/><//>`}
+    <${F} label="美国物流服务" cls="s3"><${Sel} k="svcUS" p=${p} set=${set} label="美国物流服务" opts=${SVC_US.map(x=>[x,x])}/><//>
+    <${F} label="非美国物流服务" cls="s3"><${Sel} k="svcIntl" p=${p} set=${set} label="非美国物流服务" opts=${SVC_INTL.map(x=>[x,x])}/><//>`;
+  else body=html`
+    <${F} label="售价下限" cls="s3" hint="可留空">${nu("min","$","售价下限",{pre:true})}<//>
+    <${F} label="售价上限" cls="s3" err=${E.max} hint="可留空">${nu("max","$","售价上限",{pre:true})}<//>
+    <${F} label="最小改价幅度（金额）" cls="s3" hint="留空 = 不设金额门槛">${nu("minUsd","$","最小改价幅度金额",{pre:true})}<//>
+    <${F} label="最小改价幅度（比例）" cls="s3" hint="与金额同时小于才不改">${nu("minPct","%","最小改价幅度比例")}<//>
+    <${F} label="单次变动提醒线" cls="s3" err=${E.alert} hint="超过只标出提醒，不截断目标售价">${nu("alert","%","单次变动提醒线")}<//>
+    <${F} label="尾数" cls="s3"><${Sel} k="tail" p=${p} set=${set} label="尾数" opts=${Object.entries(TAIL)}/><//>`;
+  const d=g.keys.some(k=>dirty.includes(k));
+  return html`<div class="epanel" id="epanel" role="region" aria-label=${g.name+"参数"}>
+    <div class="ep-h"><h3>${g.name}</h3><p>${g.desc}</p><span class="r">${d&&html`<${Btn} kind="quiet" sm icon="undo" onClick=${reset}>撤销本组修改<//>`}<${Btn} sm onClick=${close}>收起<//></span></div>
+    <div class="fgrid">${body}</div></div>`;
+}
+
+/* ---------- 预演 ---------- */
+const SIZE=8;
+function Preview({p,D,errs,tick,kind,ruleName,ovr,setOvr,live}){
+  const hasErr=Object.keys(errs).length>0;
+  const [res,setRes]=useState(()=>compute(p,D,ovr,kind));
+  const [busy,setBusy]=useState(false); const [at,setAt]=useState(()=>new Date());
+  const [g,setG]=useState(kind==="new"?"off":"eff"); const [q,setQ]=useState(""); const [rf,setRf]=useState(null); const [pg,setPg]=useState(1);
+  const [modal,setModal]=useState(null);
+  const first=useRef(true); const sig=JSON.stringify([p,ovr,D.mode,tick,kind]);
+  useEffect(()=>{ if(first.current){ first.current=false; return; } if(hasErr) return; let t2;
+    const t1=setTimeout(()=>{ setBusy(true); t2=setTimeout(()=>{ setRes(compute(p,D,ovr,kind)); setBusy(false); setAt(new Date()); },REDUCED?150:720); },280);
+    return ()=>{ clearTimeout(t1); clearTimeout(t2); }; },[sig,hasErr]);
+  const GS=kind==="free"?FREE_GROUPS:GROUPS;
+  const pickG=k=>{ setG(k); setRf(null); setPg(1); };
+  const all=res[g]; const ql=q.trim().toLowerCase();
+  const reasons={}; all.forEach(e=>e.reasons.forEach(r=>{ reasons[r.k]=reasons[r.k]||{t:r.t,n:0}; reasons[r.k].n++; }));
+  const list=all.filter(e=>(!rf||e.reasons.some(r=>r.k===rf))&&(!ql||e.L.title.toLowerCase().includes(ql)||e.L.itemId.includes(ql)||e.L.sku.toLowerCase().includes(ql)));
+  const pages=Math.max(1,Math.ceil(list.length/SIZE)); const cp=Math.min(pg,pages); const rows=list.slice((cp-1)*SIZE,cp*SIZE);
+  const G=GS.find(x=>x.k===g);
+  const outs=res.off.filter(e=>e.out); const outsF=rf&&rf.startsWith("out:")?outs.filter(e=>e.reasons.some(r=>r.k===rf)):outs;
+  const pkgBlocked=res.unb.filter(e=>e.reasons.some(r=>r.k==="pkg"));
+  const pkgOpts=p.pkgs.length?p.pkgs:D.pkgs;
+  const changing=res.eff.filter(e=>e.target!==e.L.price).length;
+  const EMPTY={eff:kind==="free"?"所有刊登都登入了其他规则。":outs.length?"本规则还没有生效的刊登。把「不生效」里的候选登入本规则后，这里显示它们的目标售价。":"本规则里没有生效的刊登。",
+    off:kind==="free"?"没有刊登登入其他规则。":"符合筛选的候选都已登入本规则，并且本规则在生效。",unb:"本规则里的刊登都绑定好了，都能算出价。"};
+
+  const cell=x=>{ const v=res[x.k].length; return html`<button key=${x.k} role="tab" style=${{"--gc":x.c}} class=${"gc"+(v===0?" zero":"")} aria-selected=${g===x.k} aria-controls="gpanel" title=${x.name+"："+x.note} onClick=${()=>pickG(x.k)}>
+    <span class="l1"><span class="num fade" key=${v}>${v}</span><span class="nm">${x.name}</span></span><span class="nt">${x.note}</span></button>`; };
+  const tips=e=>{
+    if(g==="eff"){ if(e.free) return html`<${Pill} plain>按 eBay 现价，不调价<//>`;
+      return [e.loss&&html`<${Pill} tone="bad" key="l">现价亏本 ${yen(e.cp)}<//>`,e.alert&&html`<${Pill} tone="warn" key="a">超出提醒线 · ${e.pct>0?"+":""}${e.pct.toFixed(1)}%<//>`,
+        e.room&&html`<${Pill} tone="ok" key="r">有 ${usd(e.room)} 降价空间<//>`,e.small&&html`<${Pill} plain key="s">差额 ${usd(Math.abs(e.diff))} 小于门槛，不改<//>`,
+        e.target!==e.L.price&&!e.loss&&html`<${Pill} plain key="p">现利润 ${yen(e.cp)}，低于下限 ${yen(e.floor)}<//>`,
+        e.target===e.L.price&&!e.room&&!e.small&&html`<${Pill} plain key="i">利润在目标区间内<//>`]; }
+    if(g==="off") return [...e.reasons.map(r=>html`<${Pill} key=${r.k} tone="slate">${r.t}<//>`),e.conf&&e.conf.length?html`<${Pill} key="c" tone="warn">同优先级：已在规则「${e.conf[0]}」<//>`:null];
+    return e.reasons.map(r=>html`<${Pill} key=${r.k} tone="warn">${r.t}<//>`); };
+  const price=e=>{ const cur=e.L.price;
+    if(g==="eff"&&e.target!==cur) return html`<div class="pr"><span class="now">${usd(cur)}</span><span class="arr">→</span><span class="to">${usd(e.target)}</span><div class=${"d "+(e.diff>0?"up":"dn")}>${(e.diff>0?"+":"−")+usd(Math.abs(e.diff))+" · "+(e.pct>0?"+":"")+e.pct.toFixed(1)+"%"}</div></div>`;
+    if(g==="eff") return html`<div class="pr"><span>${usd(cur)}</span><div class="d">与目标一致</div></div>`;
+    return html`<div class="pr"><span>${usd(cur)}</span><div class="d">eBay 现价</div></div>`; };
+  const action=e=>{ const id=e.L.id;
+    if(kind==="free") return null;
+    if(g==="eff") return html`<button class="btn quiet sm" onClick=${()=>setModal({type:"remove",ids:[id]})}>移出</button>`;
+    if(g==="off") return e.out?html`<${Btn} sm icon="move" onClick=${()=>setModal({type:"move",ids:[id],step:1})}>登入本规则<//>`:html`<button class="btn quiet sm" onClick=${()=>setModal({type:"remove",ids:[id]})}>移出</button>`;
+    if(e.reasons.some(r=>r.k==="pkg")) return html`<${Btn} sm icon="box" onClick=${()=>setModal({type:"pkg",ids:[id],pkg:pkgOpts[0]})}>设置包装<//>`;
+    if(e.reasons.some(r=>r.k==="id")) return html`<${Btn} sm onClick=${()=>toast("（原型）将跳到核对页，确认这条商品身份")}>去核对<//>`;
+    return html`<${Btn} sm icon="link" onClick=${()=>toast("（原型）将跳到核对页绑定采购报价")}>去绑定<//>`; };
+  const bulk=()=>{
+    if(kind==="free") return null;
+    if(g==="off"&&outsF.length) return html`<${Btn} kind="primary" sm icon="move" onClick=${()=>setModal({type:"move",ids:outsF.map(e=>e.L.id),step:1})}>登入本规则 ${outsF.length} 条<//>`;
+    if(g==="unb"&&pkgBlocked.length) return html`<${Btn} sm icon="box" onClick=${()=>setModal({type:"pkg",ids:pkgBlocked.map(e=>e.L.id),pkg:pkgOpts[0]})}>批量设置包装 ${pkgBlocked.length} 条<//>`;
+    return null; };
+  const b=bulk();
+  const hh=x=>String(x).padStart(2,"0");
+  return html`<section class=${"card pv"+(busy?" busy":"")+(hasErr?" stale":"")} aria-label="预演" aria-busy=${busy}>
+    <div class="pv-bar" aria-hidden="true"><i></i></div>
+    <div class="pv-h"><h2>预演</h2><span class="s">${kind==="free"?"内置规则：看哪些刊登现在按 eBay 现价":"用当前参数算；"+(live?"规则已启用，保存后目标售价立刻按新参数变，每天自动同步到 eBay":"草稿规则，启用前不影响任何售价")}</span>
+      <span class=${"pv-st"+(hasErr?" warn":"")} aria-live="polite">${hasErr?html`<${Ic} n="alert" s=${14}/>参数有误，先保留上次结果`:busy?html`<span class="spin"></span>正在按新参数重算`:html`<span class="okc"><${Ic} n="ok" s=${14} w=${2.6}/></span>已按最新参数 · <span class="mono">${hh(at.getHours())}:${hh(at.getMinutes())}:${hh(at.getSeconds())}</span>`}</span></div>
+    <div class="pv-fx">定价汇率 <span class="mono">¥150.00/$</span>（10-23 采用）<span class="sep">·</span>今日 <span class="mono">¥150.12/$</span><span class="sep">·</span>相差超过 2% 才换<span class="sep">·</span><${Pill} tone="ok">正常<//><span class="sep">·</span>${kind==="free"?html`全部 <span class="mono">${D.listings.length.toLocaleString()}</span> 条刊登都在这条规则里`:html`符合筛选的候选 <span class="mono">${res.eff.length+res.off.length+res.unb.length}</span> 条；店铺、类别、包装或标签不符的不是候选，不列出`}</div>
+    <div class="gwrap" role="tablist" aria-label="预演分组"><div class="gset rest" style=${{flex:1}}><div class="gseg">${GS.map(cell)}</div></div></div>
+    ${kind!=="free"&&res.stray.length>0&&html`<p class="stray"><${Ic} n="alert" s=${14}/>另有 <b class="mono">${res.stray.length}</b> 条已在本规则，但不符合当前筛选；保存时会问你是否一并移出。</p>`}
+    ${kind!=="free"&&res.eff.length+res.unb.length===0&&outs.length>0&&html`<div class="guide-note"><${Ic} n="move" s=${18}/><div><b>${kind==="new"?"新规则还没有刊登。":"本规则现在没有生效的刊登。"}</b>筛选圈出了 <b class="mono">${outs.length}</b> 条还没登入的候选。登入后，本规则是它们优先级最高的规则时，就按本规则定价。</div>
+      <span class="act2">${g!=="off"&&html`<${Btn} sm kind="quiet" onClick=${()=>pickG("off")}>查看候选<//>`}<${Btn} sm kind="primary" icon="move" onClick=${()=>setModal({type:"move",ids:outs.map(e=>e.L.id),step:1})}>把 ${outs.length} 条登入本规则<//></span></div>`}
+    <div class="gb" id="gpanel" role="tabpanel" aria-label=${G.name}>
+      <div class="gb-h"><div><h3><span class="tdot" style=${{background:G.c}}></span>${G.name}</h3><p>${G.note}。${g==="eff"&&kind!=="free"&&res.eff.length?html`其中 <b class="mono">${changing}</b> 条目标售价和 eBay 现价不同，${live?"下一次每日同步改到 eBay。":"启用后每天自动同步到 eBay。"}`:""}</p></div>
+        <div class="r">${b}${b&&html`<span class="bulk-note">批量操作处理整组${rf?"中筛出的这些":""}，包括其他页和搜索没显示的刊登</span>`}</div></div>
+      <div class="tools">
+        ${Object.keys(reasons).length>0&&g!=="eff"&&html`<span class="lbl">${g==="off"?"现在由谁定价":"算不出价的原因"}</span>${Object.entries(reasons).map(([k,r])=>html`<button key=${k} class="chip" aria-pressed=${rf===k} onClick=${()=>{setRf(rf===k?null:k);setPg(1);}}>${r.t}<span class="c">${r.n} 条</span></button>`)}`}
+        <div class="sbox"><${Ic} n="search" s=${15}/><input class="input" type="search" placeholder="搜索标题 / Item ID / SKU" aria-label="搜索预演刊登" value=${q} onInput=${e=>{setQ(e.target.value);setPg(1);}}/></div>
+      </div>
+    </div>
+    <div class="fade">
+      ${rows.length?html`<ul class="rows">${rows.map(e=>html`<li key=${e.L.id} class="row">
+        <${Cover} it=${e.L}/>
+        <div style=${{minWidth:0}}><div class="t1" lang="en" title=${e.L.title}>${hl(e.L.title,q)}</div><div class="t2">${e.L.sku} · #${e.L.itemId} · ${catLabel(e.L.cat)}</div><div class="tips">${tips(e)}</div></div>
+        ${price(e)}<div class="act">${action(e)}</div></li>`)}</ul>`
+      :html`<div class="rows-empty"><b>${all.length?"没有符合搜索或筛选的刊登":"这一组是空的"}</b>${all.length?"换个关键词，或清除上面的筛选。":EMPTY[g]}</div>`}
+      ${list.length>SIZE&&html`<${Pager} page=${cp} set=${setPg} total=${list.length} size=${SIZE}/>`}
+    </div>
+    ${modal&&modal.type==="pkg"&&html`<${PkgModal} m=${modal} setM=${setModal} opts=${pkgOpts} onOk=${()=>{ const ids=modal.ids, pk=modal.pkg; setOvr(o=>{ const n={...o.pkg}; ids.forEach(i=>n[i]=pk); return {...o,pkg:n}; }); setModal(null); toast("已为 "+ids.length+" 条刊登设置包装「"+pk+"」，正在重新预演"); }}/>`}
+    ${modal&&modal.type==="move"&&html`<${MoveModal} m=${modal} setM=${setModal} res=${res} ruleName=${ruleName} prio=${p.prio} live=${live} onOk=${({ids,replace,skipped})=>{
+      setOvr(o=>({...o,added:[...new Set([...o.added,...ids])],removed:o.removed.filter(i=>!ids.includes(i)),replaced:{...o.replaced,...Object.fromEntries(replace)}})); setModal(null);
+      toast("已登入 "+ids.length+" 条"+(replace.length?"，其中 "+replace.length+" 条从同优先级的旧规则移出":"")+(skipped?"，跳过 "+skipped+" 条":"")); }}/>`}
+    ${modal&&modal.type==="remove"&&html`<${Modal} title=${"从本规则移出 "+modal.ids.length+" 条"} width=${480} onClose=${()=>setModal(null)} footer=${html`<${Btn} kind="quiet" onClick=${()=>setModal(null)}>取消<//><${Btn} kind="primary" onClick=${()=>{ const ids=modal.ids; setOvr(o=>({...o,removed:[...new Set([...o.removed,...ids])],added:o.added.filter(i=>!ids.includes(i))})); setModal(null); toast("已从本规则移出 "+ids.length+" 条"); }}>移出<//>`}>
+      <p style=${{margin:0}}>移出后，这些刊登由它们登入的其他规则里优先级最高的那条定价；没有其他规则就回到<b>自由定价</b>（按 eBay 现价）。它们仍符合筛选，会留在「不生效」里，可以再登入。</p><//>`}
+  </section>`;
+}
+function PkgModal({m,setM,opts,onOk}){
+  return html`<${Modal} title=${m.ids.length>1?"批量设置包装 · "+m.ids.length+" 条":"设置包装"} onClose=${()=>setM(null)} footer=${html`<${Btn} kind="quiet" onClick=${()=>setM(null)}>取消<//><${Btn} kind="primary" onClick=${onOk}>为 ${m.ids.length} 条设置<//>`}>
+    <p class="sub" style=${{margin:0}}>${m.ids.length>1?"对「未绑定」里所有缺包装的刊登设置同一种包装，包括其他页的。":"这条刊登设置包装后会重新预演。"}这会修改刊登在 OpenEC 里的包装信息，不会直接改 eBay。</p>
+    <label class="field">包装<select class="input" value=${m.pkg} onChange=${e=>setM({...m,pkg:e.target.value})}>${opts.map(o=>html`<option key=${o} value=${o}>${o}</option>`)}</select></label>
+  <//>`; }
+function MoveModal({m,setM,res,onOk,ruleName,prio,live}){
+  const es=res.off.filter(e=>e.out&&m.ids.includes(e.L.id)); const conf=es.filter(e=>e.conf.length);
+  const [mode,setMode]=useState("replace"); const [each,setEach]=useState(()=>Object.fromEntries(conf.map(e=>[e.L.id,true])));
+  const rep=id=>mode==="replace"?true:mode==="skip"?false:!!each[id];
+  const keep=es.filter(e=>!(e.conf.length&&!rep(e.L.id))); const n=keep.length, skipped=es.length-n;
+  const my=PR[prio]; const stillOver=keep.filter(e=>e.L.rules.some(r=>rank(r)<my)).length;
+  const by={}; es.forEach(e=>{ const k=ruleLabel(e.top); by[k]=(by[k]||0)+1; }); const src=Object.entries(by).sort((a,b)=>b[1]-a[1]); const max=Math.max(1,...src.map(x=>x[1]));
+  const [typed,setTyped]=useState(""); const big=n>20; const close=()=>setM(null);
+  const ok=()=>onOk({ids:keep.map(e=>e.L.id),replace:conf.filter(e=>rep(e.L.id)).map(e=>[e.L.id,e.conf]),skipped});
+  if(m.step===2) return html`<${Modal} title="登入本规则 · 再次确认" width=${520} onClose=${close} footer=${html`<${Btn} kind="quiet" onClick=${()=>setM({...m,step:1})}>上一步<//><${Btn} kind="primary" icon="move" disabled=${typed!==String(n)} onClick=${ok}>确认登入 ${n} 条<//>`}>
+    <span class="step">第 2 步 / 共 2 步</span>
+    <p style=${{margin:0}}>一次登入 <b class="mono">${n}</b> 条，超过 20 条需要再确认一次。${conf.filter(e=>rep(e.L.id)).length?"其中 "+conf.filter(e=>rep(e.L.id)).length+" 条会先从同优先级的旧规则移出。":""}</p>
+    <label class="field">输入 <b class="mono" style=${{color:"var(--ink)"}}>${n}</b> 确认<input class=${"input mono"+(typed&&typed!==String(n)?" bad":"")} autoFocus inputMode="numeric" value=${typed} onInput=${e=>setTyped(e.target.value.replace(/\D/g,""))} aria-label="输入条数确认"/></label><//>`;
+  return html`<${Modal} title=${"把 "+es.length+" 条登入「"+ruleName+"」"} width=${640} onClose=${close} footer=${html`<${Btn} kind="quiet" onClick=${close}>取消<//><${Btn} kind="primary" icon=${big?undefined:"move"} disabled=${!n} onClick=${()=>big?setM({...m,step:2}):ok()}>${big?"下一步：确认条数":"登入 "+n+" 条"}<//>`}>
+    ${big&&html`<span class="step">第 1 步 / 共 2 步</span>`}
+    <div class="after"><${Ic} n="move" s=${18}/><div><b>登入后，这些刊登属于「${ruleName}」。</b>本规则（${PRIO[prio]}优先级）是它们登入的规则里优先级最高的，就按本规则定价；${live?"目标售价立刻变化，下一次每日同步改到 eBay。":"本规则还是草稿，启用前不影响售价。"}它们原来登入的其他规则不受影响。</div></div>
+    <div><div class="flab" style=${{fontSize:12.5,color:"var(--ink-2)",marginBottom:8}}>现在由谁定价</div><div class="srcs">
+      ${src.map(([k,v])=>html`<div class="src-row" key=${k}><span>${k}</span><span class="bar"><i style=${{width:(v/max*100)+"%"}}></i></span><span class="mono">${v} 条</span></div>`)}</div></div>
+    <dl class="sumgrid"><dt>登入后按本规则生效</dt><dd><b class="mono">${n-stillOver}</b> 条</dd><dt>仍由更高优先级规则定价</dt><dd><b class="mono">${stillOver}</b> 条${stillOver?html`<span class="faint">（登入了，但在「不生效」里）</span>`:""}</dd>${skipped?html`<dt>跳过</dt><dd><b class="mono">${skipped}</b> 条</dd>`:""}</dl>
+    ${conf.length>0&&html`<div class="conf"><div class="conf-h"><${Ic} n="alert" s=${16}/><div><b>${conf.length} 条已在同为「${PRIO[prio]}」优先级的规则里。</b>同一条刊登不能登入两条同优先级的规则，是否更换规则（从旧规则移出、登入本规则）？</div></div>
+      <div class="seg" role="radiogroup" aria-label="同优先级冲突处理">${[["replace","全部更换"],["skip","全部跳过"],["each","逐条选择"]].map(([k,t])=>html`<button key=${k} role="radio" aria-checked=${mode===k} aria-pressed=${mode===k} onClick=${()=>setMode(k)}>${t}</button>`)}</div>
+      ${mode==="each"&&html`<ul class="conf-l">${conf.map(e=>html`<li key=${e.L.id}><${Cover} it=${e.L} size=${28}/><div style=${{minWidth:0}}><div class="t1" lang="en">${e.L.title}</div><div class="t2">已在规则「${e.conf.join("」「")}」</div></div>
+        <span class="mini-seg"><button aria-pressed=${!!each[e.L.id]} onClick=${()=>setEach(s=>({...s,[e.L.id]:true}))}>更换</button><button aria-pressed=${!each[e.L.id]} onClick=${()=>setEach(s=>({...s,[e.L.id]:false}))}>跳过</button></span></li>`)}</ul>`}</div>`}
+    <div><div class="flab" style=${{fontSize:12.5,color:"var(--ink-2)",marginBottom:8}}>样例</div><div class="samples">
+      ${es.slice(0,3).map(e=>html`<div class="smp" key=${e.L.id}><${Cover} it=${e.L} size=${36}/><div style=${{minWidth:0}}><div class="t1" lang="en">${e.L.title}</div><div class="t2">${e.L.sku} · 现在按${ruleLabel(e.top)}${e.conf.length?" · 同优先级冲突":""}</div></div><span class="mono">${usd(e.L.price)}</span></div>`)}
+      ${es.length>3&&html`<div class="more2">还有 ${es.length-3} 条，确认后一起处理</div>`}</div></div><//>`; }
+
+/* ---------- 页面 ---------- */
+const guard={current:null};
+function NameEdit({value,onChange}){
+  const [ed,setEd]=useState(false); const [v,setV]=useState(value); const inp=useRef(null);
+  useEffect(()=>{ if(ed&&inp.current){ inp.current.focus(); inp.current.select(); } },[ed]);
+  const done=()=>{ const t=v.trim(); if(t) onChange(t); else setV(value); setEd(false); };
+  const w=[...v].reduce((s,c)=>s+(c.charCodeAt(0)>255?1:.58),0)+.6;
+  return html`<h1 class="rname">${ed?html`<input ref=${inp} class="name-in" value=${v} maxLength="40" aria-label="规则名" style=${{width:w+"em"}} onInput=${e=>setV(e.target.value)} onBlur=${done} onKeyDown=${e=>{ if(e.key==="Enter") done(); if(e.key==="Escape"){ setV(value); setEd(false); } }}/>`
+    :html`<button class="name-btn" title="点击修改规则名" onClick=${()=>{ setV(value); setEd(true); }}>${value}<span class="pen"><${Ic} n="edit" s=${18}/></span></button>`}</h1>`; }
+
+function RulePage({D,tick,kind}){
+  const N0=kind==="new"?"新规则":kind==="free"?"自由定价":"日版 CD 标准"; const [name,setName]=useState(N0); const [savedName,setSavedName]=useState(N0);
+  const [status,setStatus]=useState(kind==="edit"?"on":"draft");
+  const P0=kind==="free"?{...INIT,stores:[...D.stores],cats:D.tree.roots.map(r=>r.key)}:INIT;
+  const [p,setP]=useState(P0); const [saved,setSaved]=useState(P0);
+  const [ovr,setOvr]=useState(EMPTY_OVR);
+  const [openG,setOpenG]=useState(null); const [ask,setAsk]=useState(null);
+  const set=(k,v)=>setP(o=>({...o,[k]:v}));
+  useEffect(()=>{ setP(o=>({...o,cats:o.cats.filter(k=>D.tree.map.has(k)),stores:o.stores.filter(s=>D.stores.includes(s)),pkgs:o.pkgs.filter(s=>D.pkgs.includes(s)),tags:o.tags.filter(s=>D.tags.includes(s))})); setOvr(EMPTY_OVR); },[D]);
+  const free=kind==="free"; const live=status==="on";
+  const errs=free?{}:validate(p);
+  const dirty=free?[]:Object.keys(p).filter(k=>JSON.stringify(p[k])!==JSON.stringify(saved[k])).concat(name!==savedName?["name"]:[]);
+  const nErr=Object.keys(errs).length;
+  const stray=useMemo(()=>free?[]:compute(p,D,ovr,kind).stray,[p,D,ovr,kind]);
+  const headRef=useRef(null); const [stuck,setStuck]=useState(false);
+  useEffect(()=>{ const io=new IntersectionObserver(([e])=>setStuck(!e.isIntersecting),{threshold:0}); io.observe(headRef.current); return ()=>io.disconnect(); },[]);
+  useEffect(()=>{ if(!dirty.length) return; const h=e=>{ e.preventDefault(); e.returnValue=""; }; window.addEventListener("beforeunload",h); return ()=>window.removeEventListener("beforeunload",h); },[dirty.length>0]);
+  const commit=then=>{ setSaved(p); setSavedName(name); then&&then(); };
+  // 保存前：已在本规则、但不再符合新筛选的，问一次是否一并移出
+  const save=(then)=>{ if(nErr){ toast("还有 "+nErr+" 处参数要修正，先改好再保存"); return; }
+    if(stray.length){ setAsk({type:"stray",then}); return; }
+    commit(()=>{ toast(live?"已保存，目标售价按新参数生效，每天自动同步到 eBay":"已保存草稿"); then&&then(); }); };
+  guard.current=go=>{ if(dirty.length) setAsk({type:"leave",go}); else go(); };
+  const enable=()=>{ if(nErr){ toast("还有 "+nErr+" 处参数要修正，不能启用"); return; } save(()=>{ setStatus("on"); toast("规则已启用：登入且本规则优先级最高的刊登，按本规则定价并每天同步到 eBay"); }); };
+  const disable=()=>{ setStatus("draft"); toast("规则已停用：这些刊登改由其余规则或自由定价定价"); };
+  const back=()=>guard.current(()=>toast("（原型）回到定价规则列表"));
+  const g=PG.find(x=>x.k===openG);
+  const res0=useMemo(()=>D.listings.filter(L=>isCand(p,L,L.pkg)).length,[p,D]);
+  const actions=compact=>free?html`<${Btn} sm=${compact} icon="left" onClick=${back}>返回规则列表<//>`:html`
+    ${dirty.length>0&&html`<${Pill} tone="warn" pulse>${dirty.length} 处修改未保存<//>`}
+    ${status==="draft"&&html`<${Btn} kind="quiet danger" sm=${compact} icon="trash" onClick=${()=>setAsk({type:"delete"})}>删除草稿<//>`}
+    <${Btn} sm=${compact} disabled=${!dirty.length} title=${dirty.length?"":"没有未保存的修改"} onClick=${()=>save()}>${status==="draft"?"保存（草稿）":"保存修改"}<//>
+    ${status==="draft"?html`<${Btn} kind="primary" sm=${compact} icon="power" onClick=${enable}>启用<//>`:html`<${Btn} sm=${compact} icon="power" onClick=${disable}>停用<//>`}`;
+  const statusPill=free?html`<${Pill} tone="slate">内置 · 一直生效<//>`:status==="draft"?html`<${Pill}>草稿<//>`:html`<${Pill} tone="ok" pulse>已启用<//>`;
+  return html`<div>
+    <div class=${"sbar"+(stuck?" on":"")} aria-hidden=${!stuck} inert=${stuck?undefined:""}><div class="sbar-in"><button class="btn quiet sm" aria-label="返回规则列表" onClick=${back}><${Ic} n="left" s=${16}/></button><b>${name}</b>${statusPill}<span class="r">${actions(true)}</span></div></div>
+    <header class="ph" ref=${headRef}>
+      <div style=${{minWidth:0}}>
+        <button class="crumb" onClick=${back} aria-label="返回定价规则列表"><${Ic} n="left" s=${14} w=${2.4}/>PRICING<span class="sep">/</span><span class="cur">${kind==="new"?"新建规则":free?"内置规则":"编辑规则"}</span></button>
+        <div class="ttl-row">${free?html`<h1>${name}</h1>`:html`<${NameEdit} value=${name} onChange=${setName}/>`}${statusPill}</div>
+        <p>${free?html`所有刊登默认都在这条规则里。它<b style=${{fontWeight:500,color:"var(--ink)"}}>不调整任何售价，按 eBay 现价</b>；优先级在五档之下，刊登一登入其他规则，就由那条规则定价。不能删除，也不能修改参数。`
+          :html`筛选在 <b style=${{fontWeight:500,color:"var(--ink)"}}>${p.stores.length===1?p.stores[0]:p.stores.length+" 个店铺"}</b> 的 ${p.cats.length} 项类别里圈出 <span class="mono">${res0}</span> 条候选。刊登要登入本规则，并且本规则是它登入的规则里优先级最高的，才按本规则定价。`}</p>
+      </div>
+      <div class="actions">${actions(false)}</div>
+    </header>
+    ${free?html`<section class="effect" style=${{marginTop:0}} aria-label="规则参数"><${Ic} n="shield" s=${16}/><span class="lbl">内置规则</span><span>没有可改的参数：目标售价 = eBay 现价，优先级为<b>最低（内置）</b>，在「最低」档之下。要给刊登改价，把它登入别的规则即可；从其他规则全部移出后，它会回到这里。</span></section>`
+    :html`<section aria-label="规则参数">
+      <div class="sec-h"><h2>规则参数</h2><span>点一组就地修改，改完自动预演${nErr?" · ":""}${nErr?html`<span style=${{color:"var(--bad)"}}>${nErr} 处要修正</span>`:""}</span></div>
+      <div class="pstrip">${PG.map(x=>{ const s=summary(x.k,p,D), d=x.keys.some(k=>dirty.includes(k)), e=x.keys.some(k=>errs[k]);
+        return html`<button key=${x.k} class="ptile" aria-expanded=${openG===x.k} aria-controls="epanel" onClick=${()=>setOpenG(openG===x.k?null:x.k)}>
+          <span class="pl">${x.name}${e?html`<span class="dot bad" title="有参数要修正"></span>`:d?html`<span class="dot" title="有未保存修改"></span>`:null}<span class="ed"><${Ic} n=${openG===x.k?"down":"edit"} s=${13}/></span></span>
+          <span class="p1" title=${s[0]}>${s[0]}</span><span class="p2" title=${s[1]}>${s[1]}</span></button>`; })}</div>
+      ${g&&html`<${EditPanel} key=${g.k} g=${g} p=${p} set=${set} D=${D} errs=${errs} dirty=${dirty} reset=${()=>setP(o=>{ const n={...o}; g.keys.forEach(k=>n[k]=saved[k]); return n; })} close=${()=>setOpenG(null)}/>`}
+      <div class="effect"><${Ic} n="spark" s=${16}/><span class="lbl">规则效果</span><span>${effectText(p)}</span></div>
+    </section>`}
+    <${Preview} p=${p} D=${D} errs=${errs} tick=${tick} kind=${kind} ruleName=${name} ovr=${ovr} setOvr=${setOvr} live=${live||free}/>
+    ${ask&&ask.type==="stray"&&html`<${Modal} title=${"有 "+stray.length+" 条已在本规则，但不符合新筛选"} width=${540} onClose=${()=>setAsk(null)} footer=${html`<${Btn} kind="quiet" onClick=${()=>setAsk(null)}>取消<//><${Btn} onClick=${()=>{ const t=ask.then; setAsk(null); commit(()=>{ toast("已保存，这 "+stray.length+" 条保留在本规则"); t&&t(); }); }}>保留并保存<//><${Btn} kind="primary" onClick=${()=>{ const t=ask.then, ids=stray; setAsk(null); setOvr(o=>({...o,removed:[...new Set([...o.removed,...ids])],added:o.added.filter(i=>!ids.includes(i))})); commit(()=>{ toast("已保存，并把 "+ids.length+" 条移出本规则"); t&&t(); }); }}>一并移出并保存<//>`}>
+      <p style=${{margin:0}}>改了筛选后，这些刊登不再是本规则的候选。一并移出后，它们由其他规则或自由定价定价；保留则继续按本规则定价，但预演里不再列出。</p><//>`}
+    ${ask&&ask.type==="leave"&&html`<${Modal} title="离开前保存修改？" width=${500} onClose=${()=>setAsk(null)} footer=${html`<${Btn} kind="quiet" onClick=${()=>setAsk(null)}>继续编辑<//><${Btn} kind="quiet danger" onClick=${()=>{ setP(saved); setName(savedName); const go=ask.go; setAsk(null); go(); }}>放弃修改并离开<//><${Btn} kind="primary" onClick=${()=>{ const go=ask.go; setAsk(null); save(go); }}>保存后离开<//>`}>
+      <p style=${{margin:0}}>「${name}」有 <b>${dirty.length}</b> 处修改还没保存，离开后会丢失。</p><//>`}
+    ${ask&&ask.type==="delete"&&html`<${Modal} title="删除这条草稿？" width=${480} onClose=${()=>setAsk(null)} footer=${html`<${Btn} kind="quiet" onClick=${()=>setAsk(null)}>取消<//><${Btn} kind="primary danger" icon="trash" onClick=${()=>{ setAsk(null); toast("（原型）草稿已删除，回到规则列表"); }}>删除草稿<//>`}>
+      <p style=${{margin:0}}>「${name}」会被删除，不能恢复。登入它的刊登改由其余规则或自由定价定价。</p><//>`}
+  </div>`;
+}
+
+const NAV=[{key:"workspace",label:"工作台",icon:"home"},{key:"products",label:"商品",icon:"disc"},{key:"review",label:"核对",icon:"check"},{key:"sourcing",label:"选品",icon:"search"},{key:"pricing",label:"定价",icon:"tag"},{key:"maintenance",label:"维护",icon:"shield"},{key:"settings",label:"设置",icon:"sliders"}];
+function Nav(){
+  const ref=useRef(null); const [y,setY]=useState(null);
+  useLayoutEffect(()=>{ const nav=ref.current; const m=()=>{ const el=nav.querySelector('[aria-current="page"]'); if(el) setY(el.offsetTop); }; m(); const ro=new ResizeObserver(m); ro.observe(nav); window.addEventListener("resize",m); document.fonts&&document.fonts.ready.then(m); return ()=>{ ro.disconnect(); window.removeEventListener("resize",m); }; },[]);
+  const item=n=>html`<button key=${n.key} aria-current=${n.key==="pricing"?"page":undefined} onClick=${()=>guard.current&&guard.current(()=>toast("（原型）前往「"+n.label+"」"))}><${Ic} n=${n.icon}/>${n.label}</button>`;
+  return html`<nav class="nav" aria-label="主导航" ref=${ref}>${y!=null&&html`<span class="nav-ind" style=${{top:0,transform:`translateY(${y}px)`}}></span>`}
+    <div class="nav-label">日常</div>${NAV.slice(0,3).map(item)}<div class="nav-label">经营</div>${NAV.slice(3).map(item)}</nav>`;
+}
+function ProtoPanel({mode,setMode,onRe,D,kind,setKind}){
+  const [open,setOpen]=useState(true);
+  return html`<aside class="proto-panel" aria-label="原型控制">
+    <button class="pp-h" aria-expanded=${open} onClick=${()=>setOpen(!open)}><${Ic} n="sliders" s=${14}/>原型控制<span class="faint">${open?"收起":"展开"}</span></button>
+    ${open&&html`<div class="pp-b">
+      <div class="seg" role="radiogroup" aria-label="演示数据"><button role="radio" aria-checked=${mode==="few"} aria-pressed=${mode==="few"} onClick=${()=>setMode("few")}>类别少 · 7</button><button role="radio" aria-checked=${mode==="many"} aria-pressed=${mode==="many"} onClick=${()=>setMode("many")}>类别很多 · ${FEW_CATS.length+EXTRA_CATS.length}</button></div>
+      <p>${mode==="few"?"开发库里的 7 个真实叶子类别、2 个店铺、5 个标签。":"补到 "+D.tree.map.size+" 个类别节点、"+D.stores.length+" 个店铺、"+D.pkgs.length+" 种包装、"+D.tags.length+" 个标签、"+D.listings.length.toLocaleString()+" 条刊登。"}打开「筛选」看选择器。</p>
+      <div class="seg" role="radiogroup" aria-label="规则">${[["edit","已有规则"],["new","新建规则"],["free","内置·自由定价"]].map(([k,t])=>html`<button key=${k} role="radio" aria-checked=${kind===k} aria-pressed=${kind===k} onClick=${()=>setKind(k)}>${t}</button>`)}</div>
+      <p>其他规则：日版 CD 促销（高）、日版 CD 新品（普通，用来演示同优先级冲突）、DVD 清仓（低）。</p>
+      <button class="btn sm" onClick=${onRe}><${Ic} n="refresh" s=${14}/>模拟一次重新预演</button></div>`}
+  </aside>`;
+}
+function App(){
+  const [mode,setMode]=useState("few"); const [tick,setTick]=useState(0); const [kind,setKind]=useState("edit");
+  const D=useMemo(()=>makeData(mode),[mode]);
+  return html`<div class="app">
+    <aside class="rail">
+      <img class="logo" src=${WORDMARK} alt="OpenEC"/>
+      <div class="proto">原型 · 示例数据</div>
+      <button class="store" title="切换店铺"><span class="live"></span><span style=${{minWidth:0}}><b style=${{fontWeight:500}}>Synthetic Records</b><small>eBay 美国 · ${D.storeN["Synthetic Records"]} 条</small></span></button>
+      <button class="search-btn"><${Ic} n="search" s=${15}/>搜索商品或页面<kbd>⌘K</kbd></button>
+      <${Nav}/>
+      <div class="rail-foot"><span class="avatar">A</span><div style=${{minWidth:0}}><div style=${{fontWeight:500}}>Alex</div><div class="faint" style=${{fontSize:11}}>管理员 · Demo Trading</div></div></div>
+    </aside>
+    <main><div class="page enter"><${RulePage} key=${kind+mode} D=${D} tick=${tick} kind=${kind}/></div></main>
+    <${ProtoPanel} mode=${mode} setMode=${setMode} onRe=${()=>setTick(t=>t+1)} D=${D} kind=${kind} setKind=${setKind}/>
+    <${Toast}/>
+  </div>`;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App}/>`);
+})();
+</script>
+</body>
+</html>

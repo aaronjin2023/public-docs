@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="项目说明、产品导览与公开资料。阅读 OpenEC 功能介绍，跟随一张日版 CD 了解商品、核对、报价与定价维护。">
+  <meta name="description" content="项目说明、产品导览与公开资料。阅读 OpenEC 功能介绍，体验工作区、商品与定价规则的静态界面原型。">
   <meta name="theme-color" content="#ffffff">
   <meta property="og:title" content="Public docs · 公开资料">
   <meta property="og:description" content="项目说明，打开就能读。以文档与交互演示，讲清楚每个项目。">
@@ -54,6 +54,7 @@
     .catalog-heading span { color: var(--muted); font-size: 13px; }
     /* The supplied document's rounded white panels and quiet borders define this library's visual system. */
     .feature { display: grid; grid-template-columns: 1.06fr 1fr; overflow: hidden; border: 1px solid var(--line); border-radius: 24px; }
+    .feature + .feature { margin-top: 24px; }
     .feature-media { position: relative; display: block; overflow: hidden; min-width: 0; min-height: 392px; background: var(--surface); }
     .feature-media img { display: block; width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; object-position: 60% center; animation: cover-in 1s var(--ease) both; transition: transform .7s var(--ease); }
     .feature-media:hover img { transform: scale(1.035); }
@@ -137,7 +138,7 @@
       </div>
     </section>
     <section class="catalog" id="documents" aria-labelledby="documents-title">
-      <div class="catalog-heading arrive"><h2 id="documents-title">全部资料</h2><span>1 份文档</span></div>
+      <div class="catalog-heading arrive"><h2 id="documents-title">全部资料</h2><span>2 份资料</span></div>
       <article class="feature arrive">
         <a class="feature-media" href="projects/openec/" aria-label="阅读 OpenEC 功能介绍">
           <img src="assets/openec-cover.webp" alt="OpenEC 介绍页中的橙色日版 CD 盒与唱片三维场景" width="740" height="660" fetchpriority="high">
@@ -151,6 +152,22 @@
           <div class="actions arrive">
             <a class="button" href="projects/openec/">开始阅读<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></a>
             <a class="download" href="projects/openec/index.html" download="OpenEC-功能介绍.html">下载 HTML<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></svg></a>
+          </div>
+        </div>
+      </article>
+      <article class="feature arrive">
+        <a class="feature-media" href="projects/openec-prototype/" aria-label="打开 OpenEC 界面原型">
+          <img src="assets/openec-prototype.webp" alt="OpenEC 工作区原型的真实预览，包含侧边导航、工作台与演示商品数据" width="1440" height="900" loading="lazy">
+          <span class="media-open" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 18 18 6M6 6h12v12"/></svg></span>
+        </a>
+        <div class="feature-body">
+          <h3 class="arrive"><a href="projects/openec-prototype/">OpenEC 界面原型</a></h3>
+          <div class="doc-meta arrive"><span>静态交互原型</span><time datetime="2026-10-25">2026.10.25</time></div>
+          <p class="summary arrive">体验工作区、商品页与定价规则编辑页。可点击、可切换，使用演示数据，不连接真实店铺。</p>
+          <ul class="topics arrive" aria-label="原型内容"><li>工作区</li><li>商品页</li><li>定价规则</li></ul>
+          <div class="actions arrive">
+            <a class="button" href="projects/openec-prototype/">打开原型<svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></a>
+            <a class="download" href="downloads/openec-prototype.zip" download="openec-prototype.zip">下载 ZIP<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></svg></a>
           </div>
         </div>
       </article>
