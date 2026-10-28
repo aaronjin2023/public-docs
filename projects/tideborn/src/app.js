@@ -1,3 +1,4 @@
+import {startLanguageUI} from './i18n.js';
 import {swallowReading} from './ember-swallows.js';
 import {shipmentKey} from './shipment-scene.js';
 import {butterflyReading} from './spire-butterflies.js';
@@ -310,7 +311,7 @@ function showOptions(){
     catch{return `<div class="option-row"><p>${label}：暂时无法读取，已保留原件。</p></div>`;}
   }).join('');
   openModal('世界设置',`<div class="option-row"><label>气候情景<select id="climate"><option value="temperate">常态气候</option><option value="dry">持续少雨</option><option value="wet">丰雨年代</option></select></label><p>改变未来各季的降水系数，保留此前历史。这是创作情景，不是现实气候预报。</p></div><div class="option-row"><label>场景动态<input id="motion" type="checkbox" ${matchMedia('(prefers-reduced-motion: reduce)').matches?'':'checked'}></label><p>控制船只、飞鸟与镜头过渡。模拟时间由底部播放按钮单独控制。</p></div><div class="option-row"><label>保存这片世界<button id="export-save">导出存档 ↗</button></label><p>存档包含群岛状态与历史，不包含账户或个人信息。建议在清理浏览器前留存。</p></div><div class="option-row"><label for="import-save">从存档继续<input type="file" id="import-save" accept=".json,application/json" style="max-width:190px"></label><p>验证成功后替换当前世界；当前有效世界会先保留为浏览器中的上一份存档。</p></div>${backups}<div class="option-row"><label>从最初的海图重新开始<button id="new-world" class="danger">重开世界</button></label><p>重新开始前保留当前有效存档。需要再按一次确认，避免误触。</p></div>`,'options');
-  $('climate').value=state.climate;$('climate').onchange=e=>{state.climate=e.target.value;record(state,'新的气候情景',`你将未来气候设为「${e.target.selectedOptions[0].textContent}」。此前的历史保留。`,null,'choice');renderStats();if(selected)renderDrawer();toast('未来的气候情景已改变。');save();};
+  $('climate').value=state.climate;$('climate').onchange=e=>{state.climate=e.target.value;record(state,'新的气候情景',`你将未来气候设为「${{temperate:'常态气候',dry:'持续少雨',wet:'丰雨年代'}[e.target.value]}」。此前的历史保留。`,null,'choice');renderStats();if(selected)renderDrawer();toast('未来的气候情景已改变。');save();};
   $('motion').checked=motionEnabled;$('motion').onchange=e=>{motionEnabled=e.target.checked;scene?.setMotion(motionEnabled);};
   $('export-save').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`潮生-${START_YEAR+Math.floor(state.tick/4)}年.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
   $('import-save').onchange=async e=>{
@@ -411,6 +412,7 @@ function initArtPicker(){
   updateArtCaption();
 }
 initArtPicker();
+startLanguageUI();
 renderStats();
 let renderStage='准备场景',renderIssue=null;
 const lightweight=new URLSearchParams(location.search).get('graphics')==='lite'||matchMedia('(pointer: coarse)').matches;
@@ -425,3 +427,4 @@ catch(error){
 }
 // Read-only diagnostics for local checks; user state is never exposed to another service.
 window.tideborn={snapshot:()=>structuredClone(state),renderStats:()=>scene?.stats(),renderIssue:()=>renderIssue?{...renderIssue}:null,soundStats:()=>sound.stats()};
+
