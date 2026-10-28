@@ -17,6 +17,7 @@ import {BELL,BELL_STEPS,createBellRuin,bellInscription} from './bell-ruin.js';
 import {createSeaRouter,createSeaJourney} from './sea-routes.js';
 import {createFoodStore,updateFoodStore,createFields,updateFields} from './food-scene.js';
 import {bindOrbitPointers} from './orbit-input.js';
+import {openGraphicsContext} from './render-support.js';
 import * as THREE from '../assets/vendor/three.module.js';
 import { CITIES, ISLANDS, LANDMARKS, SEED } from './world-data.js';
 import { terrainAt, baseTerrainAt, elevation, noise, random, clamp, reedRiverX } from './terrain.js';
@@ -30,16 +31,18 @@ const color=c=>new THREE.Color(c);
 const mat=(c,other={})=>new THREE.MeshStandardMaterial({color:c,roughness:1,...other});
 const dummy=new THREE.Object3D();
 
-export function createScene(container, onSelect) {
+export function createScene(container, onSelect, lightweight=false) {
   const scene=new THREE.Scene();
   scene.background=color('#c6d8d6');
   scene.fog=new THREE.FogExp2('#c6d8d6',.0018);
-  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
+  const surface=document.createElement('canvas');
+  const graphics=openGraphicsContext(surface,lightweight);lightweight=graphics.lightweight;
+  const renderer=new THREE.WebGLRenderer({canvas:surface,context:graphics.context});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,lightweight?1:1.7));
   renderer.setSize(container.clientWidth,container.clientHeight);
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.25;
-  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFShadowMap;
+  renderer.shadowMap.enabled=!lightweight; renderer.shadowMap.type=THREE.PCFShadowMap;
   renderer.domElement.setAttribute('aria-label','可旋转、缩放的潮生群岛。城镇也可从导航列表进入。');
   renderer.domElement.setAttribute('role','img');
   container.append(renderer.domElement);
@@ -407,7 +410,7 @@ export function createScene(container, onSelect) {
   function render(ms){
     raf=requestAnimationFrame(render);
     if(document.hidden){lastTime=ms;return;}
-    if(ms-lastRender<1000/60)return;lastRender=ms;
+    if(ms-lastRender<1000/(lightweight?30:60))return;lastRender=ms;
     const dt=Math.min((ms-lastTime)/1000,.05)||.016;lastTime=ms;
     if(motion)visualTime+=dt;
     const damp=motion?1-Math.exp(-dt*4):1;
@@ -462,7 +465,7 @@ export function createScene(container, onSelect) {
       if(placement)l.el.style.transform=`translate(${placement.x}px,${placement.y}px) translate(-50%,-100%)`;
       l.el.classList.toggle('selected',selected===l.id);
     });
-    try{renderer.render(scene,camera);}
+    try{if(resolveReady&&graphics.context.isContextLost())throw new Error('绘图上下文已丢失，浏览器停止了三维渲染。');renderer.render(scene,camera);}
     catch(error){if(rejectReady){cancelAnimationFrame(raf);rejectReady(error);resolveReady=rejectReady=null;return;}throw error;}
     frameCount++;
     if(resolveReady){resolveReady();resolveReady=rejectReady=null;}
@@ -547,6 +550,7 @@ export function createScene(container, onSelect) {
       seaTravel:{visualTime,routes:routes.map(r=>r.geometry.attributes.position.count),boats:boats.map(({boat,journey,speed,a,b})=>({from:CITIES[a].id,to:CITIES[b].id,x:boat.position.x,z:boat.position.z,heading:boat.rotation.y,length:journey.length,speed}))},
       emberSwallows:{...emberSwallows.userData.reading,color:emberSwallows.userData.clay.color.getHexString(),visible:emberSwallows.userData.bird.visible},
       emberRiver:{pollution:emberRiver.userData.pollution,waterColor:emberRiver.userData.water.color.getHexString(),bankColor:emberRiver.userData.bank.color.getHexString(),plumeOpacity:emberRiver.userData.plume.material.opacity,plumeHeight:emberRiver.userData.plume.position.y},
+      graphics:{lightweight,pixelRatio:renderer.getPixelRatio(),antialias:graphics.context.getContextAttributes()?.antialias,shadows:renderer.shadowMap.enabled},
       waterHeight:ocean.position.y,exposedSteps:oldPortSteps.filter(top=>top>ocean.position.y).length,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,trees:treeList.length,leafyTrees:treeList.filter(t=>t.alive).length,boats:boats.length,walkers:walkers.filter(w=>w.visible).length,frameCount,
       cities:cityGroups.map((g,i)=>({id:CITIES[i].id,homes:g.userData.houses.count,capacity:g.userData.buildingCount,publicFerry:g.userData.ferry?.visible??false,civicAccess:g.userData.civicAccess?.visible??false,foodStore:{seasons:g.userData.foodStore.userData.seasons,levels:g.userData.foodStore.userData.levels},field:fields.find(f=>f.ci===i)?{stage:fields.find(f=>f.ci===i).group.userData.stage,height:fields.find(f=>f.ci===i).group.userData.height,plots:layouts[i].fields.length}:null,civicTraces:Object.values(g.userData.traces).filter(t=>t.visible).map(t=>({choice:t.userData.choice,label:t.userData.label,firstReceiver:t.userData.firstReceiver??null})),trees:treeList.filter(t=>t.island===CITIES[i].id&&t.alive).length,construction:Object.fromEntries(Object.entries(g.userData.policies).map(([id,levels])=>[id,levels.filter(group=>group.visible).length]))})),
     };},

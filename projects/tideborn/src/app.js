@@ -10,7 +10,7 @@ import {WALKS,walkReading} from './city-walk.js';
 import {FIELD_STAGES,foodSeasons} from './food-scene.js';
 import {CITIES,LANDMARKS,METHODS,POLICIES,START_YEAR,SEASONS} from './world-data.js';
 import {createWorld,advance,enact,retire,policyReason,totals,tideAt,dateLabel,discover,validateSave,compare,record,SAVE_KEY,decide,decisionReason,passageSummary,transportFor} from './simulation.js';
-import {createScene} from './scene.js';
+import {createScene} from './scene.js?v=mobile-render-2';
 import {createSoundscape} from './audio.js';
 import {parseSave,replaceSave,writeSave,SaveConflictError} from './save-store.js';
 import {PETITIONS,pendingPetitions,petitionOpenedAt,residentAt,aftermathFor,outcomeFor} from './residents.js';
@@ -372,7 +372,16 @@ window.addEventListener('storage',event=>{
 });
 
 renderStats();
-try{scene=createScene($('world'),select);scene.home();scene.update(state);await scene.ready;$('loading').hidden=true;if(state.tick>0)enter();if(loadIssue)toast(loadIssue);}
-catch(error){console.error(error);$('loading').innerHTML='<p>三维画面暂时无法启动，需要可用的 WebGL 2。</p><p>你仍可从上方「群岛图志」进入城镇，推进时间与阅读历史。</p>';$('world').append($('loading'));$('intro').hidden=true;}
+let renderStage='准备场景',renderIssue=null;
+const lightweight=new URLSearchParams(location.search).get('graphics')==='lite'||matchMedia('(pointer: coarse)').matches;
+try{scene=createScene($('world'),select,lightweight);renderStage='设置初始世界';scene.home();scene.update(state);renderStage='绘制第一帧';await scene.ready;$('loading').hidden=true;if(state.tick>0)enter();if(loadIssue)toast(loadIssue);}
+catch(error){
+  console.error(error);scene?.dispose();scene=null;
+  renderIssue={stage:renderStage,code:error.code||error.name||'Error',message:String(error.message||error).slice(0,1000)};
+  $('loading').classList.add('render-error');
+  $('loading').innerHTML=`<p>${error.code==='WEBGL_CONTEXT_UNAVAILABLE'?'浏览器未能建立 WebGL 2 绘图连接。':'三维场景启动失败。'}</p><p>仍可从「群岛图志」进入城镇，推进时间与阅读历史。</p><button id="retry-graphics">${lightweight?'重新尝试三维':'以轻量三维重试'}</button><details><summary>查看启动错误</summary><p>${escape(renderIssue.stage)} · ${escape(renderIssue.code)}</p><pre>${escape(renderIssue.message)}</pre><p>错误仅显示在此页面，不会上传。</p></details>`;
+  $('world').append($('loading'));$('world').style.touchAction='auto';$('intro').hidden=true;
+  $('retry-graphics').onclick=()=>{save();if(saveBlocked){toast('当前世界未能保存，请先从设置导出存档，再刷新重试。');return;}const url=new URL(location.href);url.searchParams.set('graphics','lite');location.assign(url.href);};
+}
 // Read-only diagnostics for local checks; user state is never exposed to another service.
-window.tideborn={snapshot:()=>structuredClone(state),renderStats:()=>scene?.stats(),soundStats:()=>sound.stats()};
+window.tideborn={snapshot:()=>structuredClone(state),renderStats:()=>scene?.stats(),renderIssue:()=>renderIssue?{...renderIssue}:null,soundStats:()=>sound.stats()};
