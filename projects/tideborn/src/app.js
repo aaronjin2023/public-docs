@@ -1,4 +1,5 @@
-import {startLanguageUI} from './i18n.js?v=council-1';
+import {graphicsProfile,GRAPHICS_KEY} from './render-support.js?v=mobile-4';
+import {startLanguageUI} from './i18n.js?v=mobile-4';
 import {renderCouncil} from './council-view.js';
 import {swallowReading} from './ember-swallows.js';
 import {shipmentKey} from './shipment-scene.js';
@@ -12,7 +13,7 @@ import {WALKS,walkReading} from './city-walk.js';
 import {FIELD_STAGES,foodSeasons} from './food-scene.js';
 import {CITIES,LANDMARKS,METHODS,POLICIES,START_YEAR,SEASONS} from './world-data.js';
 import {createWorld,advance,setCouncilEnabled,planCouncil,enact,retire,policyReason,totals,tideAt,dateLabel,discover,validateSave,compare,record,SAVE_KEY,decide,decisionReason,passageSummary,transportFor} from './simulation.js?v=council-1';
-import {createScene} from './scene.js?v=artist-4';
+import {createScene} from './scene.js?v=mobile-4';
 import {ART_STYLES,ART_STYLE_KEY,artStyle,loadArtStyle} from './art-styles.js';
 import {createSoundscape} from './audio.js?v=music-2';
 import {MUSIC_KEY,MUSIC_STYLES,musicStyle,loadMusic} from './music.js';
@@ -327,7 +328,8 @@ function showOptions(){
     try{const raw=localStorage.getItem(`${SAVE_KEY}-${suffix}`);if(!raw)return '';const saved=parseSave(raw);return `<div class="option-row"><label>${label}<button data-restore="${suffix}">${label}</button></label><p>${dateLabel(saved)} · ${fmt(totals(saved).population)} 位居民。恢复后当前有效世界仍会保留。点击两次确认。</p></div>`;}
     catch{return `<div class="option-row"><p>${label}：暂时无法读取，已保留原件。</p></div>`;}
   }).join('');
-  openModal('世界设置',`<div class="option-row"><label>气候情景<select id="climate"><option value="temperate">常态气候</option><option value="dry">持续少雨</option><option value="wet">丰雨年代</option></select></label><p>改变未来各季的降水系数，保留此前历史。这是创作情景，不是现实气候预报。</p></div><div class="option-row"><label>场景动态<input id="motion" type="checkbox" ${matchMedia('(prefers-reduced-motion: reduce)').matches?'':'checked'}></label><p>控制船只、飞鸟与镜头过渡。模拟时间由底部播放按钮单独控制。</p></div><div class="option-row"><label>保存这片世界<button id="export-save">导出存档 ↗</button></label><p>存档包含群岛状态与历史，不包含账户或个人信息。建议在清理浏览器前留存。</p></div><div class="option-row"><label for="import-save">从存档继续<input type="file" id="import-save" accept=".json,application/json" style="max-width:190px"></label><p>验证成功后替换当前世界；当前有效世界会先保留为浏览器中的上一份存档。</p></div>${backups}<div class="option-row"><label>从最初的海图重新开始<button id="new-world" class="danger">重开世界</button></label><p>重新开始前保留当前有效存档。需要再按一次确认，避免误触。</p></div>`,'options');
+  openModal('世界设置',`<div class="option-row"><label>气候情景<select id="climate"><option value="temperate">常态气候</option><option value="dry">持续少雨</option><option value="wet">丰雨年代</option></select></label><p>改变未来各季的降水系数，保留此前历史。这是创作情景，不是现实气候预报。</p></div><div class="option-row"><label>场景动态<input id="motion" type="checkbox" ${matchMedia('(prefers-reduced-motion: reduce)').matches?'':'checked'}></label><p>控制船只、飞鸟与镜头过渡。模拟时间由底部播放按钮单独控制。</p></div><div class="option-row"><label for="graphics-profile">三维画质<select id="graphics-profile"><option value="auto">跟随设备</option><option value="lite">轻量三维</option><option value="full">标准三维</option></select></label><p>两种画质使用同一个立体世界。轻量版关闭动态阴影，降低绘图负担；画风、城镇与模拟保留。切换前保存并重新载入。</p></div><div class="option-row"><label>保存这片世界<button id="export-save">导出存档 ↗</button></label><p>存档包含群岛状态与历史，不包含账户或个人信息。建议在清理浏览器前留存。</p></div><div class="option-row"><label for="import-save">从存档继续<input type="file" id="import-save" accept=".json,application/json" style="max-width:190px"></label><p>验证成功后替换当前世界；当前有效世界会先保留为浏览器中的上一份存档。</p></div>${backups}<div class="option-row"><label>从最初的海图重新开始<button id="new-world" class="danger">重开世界</button></label><p>重新开始前保留当前有效存档。需要再按一次确认，避免误触。</p></div>`,'options');
+  $('graphics-profile').value=profile.preference;$('graphics-profile').onchange=event=>{save();if(saveBlocked){event.target.value=profile.preference;toast('当前世界未能保存，请先从设置导出存档，再刷新重试。');return;}const value=event.target.value;try{localStorage.setItem(GRAPHICS_KEY,value);}catch{}const url=new URL(location.href);url.searchParams.delete('view');url.searchParams.set('graphics',value);location.assign(url.href);};
   $('climate').value=state.climate;$('climate').onchange=e=>{state.climate=e.target.value;record(state,'新的气候情景',`你将未来气候设为「${{temperate:'常态气候',dry:'持续少雨',wet:'丰雨年代'}[e.target.value]}」。此前的历史保留。`,null,'choice');renderStats();if(selected)renderDrawer();toast('未来的气候情景已改变。');save();};
   $('motion').checked=motionEnabled;$('motion').onchange=e=>{motionEnabled=e.target.checked;scene?.setMotion(motionEnabled);};
   $('export-save').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`潮生-${START_YEAR+Math.floor(state.tick/4)}年.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
@@ -432,13 +434,16 @@ initArtPicker();
 startLanguageUI();
 renderStats();
 let renderStage='准备场景',renderIssue=null;
-const lightweight=new URLSearchParams(location.search).get('graphics')==='lite'||matchMedia('(pointer: coarse)').matches;
-try{scene=createScene($('world'),select,lightweight);renderStage='设置初始世界';scene.setArtStyle(artId);scene.home();scene.update(state);renderStage='绘制第一帧';await scene.ready;$('loading').hidden=true;if(state.tick>0)enter();if(loadIssue)toast(loadIssue);}
-catch(error){
-  console.error(error);scene?.dispose();scene=null;
+let graphicsStorage;try{graphicsStorage=localStorage;}catch{}
+const profile=graphicsProfile(location.search,graphicsStorage,matchMedia('(pointer: coarse), (max-width:760px)').matches);
+const lightweight=profile.lightweight;
+try{scene=createScene($('world'),select,lightweight);renderStage='设置初始世界';scene.setArtStyle(artId);scene.home();scene.update(state);renderStage='绘制第一帧';await scene.ready;$('loading').hidden=true;if(state.tick>0)enter();if(loadIssue)toast(loadIssue);$('world').querySelector('canvas').addEventListener('webglcontextlost',event=>{event.preventDefault();renderStage='绘图连接中断';graphicsFailed(new Error('三维绘图连接已中断。当前世界仍保留，可保存后重试。'));},{once:true});}
+catch(error){graphicsFailed(error);}
+function graphicsFailed(error){
+  pause();console.error(error);scene?.dispose();scene=null;
   renderIssue={stage:renderStage,code:error.code||error.name||'Error',message:String(error.message||error).slice(0,1000)};
-  $('loading').classList.add('render-error');
-  $('loading').innerHTML=`<p>${error.code==='WEBGL_CONTEXT_UNAVAILABLE'?'浏览器未能建立 WebGL 2 绘图连接。':'三维场景启动失败。'}</p><p>仍可从「群岛图志」进入城镇，推进时间与阅读历史。</p><button id="retry-graphics">${lightweight?'重新尝试三维':'以轻量三维重试'}</button><details><summary>查看启动错误</summary><p>${escape(renderIssue.stage)} · ${escape(renderIssue.code)}</p><pre>${escape(renderIssue.message)}</pre><p>错误仅显示在此页面，不会上传。</p></details>`;
+  $('loading').hidden=false;$('loading').classList.add('render-error');
+  $('loading').innerHTML=`<p>${error.code==='WEBGL_CONTEXT_UNAVAILABLE'?'浏览器未能建立 WebGL 2 绘图连接。':renderStage==='绘图连接中断'?'三维画面已暂停。':'三维场景启动失败。'}</p><p>仍可从「群岛图志」进入城镇，推进时间与阅读历史。</p><button id="retry-graphics">${lightweight?'重新尝试三维':'以轻量三维重试'}</button><details><summary>查看启动错误</summary><p>${escape(renderIssue.stage)} · ${escape(renderIssue.code)}</p><pre>${escape(renderIssue.message)}</pre><p>错误仅显示在此页面，不会上传。</p></details>`;
   $('world').append($('loading'));$('world').style.touchAction='auto';$('intro').hidden=true;
   $('retry-graphics').onclick=()=>{save();if(saveBlocked){toast('当前世界未能保存，请先从设置导出存档，再刷新重试。');return;}const url=new URL(location.href);url.searchParams.set('graphics','lite');location.assign(url.href);};
 }

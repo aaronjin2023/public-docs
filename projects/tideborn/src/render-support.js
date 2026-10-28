@@ -1,3 +1,11 @@
+export const GRAPHICS_KEY='tideborn-graphics-v1';
+export function graphicsProfile(search,storage,compact){
+  const query=new URLSearchParams(search).get('graphics');
+  let saved='auto';try{saved=storage?.getItem(GRAPHICS_KEY)||'auto';}catch{}
+  const preference=['auto','lite','full'].includes(query)?query:['lite','full'].includes(saved)?saved:'auto';
+  return {preference,lightweight:preference==='lite'||(preference==='auto'&&compact)};
+}
+
 export function openGraphicsContext(canvas, lightweight) {
   let reason='';
   const creationError=event=>{reason=event.statusMessage||'';};

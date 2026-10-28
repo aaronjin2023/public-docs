@@ -1,7 +1,8 @@
+import {batchStaticMeshes,removeSubmergedFaces} from './static-batching.js';
 import {createShipmentOverlay} from './shipment-scene.js';
 import {walkStops} from './city-walk.js';
 import {createHarbourDetails} from './harbour-scene.js';
-import {harbourPort,harbourApproach,civicApproach,nearApproach,groundPathGeometry,createPathSteps} from './harbour-approach.js';
+import {harbourPort,harbourApproach,civicApproach,nearApproach,groundPathGeometry,createPathSteps} from './harbour-approach.js?v=mobile-4';
 import {createEmberSwallows,updateEmberSwallows,SWALLOW_FOCUS} from './ember-swallows.js';
 import {createEmberRiver,updateEmberRiver,nearEmberRiver} from './ember-river.js';
 import {createReedRiver,nearReedRiver} from './reed-river.js';
@@ -17,8 +18,8 @@ import {BELL,BELL_STEPS,createBellRuin,bellInscription} from './bell-ruin.js';
 import {createSeaRouter,createSeaJourney} from './sea-routes.js';
 import {createFoodStore,updateFoodStore,createFields,updateFields} from './food-scene.js';
 import {bindOrbitPointers} from './orbit-input.js';
-import {openGraphicsContext} from './render-support.js';
-import {createArtRenderer} from './art-renderer.js?v=artist-4';
+import {openGraphicsContext} from './render-support.js?v=mobile-4';
+import {createArtRenderer} from './art-renderer.js?v=mobile-4';
 import * as THREE from '../assets/vendor/three.module.js';
 import { CITIES, ISLANDS, LANDMARKS, SEED } from './world-data.js';
 import { terrainAt, baseTerrainAt, elevation, noise, random, clamp, reedRiverX } from './terrain.js';
@@ -39,7 +40,7 @@ export function createScene(container, onSelect, lightweight=false) {
   const surface=document.createElement('canvas');
   const graphics=openGraphicsContext(surface,lightweight);lightweight=graphics.lightweight;
   const renderer=new THREE.WebGLRenderer({canvas:surface,context:graphics.context});
-  const art=createArtRenderer(renderer);
+  const art=createArtRenderer(renderer,lightweight);
   renderer.setPixelRatio(Math.min(devicePixelRatio,lightweight?1:1.7));
   renderer.setSize(container.clientWidth,container.clientHeight);
   renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -77,6 +78,7 @@ export function createScene(container, onSelect, lightweight=false) {
   }
   landGeometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
   landGeometry.computeVertexNormals();
+  if(lightweight)removeSubmergedFaces(landGeometry);
   const terrain=new THREE.Mesh(landGeometry,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,flatShading:true}));
   terrain.receiveShadow=true; scene.add(terrain);
 
@@ -169,7 +171,8 @@ export function createScene(container, onSelect, lightweight=false) {
   ],3));
   const roofIndices=[];for(let i=0;i<roofGeometry.attributes.position.count;i+=3)roofIndices.push(i,i+2,i+1);
   roofGeometry.setIndex(roofIndices);roofGeometry.computeVertexNormals();
-  function mesh(geo,material,x,y,z,parent=scene){const m=new THREE.Mesh(geo,material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
+  const staticMeshes=[];
+  function mesh(geo,material,x,y,z,parent=scene){const m=new THREE.Mesh(geo,material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);staticMeshes.push(m);return m;}
   const stone=mat('#dedac4'),darkStone=mat('#8d9c96'),wood=mat('#806c51'),cloth=mat('#f0e8ce'),brass=mat('#b49c67');
   const pathsMaterial=mat('#c4bea0');
   function path(points,width=.6){
@@ -372,6 +375,7 @@ export function createScene(container, onSelect, lightweight=false) {
     clouds.add(cg);
   }
 
+  const batching=lightweight?batchStaticMeshes(staticMeshes):{meshes:0,batches:0,savedDraws:0};staticMeshes.length=0;
   const labels=document.createElement('div');labels.className='world-labels';container.append(labels);
   const mapOverlays=[...container.parentElement.querySelectorAll('.map-settings,.map-tools,.map-caption,#layer-legend,.artist-panel')];
   const labelObjects=[];
@@ -402,7 +406,7 @@ export function createScene(container, onSelect, lightweight=false) {
     const previousFit=overviewDistance(camera.aspect);camera.aspect=width/height;
     if(shipments.focused)frameShipment(shipments.focused);
     else if(!selected){const ratio=overviewDistance(camera.aspect)/previousFit;distance=clamp(distance*ratio,18,900);goalDistance=clamp(goalDistance*ratio,18,900);}
-    camera.updateProjectionMatrix();renderer.setSize(width,height);
+    camera.updateProjectionMatrix();if(lightweight)renderer.setPixelRatio(Math.min(devicePixelRatio,1,Math.sqrt(650000/(width*height))));renderer.setSize(width,height);
   };
   const observer=new ResizeObserver(resize);observer.observe(container);
   let lastTime=0,visualTime=0,raf=0,latestState=null,frameCount=0,lastRender=0,waterTarget=.4;
@@ -553,7 +557,7 @@ export function createScene(container, onSelect, lightweight=false) {
       seaTravel:{visualTime,routes:routes.map(r=>r.geometry.attributes.position.count),boats:boats.map(({boat,journey,speed,a,b})=>({from:CITIES[a].id,to:CITIES[b].id,x:boat.position.x,z:boat.position.z,heading:boat.rotation.y,length:journey.length,speed}))},
       emberSwallows:{...emberSwallows.userData.reading,color:emberSwallows.userData.clay.color.getHexString(),visible:emberSwallows.userData.bird.visible},
       emberRiver:{pollution:emberRiver.userData.pollution,waterColor:emberRiver.userData.water.color.getHexString(),bankColor:emberRiver.userData.bank.color.getHexString(),plumeOpacity:emberRiver.userData.plume.material.opacity,plumeHeight:emberRiver.userData.plume.position.y},
-      graphics:{lightweight,pixelRatio:renderer.getPixelRatio(),antialias:graphics.context.getContextAttributes()?.antialias,shadows:renderer.shadowMap.enabled},
+      graphics:{lightweight,batching,pixelRatio:renderer.getPixelRatio(),antialias:graphics.context.getContextAttributes()?.antialias,shadows:renderer.shadowMap.enabled},
       art:art.stats(layer),
       waterHeight:ocean.position.y,exposedSteps:oldPortSteps.filter(top=>top>ocean.position.y).length,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,trees:treeList.length,leafyTrees:treeList.filter(t=>t.alive).length,boats:boats.length,walkers:walkers.filter(w=>w.visible).length,frameCount,
       cities:cityGroups.map((g,i)=>({id:CITIES[i].id,homes:g.userData.houses.count,capacity:g.userData.buildingCount,publicFerry:g.userData.ferry?.visible??false,civicAccess:g.userData.civicAccess?.visible??false,foodStore:{seasons:g.userData.foodStore.userData.seasons,levels:g.userData.foodStore.userData.levels},field:fields.find(f=>f.ci===i)?{stage:fields.find(f=>f.ci===i).group.userData.stage,height:fields.find(f=>f.ci===i).group.userData.height,plots:layouts[i].fields.length}:null,civicTraces:Object.values(g.userData.traces).filter(t=>t.visible).map(t=>({choice:t.userData.choice,label:t.userData.label,firstReceiver:t.userData.firstReceiver??null})),trees:treeList.filter(t=>t.island===CITIES[i].id&&t.alive).length,construction:Object.fromEntries(Object.entries(g.userData.policies).map(([id,levels])=>[id,levels.filter(group=>group.visible).length]))})),

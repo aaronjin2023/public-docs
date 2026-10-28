@@ -1,3 +1,4 @@
+import mobile from './locales/mobile.js';
 import ui from './locales/ui.js';
 import council from './locales/council.js';
 import world from './locales/world.js';
@@ -8,7 +9,7 @@ import walks from './locales/walks.js';
 
 export const LANGUAGE_KEY='tideborn-language-v1';
 export const LANGUAGES=[['zh','中文'],['en','English'],['es','Español'],['fr','Français'],['ar','العربية'],['ja','日本語']];
-export const catalog=[...ui,...world,...events,...choices,...guide,...walks,...council];
+export const catalog=[...ui,...world,...events,...choices,...guide,...walks,...council,...mobile];
 const supported=new Set(LANGUAGES.map(([id])=>id));
 export function languageCode(value){const id=String(value??'').toLowerCase().split(/[-_]/)[0];return supported.has(id)?id:null;}
 export function loadLanguage(storage,languages=[]){

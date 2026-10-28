@@ -105,7 +105,7 @@ void main(){
   gl_FragColor=vec4(clamp(outColor,0.,1.),1.);
 }`;
 
-export function createArtRenderer(renderer){
+export function createArtRenderer(renderer,lightweight=false){
   let selected='original',target=null,draws=0;
   const size=new THREE.Vector2();
   const uniforms={sceneColor:{value:null},resolution:{value:new THREE.Vector2(1,1)},pixelRatio:{value:1},style:{value:0}};
@@ -122,7 +122,7 @@ export function createArtRenderer(renderer){
     render(scene,view,layer){
       if(!artApplies(selected,layer)){renderer.render(scene,view);return;}
       renderer.getDrawingBufferSize(size);
-      if(!target)target=new THREE.WebGLRenderTarget(size.x,size.y,{type:renderer.extensions.has('EXT_color_buffer_float')?THREE.HalfFloatType:THREE.UnsignedByteType,depthBuffer:true});
+      if(!target)target=new THREE.WebGLRenderTarget(size.x,size.y,{type:!lightweight&&renderer.extensions.has('EXT_color_buffer_float')?THREE.HalfFloatType:THREE.UnsignedByteType,depthBuffer:true});
       if(target.width!==size.x||target.height!==size.y)target.setSize(size.x,size.y);
       uniforms.sceneColor.value=target.texture;uniforms.resolution.value.copy(size);uniforms.pixelRatio.value=renderer.getPixelRatio();
       const autoReset=renderer.info.autoReset;renderer.info.autoReset=false;renderer.info.reset();

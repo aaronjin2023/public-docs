@@ -4,8 +4,9 @@ import {elevation,surfaceElevation,reedRiverX} from './terrain.js';
 export function harbourPort(city){
   let port,best=Infinity;
   for(let z=-106;z<=106;z+=2)for(let x=-124;x<=124;x+=2){
-    const h=elevation(x,z),d=Math.hypot(x-city.x,z-city.z);
-    if(h<.2&&h>-.9&&d<best){best=d;port={x,z};}
+    const h=elevation(x,z),d=(x-city.x)**2+(z-city.z)**2;
+    // Equal distances must pick the same landing in V8 and JavaScriptCore.
+    if(h<.2&&h>-.9&&(d<best||(d===best&&x<port.x))){best=d;port={x,z};}
   }
   return {...port,angle:Math.atan2(port.x-city.x,port.z-city.z),city:city.id};
 }
