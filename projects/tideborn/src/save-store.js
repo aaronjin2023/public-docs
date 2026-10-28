@@ -1,4 +1,4 @@
-import {SAVE_KEY,validateSave} from './simulation.js';
+import {SAVE_KEY,validateSave} from './simulation.js?v=council-1';
 
 export class SaveConflictError extends Error {constructor(){super('存档已在另一个窗口改变');this.name='SaveConflictError';}}
 export function writeSave(storage,next,expectedRaw){

@@ -1,6 +1,7 @@
 import { CITIES, POLICIES, START_YEAR, SEED, SEASONS } from './world-data.js';
 import { clamp } from './terrain.js';
 import {PETITIONS,pendingPetitions,petitionOpenedAt,civicRules,residentAt,aftermathFor,outcomeText} from './residents.js';
+import {COUNCIL_HORIZON,COUNCIL_MEMORY,COUNCIL_PROFILES,COUNCIL_GOALS,councilReading,councilObservation,councilScore,councilAffordable,validCouncil} from './council.js';
 
 export const SAVE_KEY = 'tideborn-world-v1';
 const READING_FIELDS=['population','food','wealth','ecology','pollution','knowledge','trust'];
@@ -138,10 +139,66 @@ export function transportFor(s,cityId){
   const reason=local.demand===0?(local.supply>0?'donor':'reserve'):local.unmet<1e-7?'filled':local.remainingCapacity<1e-7?'local-capacity':!donors.length?'no-surplus':donors.every(p=>p.remainingSupply<1e-7)?'supply-spent':'source-capacity';
   return {local,queue,donors,rank:queue.findIndex(p=>p.id===cityId)+1,reason,rotation};
 }
-export function advance(s, steps=1) {
+export function setCouncilEnabled(s,enabled){
+  if(typeof enabled!=='boolean')throw new Error('Invalid council mode');
+  if((s.council?.enabled??false)===enabled)return;
+  s.council??={enabled:false,startedAt:s.tick,agents:CITIES.map(c=>({city:c.id,observedTick:s.tick-1,shortageStreak:0,records:[]}))};
+  s.council.enabled=enabled;
+  record(s,'自治议事',enabled?'六城自治已开启。下一季起，议事会可以使用本城资源建设、撤除设施和回应居民议题。':'六城自治已关闭。已作出的建设、旧约和历史保留。',null,'council');
+}
+function councilCopy(s){
+  // Forecasts need current rules and resources, not the player's full journal or recursive agents.
+  return {...s,cities:structuredClone(s.cities),decisions:structuredClone(s.decisions??[]),petitionOpenings:structuredClone(s.petitionOpenings??[]),events:[],history:[],interventions:[],council:undefined};
+}
+function executeCouncilAction(s,city,action){
+  if(action.kind==='build')return enact(s,city,action.id);
+  if(action.kind==='retire')return retire(s,city,action.id);
+  return decide(s,action.id,action.choice);
+}
+export function planCouncil(s){
+  const observations=COUNCIL_PROFILES.map(p=>councilObservation(s,p.city));
+  const baseline=councilCopy(s);advance(baseline,COUNCIL_HORIZON,{autonomy:false});
+  return COUNCIL_PROFILES.map((profile,index)=>{
+    const observation=observations[index],city=s.cities.find(c=>c.id===profile.city);
+    const wait={city:city.id,observation,action:{kind:'wait'},score:0,goal:'food',reason:observation.cooldown?'cooldown':'no-gain',alternatives:[]};
+    if(observation.cooldown)return wait;
+    const actions=[];
+    for(const policy of POLICIES){
+      if(!policyReason(s,city.id,policy.id))actions.push({kind:'build',id:policy.id});
+      if(city.policies[policy.id]>0)actions.push({kind:'retire',id:policy.id});
+    }
+    for(const petition of pendingPetitions(s).filter(p=>p.city===city.id))for(const option of petition.options){
+      if(!decisionReason(s,petition.id,option.id))actions.push({kind:'decide',id:petition.id,choice:option.id});
+    }
+    const before=observation.reading,base=councilReading(baseline.cities[index]),ranked=[];
+    for(const action of actions.filter(a=>councilAffordable(city,a))){
+      const future=councilCopy(s);if(!executeCouncilAction(future,city.id,action).ok)continue;
+      advance(future,COUNCIL_HORIZON,{autonomy:false});
+      const expected=councilReading(future.cities[index]),rating=councilScore(profile,observation,before,base,expected);
+      ranked.push({action,expected,...rating});
+    }
+    ranked.sort((a,b)=>b.score-a.score);
+    const best=ranked[0];
+    return best?.score>.003?{...wait,...best,reason:'gain',alternatives:ranked.slice(0,3)}:{...wait,alternatives:ranked.slice(0,3)};
+  });
+}
+function runCouncil(s){
+  const plans=planCouncil(s);
+  for(const plan of plans){
+    const memory=s.council.agents.find(a=>a.city===plan.city),city=s.cities.find(c=>c.id===plan.city);
+    memory.observedTick=s.tick;memory.shortageStreak=plan.observation.streak;
+    if(plan.action.kind==='wait'||!councilAffordable(city,plan.action))continue;
+    if(!executeCouncilAction(s,plan.city,plan.action).ok)continue;
+    memory.records.push({tick:s.tick,action:plan.action,goal:plan.goal,score:plan.score,before:plan.observation.reading,expected:plan.expected});
+    memory.records=memory.records.slice(-COUNCIL_MEMORY);
+    const event=s.events[0];event.kind='council';event.text+=` 自治依据：${COUNCIL_GOALS[plan.goal]}。行动前粮仓 ${plan.observation.reading.food.toFixed(1)} 季、公库 ${Math.floor(plan.observation.reading.wealth)} 铜。`;
+  }
+}
+export function advance(s, steps=1,{autonomy=true}={}) {
   if(!Number.isInteger(steps)||steps<0||steps>4000) throw new Error('推进步数必须是 0–4000 的整数');
-  const rules=CITIES.map(c=>civicRules(s,c.id));
   for(let k=0;k<steps;k++) {
+    if(autonomy&&s.council?.enabled)runCouncil(s);
+    const rules=CITIES.map(c=>civicRules(s,c.id));
     s.tick++;s.shipments={tick:s.tick,legs:[]};
     const season = s.tick%4, weather=weatherAt(s.tick,s.seed)*(s.climate==='dry'?.72:s.climate==='wet'?1.18:1);
     const tide=tideAt(s.tick), flows=[];
@@ -223,6 +280,9 @@ export function advance(s, steps=1) {
       const t=totals(s), weakest=s.cities.reduce((a,b)=>a.food/a.population<b.food/b.population?a:b);
       record(s,'群岛四年札记',`群岛共有 ${t.population.toLocaleString('zh-CN')} 位居民。生态均值 ${Math.round(t.ecology*100)}%。粮食最紧张的是${CITIES.find(c=>c.id===weakest.id).name}。`,null,'summary');
     }
+    if(autonomy&&s.council)for(const agent of s.council.agents)for(const entry of agent.records){
+      if(!entry.after&&s.tick===entry.tick+COUNCIL_HORIZON){entry.after=councilReading(s.cities.find(c=>c.id===agent.city));entry.afterTick=s.tick;}
+    }
     snapshot(s);
   }
   return s;
@@ -233,6 +293,7 @@ export function discover(s,id,text) {
 }
 export function validateSave(s) {
   if(!s||s.version!==1||!Number.isInteger(s.tick)||s.tick<0||s.tick>1000000||!Number.isFinite(s.seed)) return false;
+  if(!validCouncil(s.council,s.tick))return false;
   if(!Array.isArray(s.cities)||s.cities.length!==CITIES.length||!['temperate','dry','wet'].includes(s.climate))return false;
   for(let i=0;i<CITIES.length;i++) {
     const c=s.cities[i];
@@ -298,7 +359,7 @@ export function validateSave(s) {
 export function compare(s,years=12) {
   const future=structuredClone(s), baseline=structuredClone(s);
   baseline.cities.forEach(c=>{c.policies=Object.fromEntries(POLICIES.map(p=>[p.id,0]));});
-  advance(future,years*4); advance(baseline,years*4);
+  advance(future,years*4,{autonomy:false}); advance(baseline,years*4,{autonomy:false});
   return {future:totals(future),baseline:totals(baseline),years,tick:future.tick,
     cities:future.cities.map((c,i)=>({id:c.id,future:cityReading(c),baseline:cityReading(baseline.cities[i])}))};
 }

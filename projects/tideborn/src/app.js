@@ -1,4 +1,5 @@
-import {startLanguageUI} from './i18n.js';
+import {startLanguageUI} from './i18n.js?v=council-1';
+import {renderCouncil} from './council-view.js';
 import {swallowReading} from './ember-swallows.js';
 import {shipmentKey} from './shipment-scene.js';
 import {butterflyReading} from './spire-butterflies.js';
@@ -6,16 +7,16 @@ import {frogReading} from './moss-frogs.js';
 import {heronReading} from './reed-herons.js';
 import {nurseryTideReading} from './nursery-fish.js';
 import {renderDevelopmentLog} from './development-log.js';
-import {JOURNAL_FILTERS,journalSelection} from './journal.js';
+import {JOURNAL_FILTERS,journalSelection} from './journal.js?v=council-1';
 import {WALKS,walkReading} from './city-walk.js';
 import {FIELD_STAGES,foodSeasons} from './food-scene.js';
 import {CITIES,LANDMARKS,METHODS,POLICIES,START_YEAR,SEASONS} from './world-data.js';
-import {createWorld,advance,enact,retire,policyReason,totals,tideAt,dateLabel,discover,validateSave,compare,record,SAVE_KEY,decide,decisionReason,passageSummary,transportFor} from './simulation.js';
+import {createWorld,advance,setCouncilEnabled,planCouncil,enact,retire,policyReason,totals,tideAt,dateLabel,discover,validateSave,compare,record,SAVE_KEY,decide,decisionReason,passageSummary,transportFor} from './simulation.js?v=council-1';
 import {createScene} from './scene.js?v=artist-4';
 import {ART_STYLES,ART_STYLE_KEY,artStyle,loadArtStyle} from './art-styles.js';
 import {createSoundscape} from './audio.js?v=music-2';
 import {MUSIC_KEY,MUSIC_STYLES,musicStyle,loadMusic} from './music.js';
-import {parseSave,replaceSave,writeSave,SaveConflictError} from './save-store.js';
+import {parseSave,replaceSave,writeSave,SaveConflictError} from './save-store.js?v=council-1';
 import {PETITIONS,pendingPetitions,petitionOpenedAt,residentAt,aftermathFor,outcomeFor} from './residents.js';
 
 const $=id=>document.getElementById(id);
@@ -58,6 +59,7 @@ function replaceCurrent(next,backupKey){
   savedRaw=JSON.stringify(replacement);return replacement;
 }
 function renderStats(){
+  $('council-button').textContent=state.council?.enabled?'议事会 · 自治':'议事会';
   const t=totals(state);$('year').textContent=START_YEAR+Math.floor(state.tick/4);$('season').textContent=SEASONS[state.tick%4];
   $('population').textContent=fmt(t.population);$('ecology').textContent=Math.round(t.ecology*100);
   const tide=tideAt(state.tick),next=tideAt(state.tick+1);$('tide-state').textContent=tide>.88?'长潮高水位':next>tide?'潮水渐涨':'潮水渐退';
@@ -187,9 +189,11 @@ function renderDrawer(){
     body=`${petitionContent(d)}<div class="person"><div class="person-name"><strong>${person.name}</strong><span>${person.age} 岁 · ${person.role}</span></div>${person.generation?`<p class="city-type">第 ${person.generation+1} 代记录者 · 从${d.person.name}的那一页继续</p>`:''}<blockquote class="voice">“${d.person.voice}”</blockquote>${person.generation?'<p>这是最初的记录者留下的话。后来的人保留它，也可以做出不同的决定。</p>':''}<h3>一个愿望</h3><p>${d.person.wish}。</p></div>${memoryContent(d)}<div class="city-note"><h3>${dateLabel(state)} · 生活片段</h3><p>${moment}</p></div><div class="city-action-row"><button data-tab="choices">查看城镇建设 ↗</button></div>`;
   }
   if(tab==='choices')body=`<p class="city-description">${d.dilemma}</p><p class="treasury">公共库藏 ${fmt(c.wealth)} 铜 · 行动会立即记入历史</p>${POLICIES.map(p=>{const reason=policyReason(state,c.id,p.id);return `<section class="policy"><div class="policy-head"><h3>${p.name}</h3><span>${c.policies[p.id]} / ${p.max} 级</span></div><p>${p.effect}</p><button data-policy="${p.id}" ${reason?'disabled':''}>${reason||`投入 ${p.cost} 铜`}</button><small>${p.detail}<br>地图上会出现：${p.visible}。</small>${c.policies[p.id]>0?`<button data-retire="${p.id}">撤除一级 · 不退款</button>`:""}</section>`;}).join('')}<p class="ledger-caption">撤除不额外扣款，也不退回建设投入；重建仍按原价。已有污染与知识保留，下一季按新等级计算。居民旧约继续有效。</p><div class="city-action-row"><button data-action="compare">推演十二年后的分歧 ↗</button></div>`;
+  if(tab==='people'||tab==='choices')body+='<div class="city-action-row"><button data-action="council">查看本城自治议事 ↗</button></div>';
   $('drawer-content').innerHTML=title+body;const transport=$('drawer-content').querySelector('[data-transport]');if(transport)transport.open=Boolean(transportWasOpen);bindDrawer();
 }
 function bindDrawer(){
+  $('drawer-content').querySelector('[data-action="council"]')?.addEventListener('click',()=>showCouncil(selected));
   $('drawer-content').querySelector('[data-action="species"]')?.addEventListener('click',()=>{
     const note=$('species-note');note.scrollIntoView({block:'start'});$('species-title').focus({preventScroll:true});
     note.querySelector('[data-observe]')?.click();
@@ -299,10 +303,23 @@ function showJournal(requestedFilter='all',cityId='all'){
 function showBook(){
   openModal('世界之书',`<p class="book-lead">海把土地分开。<br>生活把它们重新连接。</p><p class="modal-intro"><a href="docs/world-atlas.html" target="_blank" rel="noopener">展开完整图册 · 六城故事、海图公约与方法来源 ↗</a></p><p class="modal-intro">潮生是一片原创的虚构群岛。你抵达的这一年，六座城刚刚开始共用海图，新的航线与旧的生活同时存在。</p><section class="book-section"><h3>潮历与土地</h3><p>一年有雨生、长昼、归潮、静冬四季。两轮月亮的节律叠加，每十二年形成一个长潮循环。火山石、抬升的古海床与沉积平原，留下不同的土壤和海岸。地质与物种适应属于世界的背景设定；游戏时间推进的是城邦社会。</p></section><section class="book-section"><h3>世界如何回应你</h3><p>每季，环境与农田决定粮食产量，居民消耗库存。海运把富余粮食转给缺粮的地方。短缺与污染降低互信，持续的差异会推动迁居。共有林恢复生态，学堂积累知识，港口扩大交换，矿炉增加收入也留下污染。人口、库存与事件均由同一个本地规则模型产生。五类建设会在城中逐级出现；也可以撤除一级，建设投入不退款，过去的污染与知识保留，重建仍按原价。生态下降时，野生林冠会缩小、凋落，恢复时重新长出。望潮湾与苇原的田块随四季育苗、青穗、收割和休田，生态改变作物长势；六城港边八格粮架显示现有库存，每格约一季，超过八季显示满架。它们是全城农业与粮仓的代表性缩影。烬山的回灰河东段另以水色与岸痕表现累积污染，生活账本可直接定位；停炉后随已有污染逐季恢复。它们不是水质采样、植物生长或水流的物理模型。</p></section><section class="book-section"><h3>观察、选择与记忆</h3><p>没有必须完成的任务。你可以只看船只经过，也可以进入城镇改变它的道路。时间可以暂停，一季一季推进，也可以越过十二年。推演功能会在副本中比较当前建设和撤去五类常规建设的结果，不改变正在生活的世界。推演可展开六城的各项结果，并直接回到相应城镇调整建设。</p></section><section class="book-section"><h3>思想的来处</h3><p>参考 human-distillation-lab 的 14 个条目，把方法改写为具体的规则、空间与叙事。以下是创作者对资料的应用，不是这些人物本人参与创作或发表意见。专家库当前实测含 36 类、3,610 个条目，存在跨领域重复人物，内容仍为草稿。</p><div class="method-list">${METHODS.map(m=>`<article class="method"><div><strong>${m.name}</strong><span>${m.field} · ${m.kind}</span></div><div><p>${m.idea}<br>${m.use}</p><code>${m.path}</code></div></article>`).join('')}</div></section><section class="book-section"><h3>关于这个模型</h3><p>它是一部可交互的世界作品。产量、人口和生态系数服务于内部一致的玩法，未经过现实校准，不用于现实预测。潮汐采用两个正弦周期的简化历法；海岸地形固定，水面高度随简化潮历变化；沉钟旧港的台阶会随水位隐现。波纹和航船运动是视觉表现，不计算真实水流。没有后台大模型在扮演居民，文字是原创叙事与状态条件的组合。前六季有六项居民议题，十二年后另有留粮线与污染争议；二十四年后，同为空仓却有人收到、有人没收到时，望潮湾还会讨论分配次序。每项各有两种回应，会改变持续的产量、污染、知识或收入规则；两年后出现相应回信。新决定会保存行动前与回信时的城镇账页，反映同期气候、建设和旧约的共同结果；旧存档缺少的读数不会事后补造。记录者会代际交接，已经作出的旧约跨代保留。页面关闭后，模拟时间停止。</p></section><section class="book-section"><h3>声音与保存</h3><p>声景由浏览器实时合成。顶部「音乐」提供潮音和五种借鉴作曲语言的原创背景音乐，可调音量并随时停止。日光、暮色、夜航改变音区与音色，潮位改变风声强弱；切到后台时暂停声音。没有引用现成录音。世界自动保存于当前浏览器；换浏览器或清理站点数据不会带走存档，请先在设置中导出。Three.js 使用 MIT 许可，完整许可保留在项目中。</p></section>`,'book');
 }
+function showCouncil(scope='all'){
+  openModal('六城自治议事会',renderCouncil(state,planCouncil(state),scope),'council');
+  $('council-city').onchange=e=>{showCouncil(e.target.value);$('council-city').focus({preventScroll:true});};
+  $('council-mode').onchange=e=>{
+    if(saveBlocked){e.target.value=state.council?.enabled?'on':'off';toast('暂不能保存自治设置，请先处理存档提示。');return;}
+    setCouncilEnabled(state,e.target.value==='on');renderStats();if(selected)renderDrawer();save();
+    const message=modalMessage.textContent;showCouncil(scope);if(message)toast(message);$('council-mode').focus({preventScroll:true});
+  };
+  $('council-step').onclick=()=>{enter();step();const message=modalMessage.textContent;showCouncil(scope);if(message)toast(message);$('council-step').focus({preventScroll:true});};
+  $('council-journal').onclick=()=>showJournal('council',scope);
+  $('modal-body').querySelectorAll('[data-council-visit]').forEach(button=>button.onclick=()=>select(button.dataset.councilVisit));
+}
+$('council-button').onclick=()=>showCouncil();
 function showComparison(){
   const r=compare(state),line=t=>`<p>居民 ${fmt(t.population)} 人</p><p>生态均值 ${Math.round(t.ecology*100)}%</p><p>公共库藏 ${fmt(t.wealth)} 铜</p><p>粮食库存 ${fmt(t.food)} 份</p>`;
   const cities=[...r.cities].sort((a,b)=>(b.id===selected)-(a.id===selected));
-  openModal('十二年后的分歧',`<p class="passage-dates">${dateLabel(state)} → ${dateLabel(r)}</p><p class="modal-intro">从当前人口、库存与环境出发，在相同的气候序列里走过十二年。左边保留当前所有建设；右边把六城的五类常规建设等级归零。居民旧约在两边保留，已花掉的铜不会返还。这是一个规则内对照，不是预言，也不会推进真实时间。</p><div class="comparison"><div><h3>保留当前建设</h3>${line(r.future)}</div><div><h3>撤去常规建设</h3>${line(r.baseline)}</div></div><section class="book-section"><h3>每一座城承担什么</h3><p>海运与迁居仍在两条路径中各自演化。粮仓季数按各路径的居民用量计算；收入、生态与人口可能朝不同方向变化。</p>${cities.map(c=>{const name=CITIES.find(d=>d.id===c.id).name;return `<details class="projection-city" data-projection="${c.id}" ${c.id===selected?'open':''}><summary>${name}${c.id===selected?' · 你正在看的城':''}</summary>${readingTable(c.future,c.baseline,'保留建设','撤去建设')}<button data-comparison-city="${c.id}">回到${name}调整建设 ↗</button></details>`;}).join('')}</section>`,'compare');
+  openModal('十二年后的分歧',`<p class="passage-dates">${dateLabel(state)} → ${dateLabel(r)}</p><p class="modal-intro">从当前人口、库存与环境出发，在相同的气候序列里走过十二年。左边保留当前所有建设；右边把六城的五类常规建设等级归零。居民旧约在两边保留，已花掉的铜不会返还。这是一个规则内对照，不是预言，也不会推进真实时间。</p><p class="ledger-caption">本次建设对照暂不运行自治，两条路径都不增加新的自主行动。</p><div class="comparison"><div><h3>保留当前建设</h3>${line(r.future)}</div><div><h3>撤去常规建设</h3>${line(r.baseline)}</div></div><section class="book-section"><h3>每一座城承担什么</h3><p>海运与迁居仍在两条路径中各自演化。粮仓季数按各路径的居民用量计算；收入、生态与人口可能朝不同方向变化。</p>${cities.map(c=>{const name=CITIES.find(d=>d.id===c.id).name;return `<details class="projection-city" data-projection="${c.id}" ${c.id===selected?'open':''}><summary>${name}${c.id===selected?' · 你正在看的城':''}</summary>${readingTable(c.future,c.baseline,'保留建设','撤去建设')}<button data-comparison-city="${c.id}">回到${name}调整建设 ↗</button></details>`;}).join('')}</section>`,'compare');
   $('modal-body').querySelectorAll('[data-comparison-city]').forEach(b=>b.onclick=()=>{select(b.dataset.comparisonCity);tab='choices';renderDrawer();$('drawer-content').querySelector('[data-tab="choices"]').focus({preventScroll:true});});
 }
 function showOptions(){

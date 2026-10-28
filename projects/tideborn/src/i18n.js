@@ -1,4 +1,5 @@
 import ui from './locales/ui.js';
+import council from './locales/council.js';
 import world from './locales/world.js';
 import events from './locales/events.js';
 import choices from './locales/choices.js';
@@ -7,7 +8,7 @@ import walks from './locales/walks.js';
 
 export const LANGUAGE_KEY='tideborn-language-v1';
 export const LANGUAGES=[['zh','中文'],['en','English'],['es','Español'],['fr','Français'],['ar','العربية'],['ja','日本語']];
-export const catalog=[...ui,...world,...events,...choices,...guide,...walks];
+export const catalog=[...ui,...world,...events,...choices,...guide,...walks,...council];
 const supported=new Set(LANGUAGES.map(([id])=>id));
 export function languageCode(value){const id=String(value??'').toLowerCase().split(/[-_]/)[0];return supported.has(id)?id:null;}
 export function loadLanguage(storage,languages=[]){
@@ -37,7 +38,7 @@ export function translate(text,language,depth=0){
     for(const [key,row] of phrases){if(source.startsWith(key)&&(/[。；]$/.test(key)||/^[。；：，\s↗]/.test(source.slice(key.length)))){const rest=source.slice(key.length),gap=language!=='ja'&&/[。；]$/.test(key)&&rest&&!/^\s/.test(rest)?' ':'';result=row[columns[language]]+gap+translate(rest,language,depth+1);break;}}
   }
   if(result===undefined){
-    for(const {test,prefix,ids,row} of patterns){const match=source.match(test)??(prefix&&source.match(prefix));if(!match)continue;const args={};ids.forEach((id,i)=>args[id]=translate(match[i+1],language,depth+1));result=row[columns[language]].replace(/\{(\d+)\}/g,(_,id)=>args[id])+translate(source.slice(match[0].length),language,depth+1);break;}
+    for(const {test,prefix,ids,row} of patterns){const match=(prefix&&source.match(prefix))??source.match(test);if(!match)continue;const args={};ids.forEach((id,i)=>args[id]=translate(match[i+1],language,depth+1));result=row[columns[language]].replace(/\{(\d+)\}/g,(_,id)=>args[id])+translate(source.slice(match[0].length),language,depth+1);break;}
   }
   if(result===undefined){
     const separator=/[。\n]/.exec(source)??/(；|：|、|，|\s*[—至]\s*|\s*·\s*|\s*→\s*|\s*↗|^“|”$|^「|」$)/.exec(source);
