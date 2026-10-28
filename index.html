@@ -76,6 +76,7 @@
     .feature + .feature { margin-top: 24px; }
     .feature-media { position: relative; display: block; overflow: hidden; min-width: 0; min-height: 392px; background: var(--surface); }
     .feature-media img { display: block; width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; object-position: 60% center; animation: cover-in 1s var(--ease) both; transition: transform .7s var(--ease); }
+    .feature-media img.magazine-cover { object-fit: contain; object-position: center; padding: 20px; background: #e5e6d4; }
     .feature-media:hover img { transform: scale(1.035); }
     .media-open { position: absolute; right: 20px; bottom: 20px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--bg); color: var(--ink); transition: transform .3s var(--ease); }
     .feature-media:hover .media-open { transform: translate(2px, -2px); }
@@ -153,7 +154,7 @@
     <nav class="nav" aria-label="主导航">
       <div class="view-switch" role="group" aria-label="切换 Project 与 Design">
         <a class="view-link" href="#project" data-view-link="project">Project <small>3</small></a>
-        <a class="view-link" href="#design" data-view-link="design">Design <small>1</small></a>
+        <a class="view-link" href="#design" data-view-link="design">Design <small>2</small></a>
       </div>
       <a href="https://github.com/aaronjin2023/public-docs">GitHub<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
     </nav>
@@ -219,7 +220,7 @@
       </article>
       </div>
       <div id="design" data-category="design" aria-labelledby="design-title">
-      <div class="catalog-heading arrive"><h2 id="design-title">Design · 互动与设计</h2><span>1 个作品</span></div>
+      <div class="catalog-heading arrive"><h2 id="design-title">Design · 互动与设计</h2><span>2 个作品</span></div>
       <article class="feature arrive">
         <a class="feature-media" href="projects/tideborn/" aria-label="进入潮生群岛">
           <img src="projects/tideborn/evidence/world-current.png" alt="潮生三维群岛的实际画面，六座城在海岸之间生长" width="1280" height="720" loading="lazy">
@@ -231,6 +232,19 @@
           <p class="summary arrive">可探索、可干预、会留下历史的原创群岛文明。走进六座城，推进四季，让选择留下不同的生活与记忆。</p>
           <ul class="topics arrive" aria-label="世界内容"><li>三维群岛</li><li>季节模拟</li><li>浏览器本地存档</li></ul>
           <div class="actions arrive"><a class="button" href="projects/tideborn/">进入群岛 <span aria-hidden="true">↗</span></a></div>
+        </div>
+      </article>
+      <article class="feature arrive">
+        <a class="feature-media" href="projects/between-magazine/" aria-label="阅读昼夜之间时装周刊系列">
+          <img class="magazine-cover" src="projects/between-magazine/assets/issue-ii-cover.jpg" alt="《昼夜之间》2026年10月 II《THE LONG RUN》封面：浅青骑装与 BETWEEN 刊头" width="1008" height="1344" loading="lazy">
+          <span class="media-open" aria-hidden="true">↗</span>
+        </a>
+        <div class="feature-body">
+          <h3 class="arrive"><a href="projects/between-magazine/">昼夜之间 / BETWEEN</a></h3>
+          <div class="doc-meta arrive"><span>时装周刊</span><time datetime="2026-10">2026.10 · I / II</time></div>
+          <p class="summary arrive">以角色与服装为线索，阅读《RE:ORIGIN》和《THE LONG RUN》两期同人时装刊物。原作的印记，在今天的轮廓里重逢。</p>
+          <ul class="topics arrive" aria-label="期刊内容"><li>鬼灭之刃</li><li>JOJO · 飙马野郎</li><li>在线翻阅</li></ul>
+          <div class="actions arrive"><a class="button" href="projects/between-magazine/">翻阅周刊 <span aria-hidden="true">↗</span></a></div>
         </div>
       </article>
       </div>

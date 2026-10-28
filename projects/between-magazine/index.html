@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="昼夜之间 BETWEEN。每周一刊，每期一种视角。阅读 2026 年 10 月 II《THE LONG RUN》与 10 月 I《RE:ORIGIN》。">
+  <meta name="color-scheme" content="light">
+  <title>昼夜之间 BETWEEN — 期刊</title>
+  <style>
+    :root {
+      --paper: #fff;
+      --ink: #111;
+      --muted: #555;
+      --rule: #b9b9b9;
+      --serif: Didot, "Bodoni 72", "Times New Roman", serif;
+      --sans: "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-padding-top: 24px; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font: 16px/1.6 var(--sans); }
+    h1, h2, p, figure { margin: 0; }
+    a { color: inherit; text-underline-offset: .22em; text-decoration-thickness: 1px; }
+    a:focus-visible { outline: 2px solid var(--ink); outline-offset: 6px; }
+    .shell { width: min(1320px, calc(100% - 80px)); margin-inline: auto; }
+    .skip-link { position: absolute; top: 12px; left: 16px; z-index: 10; padding: 12px 16px; color: #fff; background: #111; transform: translateY(-160%); }
+    .skip-link:focus { transform: translateY(0); }
+    .site-header { padding-top: 34px; }
+    .identity { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; }
+    .identity-name { font-size: 18px; letter-spacing: .1em; }
+    .identity-line { font-size: 14px; }
+    .masthead { margin: 28px 0 36px -.012em; font: 400 clamp(64px, 17.8vw, 248px)/.8 var(--serif); letter-spacing: -.065em; white-space: nowrap; }
+    .issue-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(32px, 5vw, 80px); padding-top: 4px; }
+    .issue { min-width: 0; scroll-margin-top: 24px; }
+    .issue-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; border-top: 1px solid var(--ink); padding: 15px 0 16px; font-size: 14px; line-height: 1.5; }
+    .issue-number { white-space: nowrap; }
+    .issue-date { display: flex; gap: 16px; text-align: right; }
+    .date-numeric { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .cover-link { display: block; text-decoration: none; }
+    .cover-link img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: contain; background: #f2f2f2; }
+    .issue-details { padding-top: 25px; }
+    .issue-title { font: italic 400 clamp(32px, 4.1vw, 58px)/1.04 var(--serif); letter-spacing: -.035em; }
+    .issue-title a { display: inline-block; padding-block: 4px; text-decoration: none; }
+    .issue-title a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .14em; }
+    .issue-subject { margin-top: 10px; font-size: 17px; }
+    .issue-line { margin-top: 19px; font-size: 16px; }
+    .issue-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 30px; margin-top: 21px; padding-top: 8px; border-top: 1px solid var(--rule); }
+    .issue-actions a { display: inline-flex; align-items: center; min-height: 48px; padding: 6px 2px; font-size: 15px; }
+    .site-footer { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; margin-top: 76px; border-top: 1px solid var(--ink); padding: 22px 0 32px; font-size: 14px; }
+    .footer-name { font: 400 25px/1 var(--serif); letter-spacing: -.04em; }
+    .footer-note { color: var(--muted); }
+    @media (max-width: 900px) {
+      .shell { width: calc(100% - 48px); }
+      .issue-list { gap: 32px; }
+      .issue-date { gap: 9px; }
+      .date-numeric { display: none; }
+    }
+    @media (max-width: 620px) {
+      .shell { width: calc(100% - 36px); }
+      .site-header { padding-top: 23px; }
+      .identity { display: block; }
+      .identity-name { font-size: 17px; }
+      .identity-line { margin-top: 5px; font-size: 14px; }
+      .masthead { margin-top: 24px; margin-bottom: 29px; font-size: 17.7vw; }
+      .issue-list { grid-template-columns: minmax(0, 1fr); gap: 58px; }
+      .issue-meta { padding-block: 13px 15px; }
+      .date-numeric { display: inline; }
+      .issue-date { gap: 14px; }
+      .issue-details { padding-top: 20px; }
+      .issue-title { font-size: clamp(36px, 9vw, 54px); }
+      .issue-subject { font-size: 17px; }
+      .issue-line { margin-top: 15px; }
+      .issue-actions { margin-top: 18px; gap: 18px 32px; }
+      .issue-actions a { font-size: 16px; }
+      .site-footer { display: block; margin-top: 56px; padding-bottom: 27px; }
+      .footer-note { margin-top: 13px; }
+    }
+    @media (max-width: 350px) {
+      .date-numeric { display: none; }
+    }
+    @media print {
+      .shell { width: 100%; }
+      .site-header { padding-top: 0; }
+      .masthead { font-size: 17vw; }
+      .issue-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+      .issue { break-inside: avoid; }
+      .issue-actions, .skip-link { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#issues">跳至期刊列表</a>
+  <header class="site-header shell">
+    <div class="identity">
+      <p class="identity-name">昼夜之间</p>
+      <p class="identity-line">每周一刊，每期一种视角。</p>
+    </div>
+    <h1 class="masthead" lang="en">BETWEEN</h1>
+  </header>
+  <main id="issues" class="issue-list shell" aria-label="昼夜之间期刊列表">
+    <article id="issue-ii" class="issue" aria-labelledby="issue-ii-title">
+      <header class="issue-meta">
+        <p class="issue-number" lang="en">II / WEEKLY</p>
+        <time class="issue-date" datetime="2026-10"><span lang="en">October 2026</span><span class="date-numeric">10月 II</span></time>
+      </header>
+      <a class="cover-link" href="issues/2026-10-ii.html" aria-label="阅读《昼夜之间》2026 年 10 月 II：THE LONG RUN">
+        <img src="assets/issue-ii-cover.jpg" width="900" height="1200" alt="《昼夜之间》10 月 II封面，迪亚哥的浅青骑装近景与低位 BETWEEN 刊头" decoding="async" fetchpriority="high">
+      </a>
+      <div class="issue-details">
+        <h2 id="issue-ii-title" class="issue-title" lang="en"><a href="issues/2026-10-ii.html">THE LONG RUN</a></h2>
+        <p class="issue-subject">JOJO · 飙马野郎</p>
+        <p class="issue-line">同一段旅途，各自的锋芒。</p>
+        <nav class="issue-actions" aria-label="2026 年 10 月 II">
+          <a href="issues/2026-10-ii.html">阅读本期</a>
+        </nav>
+      </div>
+    </article>
+    <article id="issue-i" class="issue" aria-labelledby="issue-i-title">
+      <header class="issue-meta">
+        <p class="issue-number" lang="en">I / WEEKLY</p>
+        <time class="issue-date" datetime="2026-10"><span lang="en">October 2026</span><span class="date-numeric">10月 I</span></time>
+      </header>
+      <a class="cover-link" href="issues/2026-10-i.html" aria-label="阅读《昼夜之间》2026 年 10 月 I：RE:ORIGIN">
+        <img src="assets/issue-i-cover.jpg" width="900" height="1200" alt="《昼夜之间》10 月 I《RE:ORIGIN》鬼灭之刃真人时装封面" loading="lazy" decoding="async">
+      </a>
+      <div class="issue-details">
+        <h2 id="issue-i-title" class="issue-title" lang="en"><a href="issues/2026-10-i.html">RE:ORIGIN</a></h2>
+        <p class="issue-subject">鬼灭之刃</p>
+        <p class="issue-line">原作的印记，今天的轮廓。</p>
+        <nav class="issue-actions" aria-label="2026 年 10 月 I">
+          <a href="issues/2026-10-i.html">阅读本期</a>
+        </nav>
+      </div>
+    </article>
+  </main>
+  <footer class="site-footer shell">
+    <p class="footer-name" lang="en">BETWEEN</p>
+    <p class="footer-note">昼夜之间 · 非官方同人时装刊物 · <a href="../../#design">← Design</a></p>
+  </footer>
+</body>
+</html>
