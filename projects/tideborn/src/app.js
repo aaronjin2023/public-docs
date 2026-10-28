@@ -12,7 +12,8 @@ import {CITIES,LANDMARKS,METHODS,POLICIES,START_YEAR,SEASONS} from './world-data
 import {createWorld,advance,enact,retire,policyReason,totals,tideAt,dateLabel,discover,validateSave,compare,record,SAVE_KEY,decide,decisionReason,passageSummary,transportFor} from './simulation.js';
 import {createScene} from './scene.js?v=artist-4';
 import {ART_STYLES,ART_STYLE_KEY,artStyle,loadArtStyle} from './art-styles.js';
-import {createSoundscape} from './audio.js';
+import {createSoundscape} from './audio.js?v=music-2';
+import {MUSIC_KEY,MUSIC_STYLES,musicStyle,loadMusic} from './music.js';
 import {parseSave,replaceSave,writeSave,SaveConflictError} from './save-store.js';
 import {PETITIONS,pendingPetitions,petitionOpenedAt,residentAt,aftermathFor,outcomeFor} from './residents.js';
 
@@ -34,6 +35,8 @@ let motionEnabled=!matchMedia('(prefers-reduced-motion: reduce)').matches;
 try{savedRaw=localStorage.getItem(SAVE_KEY);if(savedRaw!==null)state=parseSave(savedRaw);}catch{saveBlocked=true;loadIssue='当前存档无法读取，原件已保留。可从设置恢复上一份存档；临时世界不会覆盖原件。';}
 if(saveBlocked)$('save-status').textContent='临时世界 · 未保存';
 const sound=createSoundscape();
+let musicPrefs={style:'ambient',volume:.65};try{musicPrefs=loadMusic(localStorage);}catch{}
+sound.setStyle(musicPrefs.style);sound.setVolume(musicPrefs.volume);
 const modal=$('modal');
 const modalMessage=$('modal-message')??document.createElement('p');modalMessage.id='modal-message';
 modalMessage.setAttribute('role','status');modalMessage.setAttribute('aria-live','polite');modalMessage.setAttribute('aria-atomic','true');
@@ -293,7 +296,7 @@ function showJournal(requestedFilter='all',cityId='all'){
 }
 
 function showBook(){
-  openModal('世界之书',`<p class="book-lead">海把土地分开。<br>生活把它们重新连接。</p><p class="modal-intro"><a href="docs/world-atlas.html" target="_blank" rel="noopener">展开完整图册 · 六城故事、海图公约与方法来源 ↗</a></p><p class="modal-intro">潮生是一片原创的虚构群岛。你抵达的这一年，六座城刚刚开始共用海图，新的航线与旧的生活同时存在。</p><section class="book-section"><h3>潮历与土地</h3><p>一年有雨生、长昼、归潮、静冬四季。两轮月亮的节律叠加，每十二年形成一个长潮循环。火山石、抬升的古海床与沉积平原，留下不同的土壤和海岸。地质与物种适应属于世界的背景设定；游戏时间推进的是城邦社会。</p></section><section class="book-section"><h3>世界如何回应你</h3><p>每季，环境与农田决定粮食产量，居民消耗库存。海运把富余粮食转给缺粮的地方。短缺与污染降低互信，持续的差异会推动迁居。共有林恢复生态，学堂积累知识，港口扩大交换，矿炉增加收入也留下污染。人口、库存与事件均由同一个本地规则模型产生。五类建设会在城中逐级出现；也可以撤除一级，建设投入不退款，过去的污染与知识保留，重建仍按原价。生态下降时，野生林冠会缩小、凋落，恢复时重新长出。望潮湾与苇原的田块随四季育苗、青穗、收割和休田，生态改变作物长势；六城港边八格粮架显示现有库存，每格约一季，超过八季显示满架。它们是全城农业与粮仓的代表性缩影。烬山的回灰河东段另以水色与岸痕表现累积污染，生活账本可直接定位；停炉后随已有污染逐季恢复。它们不是水质采样、植物生长或水流的物理模型。</p></section><section class="book-section"><h3>观察、选择与记忆</h3><p>没有必须完成的任务。你可以只看船只经过，也可以进入城镇改变它的道路。时间可以暂停，一季一季推进，也可以越过十二年。推演功能会在副本中比较当前建设和撤去五类常规建设的结果，不改变正在生活的世界。推演可展开六城的各项结果，并直接回到相应城镇调整建设。</p></section><section class="book-section"><h3>思想的来处</h3><p>参考 human-distillation-lab 的 14 个条目，把方法改写为具体的规则、空间与叙事。以下是创作者对资料的应用，不是这些人物本人参与创作或发表意见。专家库当前实测含 36 类、3,610 个条目，存在跨领域重复人物，内容仍为草稿。</p><div class="method-list">${METHODS.map(m=>`<article class="method"><div><strong>${m.name}</strong><span>${m.field} · ${m.kind}</span></div><div><p>${m.idea}<br>${m.use}</p><code>${m.path}</code></div></article>`).join('')}</div></section><section class="book-section"><h3>关于这个模型</h3><p>它是一部可交互的世界作品。产量、人口和生态系数服务于内部一致的玩法，未经过现实校准，不用于现实预测。潮汐采用两个正弦周期的简化历法；海岸地形固定，水面高度随简化潮历变化；沉钟旧港的台阶会随水位隐现。波纹和航船运动是视觉表现，不计算真实水流。没有后台大模型在扮演居民，文字是原创叙事与状态条件的组合。前六季有六项居民议题，十二年后另有留粮线与污染争议；二十四年后，同为空仓却有人收到、有人没收到时，望潮湾还会讨论分配次序。每项各有两种回应，会改变持续的产量、污染、知识或收入规则；两年后出现相应回信。新决定会保存行动前与回信时的城镇账页，反映同期气候、建设和旧约的共同结果；旧存档缺少的读数不会事后补造。记录者会代际交接，已经作出的旧约跨代保留。页面关闭后，模拟时间停止。</p></section><section class="book-section"><h3>声音与保存</h3><p>声景由浏览器实时合成，使用稀疏的五声音阶与滤波风声。日光、暮色、夜航改变音区与音色，潮位改变风声强弱；切到后台时暂停声音。没有引用现成录音。世界自动保存于当前浏览器；换浏览器或清理站点数据不会带走存档，请先在设置中导出。Three.js 使用 MIT 许可，完整许可保留在项目中。</p></section>`,'book');
+  openModal('世界之书',`<p class="book-lead">海把土地分开。<br>生活把它们重新连接。</p><p class="modal-intro"><a href="docs/world-atlas.html" target="_blank" rel="noopener">展开完整图册 · 六城故事、海图公约与方法来源 ↗</a></p><p class="modal-intro">潮生是一片原创的虚构群岛。你抵达的这一年，六座城刚刚开始共用海图，新的航线与旧的生活同时存在。</p><section class="book-section"><h3>潮历与土地</h3><p>一年有雨生、长昼、归潮、静冬四季。两轮月亮的节律叠加，每十二年形成一个长潮循环。火山石、抬升的古海床与沉积平原，留下不同的土壤和海岸。地质与物种适应属于世界的背景设定；游戏时间推进的是城邦社会。</p></section><section class="book-section"><h3>世界如何回应你</h3><p>每季，环境与农田决定粮食产量，居民消耗库存。海运把富余粮食转给缺粮的地方。短缺与污染降低互信，持续的差异会推动迁居。共有林恢复生态，学堂积累知识，港口扩大交换，矿炉增加收入也留下污染。人口、库存与事件均由同一个本地规则模型产生。五类建设会在城中逐级出现；也可以撤除一级，建设投入不退款，过去的污染与知识保留，重建仍按原价。生态下降时，野生林冠会缩小、凋落，恢复时重新长出。望潮湾与苇原的田块随四季育苗、青穗、收割和休田，生态改变作物长势；六城港边八格粮架显示现有库存，每格约一季，超过八季显示满架。它们是全城农业与粮仓的代表性缩影。烬山的回灰河东段另以水色与岸痕表现累积污染，生活账本可直接定位；停炉后随已有污染逐季恢复。它们不是水质采样、植物生长或水流的物理模型。</p></section><section class="book-section"><h3>观察、选择与记忆</h3><p>没有必须完成的任务。你可以只看船只经过，也可以进入城镇改变它的道路。时间可以暂停，一季一季推进，也可以越过十二年。推演功能会在副本中比较当前建设和撤去五类常规建设的结果，不改变正在生活的世界。推演可展开六城的各项结果，并直接回到相应城镇调整建设。</p></section><section class="book-section"><h3>思想的来处</h3><p>参考 human-distillation-lab 的 14 个条目，把方法改写为具体的规则、空间与叙事。以下是创作者对资料的应用，不是这些人物本人参与创作或发表意见。专家库当前实测含 36 类、3,610 个条目，存在跨领域重复人物，内容仍为草稿。</p><div class="method-list">${METHODS.map(m=>`<article class="method"><div><strong>${m.name}</strong><span>${m.field} · ${m.kind}</span></div><div><p>${m.idea}<br>${m.use}</p><code>${m.path}</code></div></article>`).join('')}</div></section><section class="book-section"><h3>关于这个模型</h3><p>它是一部可交互的世界作品。产量、人口和生态系数服务于内部一致的玩法，未经过现实校准，不用于现实预测。潮汐采用两个正弦周期的简化历法；海岸地形固定，水面高度随简化潮历变化；沉钟旧港的台阶会随水位隐现。波纹和航船运动是视觉表现，不计算真实水流。没有后台大模型在扮演居民，文字是原创叙事与状态条件的组合。前六季有六项居民议题，十二年后另有留粮线与污染争议；二十四年后，同为空仓却有人收到、有人没收到时，望潮湾还会讨论分配次序。每项各有两种回应，会改变持续的产量、污染、知识或收入规则；两年后出现相应回信。新决定会保存行动前与回信时的城镇账页，反映同期气候、建设和旧约的共同结果；旧存档缺少的读数不会事后补造。记录者会代际交接，已经作出的旧约跨代保留。页面关闭后，模拟时间停止。</p></section><section class="book-section"><h3>声音与保存</h3><p>声景由浏览器实时合成。顶部「音乐」提供潮音和五种借鉴作曲语言的原创背景音乐，可调音量并随时停止。日光、暮色、夜航改变音区与音色，潮位改变风声强弱；切到后台时暂停声音。没有引用现成录音。世界自动保存于当前浏览器；换浏览器或清理站点数据不会带走存档，请先在设置中导出。Three.js 使用 MIT 许可，完整许可保留在项目中。</p></section>`,'book');
 }
 function showComparison(){
   const r=compare(state),line=t=>`<p>居民 ${fmt(t.population)} 人</p><p>生态均值 ${Math.round(t.ecology*100)}%</p><p>公共库藏 ${fmt(t.wealth)} 铜</p><p>粮食库存 ${fmt(t.food)} 份</p>`;
@@ -350,12 +353,26 @@ function updateLegend(){
 function setMapLayer(value){$('layer').value=value;scene?.setLayer(value);updateLegend();updateArtCaption();}
 $('layer').onchange=e=>{if(sceneFocus?.startsWith('shipment:')){sceneFocus=null;$('view-subtitle').textContent=CITIES.find(c=>c.id===selected)?.type??'七座岛屿 · 六种生活';}setMapLayer(e.target.value);};
 $('light').onchange=e=>{scene?.setLight(e.target.value);sound.setEnvironment({light:e.target.value});if(selected==='spire'){if(sceneFocus==='spire-butterflies')$('view-subtitle').textContent=detailCaption(sceneFocus);if(tab==='place')renderDrawer();}};
-$('sound').onclick=async()=>{
-  if(audioBusy)return;audioBusy=true;$('sound').disabled=true;
-  try{if(soundOn){await sound.stop();soundOn=false;}else{await sound.start();soundOn=true;}$('sound').setAttribute('aria-pressed',String(soundOn));$('sound').innerHTML=`声景 <span>${soundOn?'开':'关'}</span>`;}
-  catch{toast('此浏览器暂时无法开启声音，世界仍可继续。');}
-  finally{audioBusy=false;$('sound').disabled=false;}
-};
+function updateSoundControls(){
+  $('sound').setAttribute('aria-pressed',String(soundOn));$('sound').innerHTML=`声景 <span>${soundOn?'开':'关'}</span>`;$('sound').disabled=audioBusy;
+  if($('music-toggle')){$('music-toggle').textContent=soundOn?'停止播放':'播放所选声景';$('music-toggle').disabled=audioBusy;$('music-toggle').setAttribute('aria-pressed',String(soundOn));}
+  if($('music-current'))$('music-current').textContent=`${soundOn?'正在播放':'已选择'} · ${musicStyle(musicPrefs.style).name}`;
+}
+async function toggleSound(){
+  if(audioBusy)return;audioBusy=true;updateSoundControls();
+  try{if(soundOn){await sound.stop();soundOn=false;}else{await sound.start();soundOn=true;}}
+  catch{soundOn=false;toast('此浏览器暂时无法开启声音，世界仍可继续。');}
+  finally{audioBusy=false;updateSoundControls();}
+}
+function rememberMusic(){try{localStorage.setItem(MUSIC_KEY,JSON.stringify(musicPrefs));}catch{toast('本次声音设置已应用，浏览器暂时无法记住选择。');}}
+function showMusic(){
+  openModal('音乐与声景',`<p class="modal-intro">为群岛选一段背景音乐。播放时切换会淡出上一段，海风仍在远处。</p><fieldset class="music-choices"><legend class="sr-only">音乐风格</legend>${MUSIC_STYLES.map(m=>`<label class="music-choice"><input type="radio" name="music-style" value="${m.id}" ${m.id===musicPrefs.style?'checked':''}><span><strong>${m.name}</strong><small>${m.detail}</small></span></label>`).join('')}</fieldset><div class="music-controls"><button id="music-toggle" aria-pressed="${soundOn}"></button><label for="music-volume">音量 <output id="music-volume-value">${Math.round(musicPrefs.volume*100)}%</output></label><input id="music-volume" type="range" min="0" max="100" step="1" value="${Math.round(musicPrefs.volume*100)}"></div><p id="music-current" class="music-current" role="status"></p><p class="music-note">原创程序乐句，借鉴作曲语言。声音由浏览器合成；风格与音量会记住，刷新后保持静音。页面在后台时暂停发声。</p>`,'music');
+  $('modal-body').querySelectorAll('[name="music-style"]').forEach(input=>input.onchange=()=>{musicPrefs.style=musicStyle(input.value).id;sound.setStyle(musicPrefs.style);rememberMusic();updateSoundControls();});
+  $('music-toggle').onclick=toggleSound;
+  $('music-volume').oninput=event=>{musicPrefs.volume=Number(event.target.value)/100;sound.setVolume(musicPrefs.volume);$('music-volume-value').textContent=`${event.target.value}%`;};
+  $('music-volume').onchange=rememberMusic;updateSoundControls();
+}
+$('sound').onclick=toggleSound;$('music-button').onclick=showMusic;
 $('world').addEventListener('keydown',e=>{if(['+','=','-','Home','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();if(e.key==='Home')closeDrawer();else if(e.key.startsWith('Arrow'))scene?.rotate(e.key==='ArrowLeft'?-.15:e.key==='ArrowRight'?.15:0,e.key==='ArrowUp'?-.1:e.key==='ArrowDown'?.1:0);else scene?.zoom(e.key==='-'?1.15:.87);}});
 document.querySelector('.skip-link').onclick=e=>{e.preventDefault();showAtlas();$('city-nav').querySelector('button').focus();};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.open&&selected){if($('drawer').hidden)closeDrawer();else hideDrawer();}});
