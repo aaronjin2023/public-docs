@@ -1,0 +1,11 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "12",
+  "at": "2026-10-27T20:07:50+09:00",
+  "title": "手势从两根手指回到一根",
+  "summary": "生产输入函数回归检查与真实鼠标旋转；IAB 不支持触控注入，实体双指未测。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "432f87ec93c340b8124016f59346eb373f552e8f3f9fdb2699e7f47385f31754"
+  ]
+}

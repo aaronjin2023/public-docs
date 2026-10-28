@@ -1,0 +1,12 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "05",
+  "at": "2026-10-27T14:49:00+09:00",
+  "title": "建筑需要完整的一块地",
+  "summary": "六城全三级 QA 界面；课堂高差均低于 3。34.26 秒窗口观察 46.82 fps，仅代表当时本机版本。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "b1fab0fd6ac24b5d6f26af13a708f0bffb702488a6584f5bbc8f425b18589b37",
+    "33a741cd46d0af2b9ac3ebcc4a9345cbf2b5bfb88e6138c996734cd29ea1ff70"
+  ]
+}

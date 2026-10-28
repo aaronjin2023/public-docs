@@ -1,0 +1,12 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "20",
+  "at": "2026-10-27T22:52:00+09:00",
+  "title": "同为空仓，为什么总有人排在后面",
+  "summary": "63 项测试；两条真实选择在第 163 季分别给林汐和望潮湾 55 份。完整状态对照模型。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "78f7df4f4c5affa933f18d500632b99caf732ef6a5da98ba64845c9b28ae3f62",
+    "eea052ed9bc431516814c414e2ea314c835af49946925123b7f57a994b8bf305"
+  ]
+}

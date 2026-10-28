@@ -1,0 +1,12 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "03",
+  "at": "2026-10-27T14:30:00+09:00",
+  "title": "让旧约与存档一起活下去",
+  "summary": "19 项测试；实际导入、恢复、损坏原件保留和百年旧约。声音仅程序验证，未人工听审。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "f9be81b13867f83e81ae6864bc183b6354626d683fc3e445a7728a29175d442f",
+    "0081c607f1d1d28552d6e4be000cd3746544025dce8939a7a8926a38a82d3fae"
+  ]
+}

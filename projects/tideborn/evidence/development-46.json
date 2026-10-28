@@ -1,0 +1,15 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "46",
+  "at": "2026-10-28T09:40:11.740102+09:00",
+  "title": "把世界装进一个可带走的包",
+  "summary": "本地110项测试通过；独立解压版109项通过、1项外部参考资料不可用明确跳过。普通资金下完成居民选择、建设、两年回信、只读推演和遗址发现；导出、无效导入保护、有效导入与刷新验证通过。图册图片与开发日志可读。窄屏已核无横向溢出；实体触控、人工听审未验收。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "ce45cd4ce67c79f119918b5a7af4e2d4e69e66f583e942985e8918d19ac06709",
+    "d2d6e2842ed442b28041a0b870ead0ad2348e298aea95b02588ef63f3dbb6bbf",
+    "24e8e17fc562b9dada64cb82cbd9dd3c1dbfd5325e75f7f2d3003bbb53b948b7",
+    "b1e245e1e51864ed5ac91ec6b53f2b8e970d0441ded11e6e1406e8f56c2a868a",
+    "5083bddaefeae82e8623235d64c202fbf11f46ca2f54ef9395c851abb2ad7b79"
+  ]
+}

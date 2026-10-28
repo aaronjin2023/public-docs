@@ -1,0 +1,12 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "02",
+  "at": "2026-10-27T12:24:00+09:00",
+  "title": "让六座城有各自的地形生活",
+  "summary": "7 项测试；六城、建设扣费、刷新和增资采矿 QA 情景。参考库只读。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "f862e20e414e06e65cba70e0c0012c71b79cbf1360428cd08439a016b2e650a6",
+    "8dbb5194265e643c1a25ba45052f986d06b9d66d42fcbb645eef16a2665cdec1"
+  ]
+}

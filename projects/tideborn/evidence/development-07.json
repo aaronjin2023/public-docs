@@ -1,0 +1,11 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "07",
+  "at": "2026-10-27T17:17:00+09:00",
+  "title": "另一扇窗口不应抹掉水渠",
+  "summary": "23 项测试；两窗口真实建设与恢复。localStorage 不是原子协作事务，仍建议单窗口推进。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "b65b82d90e0581d9ba4f39a9c8a9e9c50fb77bd7e9cdbd92738adfbdad1eb2d4"
+  ]
+}

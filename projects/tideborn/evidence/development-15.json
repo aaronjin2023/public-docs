@@ -1,0 +1,11 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "15",
+  "at": "2026-10-27T20:50:00+09:00",
+  "title": "给两百年后的居民留下实际账页",
+  "summary": "真实前后读数对照；第 809 季永久账页保持原值。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "aa406d149be27f1cec9e6550d0b102c67da64a399a01205b40693bd68bbd642a"
+  ]
+}

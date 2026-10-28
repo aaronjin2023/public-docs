@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111413">
+  <meta name="description" content="潮生：一片可探索、可干预、会留下历史的群岛。">
+  <title>潮生 · 在潮水之间，世界生长</title>
+  <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <a class="skip-link" href="#city-nav">跳到城镇导航</a>
+  <header class="topbar">
+    <button id="home" class="brand" aria-label="潮生，回到群岛全景"><img src="./assets/mark.svg" alt="" width="34" height="34"><span>潮生</span><span class="brand-en">Tideborn</span></button>
+    <nav class="main-nav" aria-label="世界导航">
+      <button id="atlas-button">群岛图志</button>
+      <button id="journal-button">年代记<span id="event-count"></span></button>
+      <button id="book-button">世界之书</button>
+      <button id="development-button">开发日志</button>
+    </nav>
+    <div class="top-actions"><button id="sound" aria-pressed="false">声景 <span>关</span></button><button id="help-button" aria-label="操作说明">?</button></div>
+  </header>
+  <main class="world-shell">
+    <div id="world" tabindex="0" aria-label="群岛三维视图，方向键旋转，加减键缩放，Home 回到全景"></div>
+    <div id="loading" role="status"><span class="loading-mark"></span><p>正在绘制海岸，点亮灯塔…</p></div>
+    <section id="intro" class="intro" aria-label="进入潮生">
+      <h1>潮生</h1>
+      <p class="intro-line">在潮水之间，<br>世界生长。</p>
+      <p class="intro-copy">六座城，一片不断变化的海。<br>你可以做一个旅人，也可以改变历史。</p>
+      <button id="enter" class="primary">进入群岛 <span aria-hidden="true">↗</span></button>
+      <p class="intro-note">一个由人类思想的碎片孕育的世界</p>
+    </section>
+    <div class="map-tools" aria-label="地图工具">
+      <button id="zoom-in" aria-label="放大地图">+</button><button id="zoom-out" aria-label="缩小地图">−</button>
+      <button id="reset-camera" aria-label="回到全景" title="回到全景">⌂</button>
+    </div>
+    <div class="map-caption"><span id="view-title">长潮群岛</span><span id="view-subtitle">七座岛屿 · 六种生活</span></div>
+    <div class="map-settings">
+      <label><span class="sr-only">地图图层</span><select id="layer"><option value="terrain">自然地貌</option><option value="trade">海上航线</option><option value="ecology">生态状况</option><option value="height">海拔层次</option></select></label>
+      <label><span class="sr-only">场景光照</span><select id="light"><option value="day">日光</option><option value="dusk">暮色</option><option value="night">夜航</option></select></label>
+    </div>
+    <div id="layer-legend" class="layer-legend" hidden></div>
+    <aside id="drawer" class="drawer" aria-label="探索详情" hidden>
+      <div class="drawer-top"><button id="back-to-world">← 回到群岛</button><button id="close-drawer" aria-label="关闭详情">×</button></div>
+      <div id="drawer-content"></div>
+    </aside>
+  </main>
+  <footer class="world-footer">
+    <div class="time-block"><span class="date-caption">长潮纪</span><strong id="year">208</strong><span id="season">雨生</span><button id="play" aria-label="让时间流动" aria-pressed="false">▶</button><button id="step" title="推进一季">下一季</button><button id="decade" title="推进十二年">十二年后 ↗</button></div>
+    <div class="world-pulse" aria-label="群岛近况"><span><b id="population">6,310</b> 居民</span><span><b id="ecology">82</b>% 生态</span><span id="tide-state">潮水渐涨</span></div>
+    <div class="footer-note"><span id="save-status">世界保存在此浏览器</span><button id="options-button" aria-label="世界设置">设置</button></div>
+    <div class="news-strip"><span class="news-label">海上传来</span><button id="latest-news">长潮纪 208 年，六座城邦共同打开海图。</button></div>
+  </footer>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <dialog id="modal" aria-labelledby="modal-title"><div class="modal-head"><h2 id="modal-title"></h2><button id="close-modal" aria-label="关闭窗口">×</button></div><div id="modal-body"></div></dialog>
+  <noscript><p class="noscript">潮生需要 JavaScript 才能让世界运行。<a href="docs/world-atlas.html">阅读世界图册与方法来源 ↗</a></p></noscript>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

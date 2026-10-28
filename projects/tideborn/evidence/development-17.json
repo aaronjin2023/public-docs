@@ -1,0 +1,11 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "17",
+  "at": "2026-10-27T21:17:00+09:00",
+  "title": "回灰河记得停炉之前",
+  "summary": "50 项测试；撤炉当下材质不变、十二年逐渐恢复。表现性痕迹，不是流体模型。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "3380b52d37aff70c058694e1817a50995a030a699e9dbf4364fcf86532140a28"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "04",
+  "at": "2026-10-27T14:35:05+09:00",
+  "title": "不能声称一艘没有到来的救援船",
+  "summary": "20 项测试；第 96 季真实账本与窄屏检查。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "ab8e1ead7826e6e3c1df7563d3ea7212911eb12f5600aed5abb5f8a6c5156dd4"
+  ]
+}

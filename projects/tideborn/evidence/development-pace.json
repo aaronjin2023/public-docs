@@ -1,0 +1,9 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "pace",
+  "at": "2026-10-27T13:38:00+09:00",
+  "title": "第一次节奏纠偏",
+  "summary": "区分等待与实际开发；区间计数包含统计工作，不把等待时长折算为计算用量。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": []
+}

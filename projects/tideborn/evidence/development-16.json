@@ -1,0 +1,11 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "16",
+  "at": "2026-10-27T20:54:16+09:00",
+  "title": "群岛总量之下是谁承担代价",
+  "summary": "47 项测试；42 行浏览器读数对照模型，真实世界原值不变。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "1d86219da49e42c959c7174a7bb7e53ce29525f7ced3ac5487416b9cfafbdf14"
+  ]
+}

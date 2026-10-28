@@ -1,0 +1,11 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "18",
+  "at": "2026-10-27T21:52:00+09:00",
+  "title": "粮食确实从另一座城来",
+  "summary": "54 项测试；真实跨季替换、无运输、旧档缺页与伪造导入。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "b5a1563567c6db4350b0139064329213fcaec5ef41f0d67a34d72b9ab90163c7"
+  ]
+}

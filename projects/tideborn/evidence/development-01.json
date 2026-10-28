@@ -1,0 +1,12 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "01",
+  "at": "2026-10-27T11:00:00+09:00",
+  "title": "从思想碎片到可进入的群岛",
+  "summary": "首轮 6 项测试；百年模拟、桌面与 390px 操作。时间来自工作记录约时。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "295f3415e3a1dc5ab034a68bc368b3f26516bd1583b3dc3d7eb14db5c35cb419",
+    "6b38faa76a247dfd035242b53671143b503cef1f3ed3f2494fa030b704047fdc"
+  ]
+}

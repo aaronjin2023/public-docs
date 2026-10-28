@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-10-28T01:02:49.485197+00:00",
+  "usage_as_of": "2026-10-28T01:02:39.824Z",
+  "usage": {
+    "input_tokens": 219003954,
+    "cached_input_tokens": 215726848,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 998169,
+    "reasoning_output_tokens": 356580,
+    "total_tokens": 220002123,
+    "uncached_input_tokens": 3277106
+  },
+  "notes": [
+    "Cumulative counters are read once at their latest value, not summed across samples.",
+    "Cached input is a subset of input. Reasoning output is a subset of output.",
+    "Repeated context reads contribute tokens. This is not a count of unique written text.",
+    "Only recorded requests through usage_as_of are covered. The active reply may not be recorded yet.",
+    "These are session token counters, not a billing or credit-deduction receipt."
+  ],
+  "scope": "Recorded development token totals; session/turn identifiers and individual request records omitted."
+}

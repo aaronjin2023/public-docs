@@ -1,0 +1,398 @@
+{
+  "source_root": "human-distillation-lab（方法参考目录，非完整资料库）",
+  "commit": "cfc59a359f8a8a0d2bdcd2f1a126360a08c27ab8",
+  "entries": [
+    {
+      "path": "geologists/alfred-wegener",
+      "files": {
+        "SKILL.md": "bbc2bbd5ea7529538c66860f23754e7d7bf68a7d15a3ae4b659626100ad144da",
+        "decisions.md": "daeaee38931cdecb27e8f465b2960c0e094b7522a53c6d7a6a90c5c39972fb3f",
+        "style.md": "a357b7f5187289bf75f738ba057d8ecdad9dcab20bb7587f4a9c106a2359d6d1",
+        "manifest.json": "0b2d6db4b111ab576e5d8e05f17dbd7725016a78261a8685b7f74096056f95e1",
+        "conflicts.md": "3e5506110410666ece07f9891dcdd805cc5ac17d0bd3373b874f9022e15763f9"
+      },
+      "source_works": [
+        "大陆漂移说",
+        "《海陆的起源》",
+        "古气候证据",
+        "海岸线与化石分布拟合"
+      ],
+      "sources": [
+        "Wikipedia 'Alfred Wegener' https://en.wikipedia.org/wiki/Alfred_Wegener",
+        "《海陆的起源》(Die Entstehung der Kontinente und Ozeane)",
+        "科学家类 scientists/alfred-wegener/ 已有蒸馏（按地质口径重蒸）"
+      ],
+      "known_gaps": [
+        "《海陆的起源》各版差异未逐版核对",
+        "古气候证据的原始数据未核对"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "geologists/james-hutton",
+      "files": {
+        "SKILL.md": "9f3d4033f0c614044fc5132d3327d121e9002ee3a16b3d7cd78231d8338850f4",
+        "decisions.md": "444a32a25a7f971aa1ea85dd7231584aded4114e510db7b136f70d8b29dfef88",
+        "style.md": "7230d2862447c190623a0244cf4c10c88ba9848024b2e4fe3720334f21c7e7cf",
+        "manifest.json": "0536f22cb7ea467dfee83726d9106435b837f7e96668e4f54b11890086455937",
+        "conflicts.md": "82673ae5bdbcef7e0d85d2e071baa886629bc945887acce78c56230357f0f472"
+      },
+      "source_works": [
+        "均变论",
+        "《地球理论》",
+        "深时概念",
+        "角度不整合面"
+      ],
+      "sources": [
+        "Wikipedia 'James Hutton' https://en.wikipedia.org/wiki/James_Hutton",
+        "《地球理论》(Theory of the Earth, 1788/1795)",
+        "科学家类 scientists/james-hutton/ 已有蒸馏（按地质口径重蒸）"
+      ],
+      "known_gaps": [
+        "《地球理论》原文未逐句核对",
+        "西卡角观察的具体日期未核对"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "geographers/alexander-von-humboldt",
+      "files": {
+        "SKILL.md": "dbe846dc27d5fa57147d0719c1a64359df65c91df8dcb58da7b8ea6fe3fdd79f",
+        "decisions.md": "0c0682041e354f4d0b5d76c1a56fc1d1769f1a4afd98ef09bd6f5a8a48c7fb3f",
+        "style.md": "44a8792b86cb7a905557531288a442671c4a879bb60179dd7f0882b0bec0e176",
+        "manifest.json": "025077a16e416e10c29768f1bb68d2a56e049b1e57f66a8f97ca55e3f3aa0ef4",
+        "conflicts.md": "b6290540697143de4080e9e63c3320cc8df7d3f968eba77ff1d8369a2d529f1d"
+      },
+      "source_works": [
+        "《宇宙》(Kosmos)",
+        "《新大陆热带地区旅行记》",
+        "《植物地理学论稿》"
+      ],
+      "sources": [
+        "地理学家草稿 v1（geographers-top100-draft.md）",
+        "Wikipedia / Britannica 共识（见 verification）"
+      ],
+      "known_gaps": [
+        "南美考察各段的具体测点未逐项核对原文",
+        "《宇宙》各卷的刊行次序未逐项核对",
+        "植被带谱图的各版本差异未核对"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "biologists/charles-darwin",
+      "files": {
+        "SKILL.md": "2ac5464db467b65c73656dbceb66074130c678f5ffddb514223ad9ac92336919",
+        "decisions.md": "44628642ddc196ab008a21923c3c87d655a3bd8cdcd2c9222bc476c329eaae4d",
+        "style.md": "29a43f825fdb5fe12284ad4560f0424a342f04334579584a1ec6d3357897b1ab",
+        "manifest.json": "21c4fc689b67432177d182f917fe8b900289d7e2f70c87603fbbaa5e2e03a824",
+        "conflicts.md": "34c6ba941f67d191e7421569c7e540a0def5f642ad72ce57c242b73915b2193f"
+      },
+      "source_works": [
+        "《物种起源》",
+        "自然选择理论",
+        "共同祖先"
+      ],
+      "sources": [
+        "生物学家草稿 v1（biologists-top100-draft.md）第 2 节与第 5 节",
+        "英文 Wikipedia 各生物学家主条目共识（生卒与代表作通说）"
+      ],
+      "known_gaps": [
+        "《物种起源》各版未逐版核对；贝格尔号笔记原文未逐句核对。"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "biologists/rachel-carson",
+      "files": {
+        "SKILL.md": "d1e5261a9ce5ba7b36785f7d190228833ebfa9721af99cac015856235ca7100f",
+        "decisions.md": "5a84df381637fe6d9591e3d6aa0716415ecf0b29ee2fdb360b14b5d81300effe",
+        "style.md": "ea86390799882aa4e933e31f8734321199529a1e8f3eecdceb36787dc050f78c",
+        "manifest.json": "086e971ade4dc4f740ae2156f2d89df5d01ebb5c358bf5643f6e0ae45c4fb082",
+        "conflicts.md": "d29227b09c2b8e28682d26bb8c4d86ce116048d1f305b430b76a7f1e05fcaffd"
+      },
+      "source_works": [
+        "《寂静的春天》",
+        "杀虫剂生态危害",
+        "《海风下》"
+      ],
+      "sources": [
+        "Wikipedia 'Rachel Carson'（英文 Wikipedia 主条目通说）",
+        "biologists-top100-draft.md v1"
+      ],
+      "known_gaps": [
+        "《寂静的春天》引用的部分原始数据未逐项核对",
+        "译文/转述未标 verbatim；关键日期与作品名未逐一核对原文出处"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "astronomers/johannes-kepler",
+      "files": {
+        "SKILL.md": "0acde023282b5179a2a9c9241a4767da0991ee92a1cbe6cc55d1722640cf8bef",
+        "decisions.md": "d55d0ffdb4cfd0cecaad3c9feff2faec66380abb0ee1ad4ec43efd1343e39538",
+        "style.md": "6e397be7ffb5117a89ace8f51a06e461b546a5832797b7d0209464a0835d64ae",
+        "manifest.json": "342a3277c73499ee50e710d075e2c3cb16cf2574334a84df44745a518cb3a502",
+        "conflicts.md": "384ac4b1e92cc6faccac44fbd5a775193c0d9b27858e2a1ef7c9e0d7a96bd9c9"
+      },
+      "source_works": [
+        "行星运动三定律：椭圆轨道定律、面积定律、调和定律",
+        "《新天文学》（Astronomia Nova, 1609）：火星轨道的椭圆拟合",
+        "《鲁道夫星表》（Tabulae Rudolphinae, 1627）：基于第谷数据的行星表"
+      ],
+      "sources": [
+        "Wikipedia 'Johannes Kepler' https://en.wikipedia.org/wiki/Johannes_Kepler",
+        "Britannica 'Johannes Kepler' https://www.britannica.com/biography/Johannes-Kepler"
+      ],
+      "known_gaps": [
+        "《新天文学》原文（拉丁文）未逐句核对",
+        "8 角分残差的具体计算过程待原文核对",
+        "《鲁道夫星表》的具体条目未逐项核对"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "sociologists/ibn-khaldun",
+      "files": {
+        "SKILL.md": "4e640a1ebd283881720235fa5697c6a5b2351be9587022c718b1859685cd453e",
+        "decisions.md": "546dfa54ad1cdcbb28495c53523477e70291e448a1f191ea652597ed42701b7c",
+        "style.md": "f7e7bb52e18021844221d2f57fc42dcf906ec03c4b871d454d7c0423fa0ab01d",
+        "manifest.json": "0c816419732180178d1db8ddadfd9883c18112427f6159d9cb0e0e7e98104b54",
+        "conflicts.md": "2e63ebb7df892c3429ac0391ca57248a96ca0f8132ec5b8b896ff4c4aaff82df"
+      },
+      "source_works": [
+        "《历史绪论》",
+        "《历史》"
+      ],
+      "sources": [],
+      "known_gaps": [
+        "阿拉伯文原文未核对，概念译名以通行中译本为准",
+        "《历史》通史各卷未逐卷核对，只蒸《历史绪论》模型"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "philosophers/rawls",
+      "files": {
+        "SKILL.md": "998d7bf5c2a7b63173cb3714678694c5348dee2b9f8690c8c41dfde990a94026",
+        "decisions.md": "324f12abadd9ca681c1918abeb3fbeded0daea3cfec40a8f202c7b6ab7f1f6f4",
+        "style.md": "373a953b303f1c526c72fc1fa4546ff9e3d5aa327c2e8b3638e5d17f1d033e15",
+        "manifest.json": "6d5a007987926b5f127fd62642f34fad3abce3e08f93a166aa513bead0c917b8",
+        "conflicts.md": "d7e73d0718249f3872858726283abe8a3682b68e86d1b74f55da1608e96c2fc9"
+      },
+      "source_works": [
+        "《正义论》",
+        "《政治自由主义》",
+        "《万民法》"
+      ],
+      "sources": [
+        "《正义论》《政治自由主义》通行译本",
+        "philosophers-top100-draft.md 第 2 节 #88"
+      ],
+      "known_gaps": [
+        "《正义论》修订版的差异未逐条核对",
+        "《万民法》的国际正义论证较薄"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "thinkers/laozi",
+      "files": {
+        "SKILL.md": "1e61bb00972afbbb973f5aab6ddfa8f972b99608ae0da055d90a48574ed177ab",
+        "decisions.md": "768db274e7e2be4f38bed573d6adc6e07e086bf53e294b9c82df9121d72ba925",
+        "style.md": "ec1d9de980c9751d197830f9369c9585089693826385b05ae6e9ae5fb43a60c0",
+        "manifest.json": "32820db8e98e868f6ace179b9d353331fc7998392c0614ad151f6faef126ede2",
+        "conflicts.md": "7153bbc2eae524d86cb241219d0fef4604abffcec7449f08d351bbf06bcad9f6"
+      },
+      "source_works": [
+        "《道德经》（又名《老子》，作者与成书年代有争议）"
+      ],
+      "sources": [
+        "英文 Wikipedia 'Dao De Jing' / 'Laozi'",
+        "郭店楚简（出土本，约前 4 世纪）"
+      ],
+      "known_gaps": [
+        "最早出土本郭店楚简约前 4 世纪，今本约成于战国晚期（前 3 世纪中叶）。",
+        "章节编排为后世所定，原始顺序不可考。",
+        "style.md §4 留白未展开：本稿未记录其有意不答的具体问题。"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "architects/vitruvius",
+      "files": {
+        "SKILL.md": "39992654b26a35027b5dfed532994e2f539cf1ec8e2524441b3b280eef2521f6",
+        "decisions.md": "4f735668be2853c7f0b09f4efc13fe4ebb8f8fea684d12cc5c3d5a8c2bb9725a",
+        "style.md": "dd749b7e607d57c17a91c4ef39a65318f8dd62c95548b36896917132024e8570",
+        "manifest.json": "95eeea279e02768f743cd9fb3399c8f92fa09c10cb2063336c10d7f1295ea084",
+        "conflicts.md": "797cb0773883bb4543b4d432b01a85adcfff511e4c404bc6fb3629950c9e3291"
+      },
+      "source_works": [
+        "《法诺巴西利卡》",
+        "《建筑十书》",
+        "《罗马剧场》（论述）"
+      ],
+      "sources": [
+        "草稿 architects-top100-draft.md v1",
+        "Wikipedia / Britannica / 建筑史通说（生卒与代表作）",
+        "建成建筑与测绘、图纸、模型"
+      ],
+      "known_gaps": [
+        "维特鲁威建成作品多已不存，蒸馏以《建筑十书》与后世复原为准，著作只作辅助证据之外的核心文本依据，见SKILL.md首行声明。",
+        "法诺巴西利卡的平面复原方案不一。"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "landscape-designers/wang-wei",
+      "files": {
+        "SKILL.md": "b00eb312dd25be7b7f4cf2c52266ca78d8433fe1e2ea44f3b14d025774d24727",
+        "decisions.md": "1a070d4e11fba39b09c7bdbe2f122243863eada8cfdaf6473f1fbcdddaee0aad",
+        "style.md": "5a5ac777f51d8f05e01e41f0d0902cff8cdbc34dbb14783cc92b4ab1b65de6bb",
+        "manifest.json": "fd9538ba6cdebdb8b95607bb954ece4290cd13f0227eb228332e5ddff4180bec",
+        "conflicts.md": "79cd0959a788668f3be42f63745d259c04d8534eb1ea72ca987dc748496d01ab"
+      },
+      "source_works": [
+        "《辋川别业》",
+        "《辋川二十景》"
+      ],
+      "sources": [
+        "《辋川集》通行本",
+        "草稿 landscape-designers-top100-draft.md 第 2 节 A 组 #1"
+      ],
+      "known_gaps": [
+        "辋川别业原址布局无实测图，空间细节只能据《辋川集》诗文反推",
+        "二十景中个别景名异写未逐一核对"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "writers/italo-calvino",
+      "files": {
+        "SKILL.md": "bdaef31dc45da912ab0d708c78f9aa1b2884751845dec016cb560de7d775e9b3",
+        "decisions.md": "4d9164832cfd447a476d6a49aa2741b1d1233399dcbd570ede9db0ddddd04b05",
+        "style.md": "bae342db1ae390ff87b2d7e46861d32599ef301e752730514b8099481c12500c",
+        "manifest.json": "aa5c45043eeeee0641ac1f5173f762f974782689a1e3e0c152a503205f9553e6",
+        "conflicts.md": "ad5a93fe4e1137e85eee2a0310d6791aca408765731155b61021fb348907f7b2"
+      },
+      "source_works": [
+        "《看不见的城市》",
+        "《如果在冬夜，一个旅人》",
+        "《树上的男爵》"
+      ],
+      "sources": [
+        "writers-top100-draft.md（名单、生卒、代表作；生卒按文学史通说）",
+        "Wikipedia / Britannica 共识（生卒与代表作，未逐条贴链接）"
+      ],
+      "known_gaps": [
+        "《看不见的城市》五十五座城市的分组未逐城核对",
+        "《冬夜》十个开头故事的标题与顺序引自通说，未逐篇核对"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "educators/maria-montessori",
+      "files": {
+        "SKILL.md": "07160367259e399b2a2ffbd55c6c84192f83e14a9b92d1d7f017ca29c4997540",
+        "decisions.md": "4a414de882b3af872d806071a4fafc91ad41603edd8e1689fb5202e97de497b5",
+        "style.md": "f9f7520eeb207376d71ad6ef4b4763ca2e3fc628ed05d336e285d6c0aa77afe2",
+        "manifest.json": "d56f10f16ef9f0d47234af6d361cc7196a4b7dad5f6e1f300965e7a015e74fc8",
+        "conflicts.md": "579ef9c172117e778f90dc5e5e6aba3bf6a12345b9eddbf0b1cb8a3bc34e6d2a"
+      },
+      "source_works": [
+        "《蒙台梭利方法》",
+        "《童年的秘密》",
+        "《发现儿童》"
+      ],
+      "sources": [
+        "《蒙台梭利方法》",
+        "《童年的秘密》",
+        "《发现儿童》",
+        "草稿 educators-top100-draft.md 第 6 节（教育家模板）"
+      ],
+      "known_gaps": [
+        "蒙台梭利教具的完整序列未逐一展开",
+        "敏感期理论的具体年龄划分在不同著作中略有出入，记此存疑"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    },
+    {
+      "path": "composers/claude-debussy",
+      "files": {
+        "SKILL.md": "44bb1c2e859650474461309a3af5d5fced3e2a5b390fb3c91d36b6bb4966c9bc",
+        "decisions.md": "9d93bde4883cf7964eee86027be820dc7a15eaf585b099178ee86774787a62c6",
+        "style.md": "e193de99a64bb1f824824c2bd1e4253978251a01a0bc4dc2b435e370e848ca8f",
+        "manifest.json": "aab9d89715e869da1586402da0cff82b62ead049b278ea4bcd75dd79813271ef",
+        "conflicts.md": "a9f3b494357b5f00cb63ad80ecc7d9905e1c002273d1d14661fc73910d5ac671"
+      },
+      "source_works": [
+        "《牧神午后前奏曲》(Prélude à l'après-midi d'un faune)",
+        "《大海》(La mer)",
+        "《佩莱阿斯与梅丽桑德》(Pelléas et Mélisande)"
+      ],
+      "sources": [
+        "composers-top100-draft.md 名单与代表作",
+        "英文维基百科各作曲家条目通说（生卒与代表作）",
+        "Grove Music Online / IMSLP 乐谱目录（待逐人核对，见 known_gaps）"
+      ],
+      "known_gaps": [
+        "各作品修订版本未逐件核对"
+      ],
+      "status": "draft v0.1",
+      "living_person": false
+    }
+  ],
+  "category_counts": {
+    "actors": 100,
+    "architects": 100,
+    "astronomers": 100,
+    "biologists": 100,
+    "calligraphers": 100,
+    "cartoonists": 110,
+    "chefs": 100,
+    "chemists": 100,
+    "composers": 100,
+    "dancers": 100,
+    "directors": 100,
+    "educators": 100,
+    "fashion-designers": 100,
+    "geographers": 100,
+    "geologists": 100,
+    "jurists": 100,
+    "landscape-designers": 100,
+    "lyricists": 100,
+    "managers": 100,
+    "marketers": 100,
+    "materials-scientists": 100,
+    "military": 100,
+    "musicians": 100,
+    "navigators": 100,
+    "painters": 100,
+    "philosophers": 100,
+    "physicists": 100,
+    "poets": 100,
+    "psychologists": 100,
+    "scientists": 100,
+    "screenwriters": 100,
+    "singers": 100,
+    "sociologists": 100,
+    "tax": 100,
+    "thinkers": 100,
+    "writers": 100
+  },
+  "entry_count": 3610,
+  "note": "方法改编用于原创虚构作品；不是专家本人意见、史实复刻或科学预测。参考库未被修改。"
+}

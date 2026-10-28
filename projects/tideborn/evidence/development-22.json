@@ -1,0 +1,12 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "22",
+  "at": "2026-10-27T23:17:51.711743+09:00",
+  "title": "把开发过程放回世界里",
+  "summary": "67 项测试和计数器自检；桌面、360px、键盘展开、加载失败/恢复与世界原值保护。较早阶段来自既有记录，不伪造逐条内部思考。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "76bfe5970ecc68df1148cc7cbfb8a162a1885910a988d6019d266088d98f6aa5",
+    "e1712fb4588d3c97a18083db39f9ddb9b8f4340424dc288584801baa5ca68fa2"
+  ]
+}

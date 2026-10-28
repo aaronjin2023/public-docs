@@ -1,0 +1,14 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "41",
+  "at": "2026-10-28T07:23:04.796007+09:00",
+  "title": "收起文字，仍留在眼前的地方",
+  "summary": "103项原有测试通过，UI lint为0 FAIL/0 WARN。真实鼠标收起和原位Escape均保持657.5滚动位置，原页签和相机目标精确保持；隐藏期间33→34季完整JSON与模型一致，恢复时暂停。漫游第二站、首次遗址发现后的只读往返、收起后换城、两次Escape及窗口Escape通过。360/390px无横向溢出、地图工具与恢复入口不重叠；完整世界/当前存档/备份刷新一致，新增异常0。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "5b6f9b95906cb784207cb811b5c742f387d376177fc110cb5e9c9a1725a415a0",
+    "eb9c145a56a2f08bd85fea2af85f1f52ee7c4d5e4d25dbdcb5a68964311693f9",
+    "adeb8a943e0e97ff7f87c19264f24bf88228a7027468c0174d2f9a8cfefe75ee",
+    "8dea4b6134c86aa739502fce9b33439c5a4f13400b064eea20e717ea7b1b1d75"
+  ]
+}

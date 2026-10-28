@@ -1,0 +1,15 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "47",
+  "at": "2026-10-28T10:02:39.787514+09:00",
+  "title": "让世界留在这里",
+  "summary": "既有世界、当前存档和上一份备份刷新前后一致。最近完整110项测试通过，便携环境109项通过、1项因外部参考资料不可用明确跳过；已验证运行文件保持。当时完成的是本地交付，尚未部署；未做实体触控或人工听审，不宣称用户已经验收。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "6df97db8b7ab0b831c30baec7744c8c893d4df12bb180b37d6c5a6960e9a7e54",
+    "ee8fa14e5600c7d8fef11267bef3f5c0a02f447c0d7bd005ac7ca8a3427877b3",
+    "b297def18f0c282b062007f8dc904d8a3b226441cd5df53657dcefeead8c00be",
+    "24e8e17fc562b9dada64cb82cbd9dd3c1dbfd5325e75f7f2d3003bbb53b948b7",
+    "b1e245e1e51864ed5ac91ec6b53f2b8e970d0441ded11e6e1406e8f56c2a868a"
+  ]
+}

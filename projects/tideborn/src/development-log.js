@@ -1,0 +1,13 @@
+const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const count=value=>value.toLocaleString('zh-CN');
+const date=value=>value?new Date(value).toLocaleString('zh-CN',{timeZone:'Asia/Tokyo',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}):'项目开始';
+const tokenLine=u=>`${count(u.total_tokens)} token · 输入 ${count(u.input_tokens)}（其中缓存 ${count(u.cached_input_tokens)}）· 输出 ${count(u.output_tokens)}`;
+
+export function renderDevelopmentLog(report){
+  const {usage,entries}=report;
+  const evidence=paths=>paths.filter(p=>/^(evidence|docs)\/[\w./-]+\.(json|png|txt|html)$/.test(p)&&!p.includes('..')).map((p,i)=>`<a href="./${escape(p)}" target="_blank" rel="noopener">${p.endsWith('.png')?'现场截图':'公开验证摘要'} ${i+1} ↗</a>`).join('');
+  return `<p class="book-lead">世界怎样长成</p><p class="modal-intro">潮生里的缺粮、污染与争议，怎样促成一次次改进。展开一个时点，读当时的开发判断、实际动作与理由。</p>
+    <section class="dev-usage" aria-label="真实累计用量"><dl><div><dt>累计 token</dt><dd>${count(usage.total_tokens)}</dd></div><div><dt>其中缓存输入</dt><dd>${count(usage.cached_input_tokens)}</dd></div><div><dt>输出 token</dt><dd>${count(usage.output_tokens)}</dd></div></dl><p>回执截至 ${date(report.usage_as_of)} JST · 日志更新于 ${date(report.generated_at)} JST</p><details class="dev-accounting"><summary>这些 token 怎样统计？</summary><p>输入合计 ${count(usage.input_tokens)}，其中未缓存输入 ${count(usage.uncached_input_tokens)}。缓存是输入的一部分，已计入总计；推理输出也已包含在输出中，不能重复相加。重复读取上下文会贡献 token，这不是独有文字数量，也不是账单。</p><p>每条用量取前后两个累计回执的差值，可能包含复核、说明与其他接续工作，不能精确归因于某一句判断或某项功能。没有把等待时长换算成 token。尚未归入阶段的已记录用量：${count(report.unassigned.total_tokens)} token；当前回复未落盘的部分不在统计内。</p></details><button id="refresh-development">读取最新记录 ↻</button><a href="./evidence/token-usage.json" target="_blank" rel="noopener">用量汇总回执 ↗</a></section>
+    <p class="dev-caption">公开日志保留原有49个阶段和各区间用量；内部流程仅作概括，累计数字与统计截止时间保持原回执。判断与理由为依据工作记录和验证回执整理的摘要。时间为阶段记录时间，日本时间 JST，并非逐条请求或连续执行记录。测试世界与此刻你正在玩的存档相互独立。</p>
+    <div class="dev-timeline">${[...entries].reverse().map((e,i)=>`<details class="dev-entry" data-development="${escape(e.id)}" ${i===0?'open':''}><summary><time datetime="${escape(e.at)}">${date(e.at)} JST</time><strong>${escape(e.title)}</strong><span>${count(e.tokens.usage.total_tokens)} token · 区间回执</span></summary><dl>${[['世界经历',e.world],['开发判断',e.judgment],['做了什么',e.change],['为什么这样做',e.reason],['验证与边界',e.verification]].map(([label,value])=>`<dt>${label}</dt><dd>${escape(value)}</dd>`).join('')}</dl><p class="dev-token">${tokenLine(e.tokens.usage)}<br>回执边界：${date(e.tokens.from_receipt)} → ${date(e.tokens.through_receipt)} JST</p><div class="dev-evidence">${evidence(e.evidence)}</div></details>`).join('')}</div>`;
+}

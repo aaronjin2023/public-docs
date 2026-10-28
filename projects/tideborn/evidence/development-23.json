@@ -1,0 +1,13 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "23",
+  "at": "2026-10-27T23:46:04.488899+09:00",
+  "title": "沿着街道，走进六座城",
+  "summary": "69 项测试；十八处实际浏览器画面全部查看，切换前后世界原值不变。键盘、360/390px、推进一季、真实 55 份运粮和逐字刷新保存通过。玩家第 51 季世界保全。固定视点漫游，不是自由步行角色；实体手机与人工听审未做。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "8f331b66566ca4758ff7c5a2bbc13b0d8c1565cd8b2b712a6d928e63e8ff2060",
+    "5c8ba464e1a3eb669ec49c379e7a340187f96dd8d64a035e4f6b02121d0c2f69",
+    "b25ab374fea49fd557f4b6aeb97a2f8e96ede69b69ccad5182e518e41fceeacf"
+  ]
+}

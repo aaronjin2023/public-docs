@@ -1,0 +1,12 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "06",
+  "at": "2026-10-27T14:54:14+09:00",
+  "title": "等世界真正绘出第一帧",
+  "summary": "硬刷新、城镇导航与新异常游标检查；没有注入真实 GPU 故障。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "91849b06b6704c5a41790501cb40f484f83d0d878c473448a6d1f6dde63d87c4",
+    "cd36ea71a4454fe9ba3b5bae3581b832dd213fabdaf053537b334be1ca467d01"
+  ]
+}

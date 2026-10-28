@@ -1,0 +1,9 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "hold",
+  "at": "2026-10-27T16:29:00+09:00",
+  "title": "保全候选版本的阶段",
+  "summary": "入口和文件核对；没有重复完整测试，也没有在等待期间执行。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": []
+}

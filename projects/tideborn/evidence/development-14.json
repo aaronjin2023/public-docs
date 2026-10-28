@@ -1,0 +1,11 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "14",
+  "at": "2026-10-27T20:33:18+09:00",
+  "title": "粮仓和四季终于在岸边可见",
+  "summary": "六城粮架、四季与满级共存；粮架是库存缩影，不是逐袋粮食。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "99f9bc59ede55077e62b1262e76f087babf4f82581ea1bf268a2c38dbad5e14e"
+  ]
+}

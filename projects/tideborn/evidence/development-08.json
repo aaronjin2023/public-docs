@@ -1,0 +1,11 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "08",
+  "at": "2026-10-27T18:05:00+09:00",
+  "title": "缩窄窗口后，六座城都该留在海图里",
+  "summary": "1280→390→360→1280 连续验证；实体手机触控未测试。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "45086b04ea9a9e43a08a52c8f256c29820c05a81f63a256ed43f687135f9949a"
+  ]
+}

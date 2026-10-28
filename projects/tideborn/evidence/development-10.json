@@ -1,0 +1,11 @@
+{
+  "type": "public-development-verification-summary",
+  "stage": "10",
+  "at": "2026-10-27T19:58:01+09:00",
+  "title": "十二种决定，十二处留下的地方",
+  "summary": "26 项测试；十二种真实场景、全三级共存和窄屏。",
+  "scope": "摘自已交付高层开发记录的验证摘要；不是原始运行日志、原始会话或独立重验。",
+  "source_evidence_sha256": [
+    "6de31b0d18fdc968f8ea8be7dfb6c9877942a15164f1bba00692e383072c4109"
+  ]
+}
