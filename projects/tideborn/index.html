@@ -7,7 +7,7 @@
   <meta name="description" content="潮生：一片可探索、可干预、会留下历史的群岛。">
   <title>潮生 · 在潮水之间，世界生长</title>
   <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=mobile-render-2">
+  <link rel="stylesheet" href="./style.css?v=artist-4">
 </head>
 <body>
   <a class="skip-link" href="#city-nav">跳到城镇导航</a>
@@ -37,6 +37,7 @@
     </div>
     <div class="map-caption"><span id="view-title">长潮群岛</span><span id="view-subtitle">七座岛屿 · 六种生活</span></div>
     <div class="map-settings">
+      <details id="artist-menu"><summary aria-label="画家：切换场景风格">画家 · <span id="artist-name">原貌</span></summary><section class="artist-panel" aria-label="场景画风"><div class="artist-heading"><h2>把群岛画成另一种模样</h2><button id="artist-close" aria-label="关闭画风面板">×</button></div><div id="artist-options"></div><p id="artist-description" aria-live="polite"></p><p id="artist-layer-note">数据图层保留原色；回到自然地貌后恢复画风。</p><p class="artist-footnote">绘画语言的实时演绎 · 5 种绘画 / 5 种漫画</p></section></details>
       <label><span class="sr-only">地图图层</span><select id="layer"><option value="terrain">自然地貌</option><option value="trade">海上航线</option><option value="ecology">生态状况</option><option value="height">海拔层次</option></select></label>
       <label><span class="sr-only">场景光照</span><select id="light"><option value="day">日光</option><option value="dusk">暮色</option><option value="night">夜航</option></select></label>
     </div>
@@ -55,6 +56,6 @@
   <div id="toast" role="status" aria-live="polite" hidden></div>
   <dialog id="modal" aria-labelledby="modal-title"><div class="modal-head"><h2 id="modal-title"></h2><button id="close-modal" aria-label="关闭窗口">×</button></div><div id="modal-body"></div></dialog>
   <noscript><p class="noscript">潮生需要 JavaScript 才能让世界运行。<a href="docs/world-atlas.html">阅读世界图册与方法来源 ↗</a></p></noscript>
-  <script type="module" src="./src/app.js?v=mobile-render-2"></script>
+  <script type="module" src="./src/app.js?v=artist-4"></script>
 </body>
 </html>

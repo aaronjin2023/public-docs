@@ -18,6 +18,7 @@ import {createSeaRouter,createSeaJourney} from './sea-routes.js';
 import {createFoodStore,updateFoodStore,createFields,updateFields} from './food-scene.js';
 import {bindOrbitPointers} from './orbit-input.js';
 import {openGraphicsContext} from './render-support.js';
+import {createArtRenderer} from './art-renderer.js?v=artist-4';
 import * as THREE from '../assets/vendor/three.module.js';
 import { CITIES, ISLANDS, LANDMARKS, SEED } from './world-data.js';
 import { terrainAt, baseTerrainAt, elevation, noise, random, clamp, reedRiverX } from './terrain.js';
@@ -38,6 +39,7 @@ export function createScene(container, onSelect, lightweight=false) {
   const surface=document.createElement('canvas');
   const graphics=openGraphicsContext(surface,lightweight);lightweight=graphics.lightweight;
   const renderer=new THREE.WebGLRenderer({canvas:surface,context:graphics.context});
+  const art=createArtRenderer(renderer);
   renderer.setPixelRatio(Math.min(devicePixelRatio,lightweight?1:1.7));
   renderer.setSize(container.clientWidth,container.clientHeight);
   renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -371,7 +373,7 @@ export function createScene(container, onSelect, lightweight=false) {
   }
 
   const labels=document.createElement('div');labels.className='world-labels';container.append(labels);
-  const mapOverlays=[...container.parentElement.querySelectorAll('.map-settings,.map-tools,.map-caption,#layer-legend')];
+  const mapOverlays=[...container.parentElement.querySelectorAll('.map-settings,.map-tools,.map-caption,#layer-legend,.artist-panel')];
   const labelObjects=[];
   [...CITIES,...LANDMARKS].forEach(c=>{
     const el=document.createElement('button');el.type='button';el.className=`map-label ${CITIES.includes(c)?'city-label':'landmark-label'}`;
@@ -465,7 +467,7 @@ export function createScene(container, onSelect, lightweight=false) {
       if(placement)l.el.style.transform=`translate(${placement.x}px,${placement.y}px) translate(-50%,-100%)`;
       l.el.classList.toggle('selected',selected===l.id);
     });
-    try{if(resolveReady&&graphics.context.isContextLost())throw new Error('绘图上下文已丢失，浏览器停止了三维渲染。');renderer.render(scene,camera);}
+    try{if(resolveReady&&graphics.context.isContextLost())throw new Error('绘图上下文已丢失，浏览器停止了三维渲染。');art.render(scene,camera,layer);}
     catch(error){if(rejectReady){cancelAnimationFrame(raf);rejectReady(error);resolveReady=rejectReady=null;return;}throw error;}
     frameCount++;
     if(resolveReady){resolveReady();resolveReady=rejectReady=null;}
@@ -473,6 +475,7 @@ export function createScene(container, onSelect, lightweight=false) {
   raf=requestAnimationFrame(render);
   return {
     ready,
+    setArtStyle(id){return art.setStyle(id);},
     focus(id){walkFocus=null;shipments.clearFocus();selected=id;const c=[...CITIES,...LANDMARKS].find(c=>c.id===id);if(c){goalTarget.set(c.x,elevation(c.x,c.z)+1,c.z);goalDistance=CITIES.some(city=>city.id===id)?72:55;goalPolar=.89;goalAzimuth=.68;}const p=id==='garden'?GARDEN.focus:id==='fold'?FOLD.focus:id==='bell'?BELL.focus:null;if(p){goalTarget.set(p.x,p.y,p.z);goalDistance=p.distance;goalPolar=p.polar;goalAzimuth=p.azimuth;}},
     focusWalk(cityId,index){
       const stop=cityGroups[CITIES.findIndex(c=>c.id===cityId)]?.userData.walk[index];if(!stop)return false;
@@ -551,9 +554,10 @@ export function createScene(container, onSelect, lightweight=false) {
       emberSwallows:{...emberSwallows.userData.reading,color:emberSwallows.userData.clay.color.getHexString(),visible:emberSwallows.userData.bird.visible},
       emberRiver:{pollution:emberRiver.userData.pollution,waterColor:emberRiver.userData.water.color.getHexString(),bankColor:emberRiver.userData.bank.color.getHexString(),plumeOpacity:emberRiver.userData.plume.material.opacity,plumeHeight:emberRiver.userData.plume.position.y},
       graphics:{lightweight,pixelRatio:renderer.getPixelRatio(),antialias:graphics.context.getContextAttributes()?.antialias,shadows:renderer.shadowMap.enabled},
+      art:art.stats(layer),
       waterHeight:ocean.position.y,exposedSteps:oldPortSteps.filter(top=>top>ocean.position.y).length,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,trees:treeList.length,leafyTrees:treeList.filter(t=>t.alive).length,boats:boats.length,walkers:walkers.filter(w=>w.visible).length,frameCount,
       cities:cityGroups.map((g,i)=>({id:CITIES[i].id,homes:g.userData.houses.count,capacity:g.userData.buildingCount,publicFerry:g.userData.ferry?.visible??false,civicAccess:g.userData.civicAccess?.visible??false,foodStore:{seasons:g.userData.foodStore.userData.seasons,levels:g.userData.foodStore.userData.levels},field:fields.find(f=>f.ci===i)?{stage:fields.find(f=>f.ci===i).group.userData.stage,height:fields.find(f=>f.ci===i).group.userData.height,plots:layouts[i].fields.length}:null,civicTraces:Object.values(g.userData.traces).filter(t=>t.visible).map(t=>({choice:t.userData.choice,label:t.userData.label,firstReceiver:t.userData.firstReceiver??null})),trees:treeList.filter(t=>t.island===CITIES[i].id&&t.alive).length,construction:Object.fromEntries(Object.entries(g.userData.policies).map(([id,levels])=>[id,levels.filter(group=>group.visible).length]))})),
     };},
-    dispose(){cancelAnimationFrame(raf);observer.disconnect();renderer.dispose();labels.remove();canvas.remove();},
+    dispose(){cancelAnimationFrame(raf);observer.disconnect();art.dispose();renderer.dispose();labels.remove();canvas.remove();},
   };
 }

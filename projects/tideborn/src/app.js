@@ -10,7 +10,8 @@ import {WALKS,walkReading} from './city-walk.js';
 import {FIELD_STAGES,foodSeasons} from './food-scene.js';
 import {CITIES,LANDMARKS,METHODS,POLICIES,START_YEAR,SEASONS} from './world-data.js';
 import {createWorld,advance,enact,retire,policyReason,totals,tideAt,dateLabel,discover,validateSave,compare,record,SAVE_KEY,decide,decisionReason,passageSummary,transportFor} from './simulation.js';
-import {createScene} from './scene.js?v=mobile-render-2';
+import {createScene} from './scene.js?v=artist-4';
+import {ART_STYLES,ART_STYLE_KEY,artStyle,loadArtStyle} from './art-styles.js';
 import {createSoundscape} from './audio.js';
 import {parseSave,replaceSave,writeSave,SaveConflictError} from './save-store.js';
 import {PETITIONS,pendingPetitions,petitionOpenedAt,residentAt,aftermathFor,outcomeFor} from './residents.js';
@@ -23,6 +24,7 @@ const delta=(n,digits=0)=>{const value=Number(n.toFixed(digits));return `${value
 let state=createWorld(),scene=null,selected=null,tab='place',playing=false,playTimer=null,soundOn=false,toastTimer=null,modalKind=null;
 let saveBlocked=false,loadIssue='',audioBusy=false,savedRaw=null;
 let sceneFocus=null;
+let artId='original';try{artId=loadArtStyle(localStorage);}catch{}
 let walkIndex=0;
 let drawerScroll=0;
 const resumeDetail=document.createElement('button');resumeDetail.id='resume-detail';resumeDetail.textContent='继续阅读 ↗';resumeDetail.hidden=true;
@@ -345,7 +347,7 @@ function updateLegend(){
   const legends={terrain:'',trade:`金色箭头：${transport}。灰虚线：常设航路。帆船为场景表现。`,ecology:'土褐 → 叶绿：生态由低到高',height:'低地 → 高山：颜色逐渐变浅'};
   $('layer-legend').textContent=legends[value];$('layer-legend').hidden=value==='terrain';
 }
-function setMapLayer(value){$('layer').value=value;scene?.setLayer(value);updateLegend();}
+function setMapLayer(value){$('layer').value=value;scene?.setLayer(value);updateLegend();updateArtCaption();}
 $('layer').onchange=e=>{if(sceneFocus?.startsWith('shipment:')){sceneFocus=null;$('view-subtitle').textContent=CITIES.find(c=>c.id===selected)?.type??'七座岛屿 · 六种生活';}setMapLayer(e.target.value);};
 $('light').onchange=e=>{scene?.setLight(e.target.value);sound.setEnvironment({light:e.target.value});if(selected==='spire'){if(sceneFocus==='spire-butterflies')$('view-subtitle').textContent=detailCaption(sceneFocus);if(tab==='place')renderDrawer();}};
 $('sound').onclick=async()=>{
@@ -371,10 +373,31 @@ window.addEventListener('storage',event=>{
   $('save-status').textContent='已同步另一窗口';toast('另一个窗口更新了世界，当前页面已同步并暂停时间。');
 });
 
+function updateArtCaption(){
+  const style=artStyle(artId);$('artist-name').textContent=style.name.split(' · ')[0];
+  $('artist-description').textContent=style.description;
+  $('artist-layer-note').textContent=$('layer').value==='terrain'?'数据图层保留原色；回到自然地貌后恢复画风。':'当前数据图层使用原始配色；切回自然地貌后应用所选画风。';
+}
+function initArtPicker(){
+  const choice=style=>`<label class="artist-choice"><input type="radio" name="art-style" value="${style.id}" ${style.id===artId?'checked':''}><span class="artist-swatch" aria-hidden="true">${style.colors.map(c=>`<i style="background:${c}"></i>`).join('')}</span><span>${style.name}</span></label>`;
+  $('artist-options').innerHTML=choice(ART_STYLES[0])+`<div class="artist-columns">${['绘画','漫画'].map(group=>`<fieldset><legend>${group}</legend>${ART_STYLES.filter(s=>s.group===group).map(choice).join('')}</fieldset>`).join('')}</div>`;
+  $('artist-options').addEventListener('change',event=>{
+    if(event.target.name!=='art-style')return;
+    artId=artStyle(event.target.value).id;scene?.setArtStyle(artId);updateArtCaption();
+    try{localStorage.setItem(ART_STYLE_KEY,artId);}catch{toast('画风已应用，本次浏览器无法记住选择。');}
+  });
+  const menu=$('artist-menu'),summary=menu.querySelector('summary');
+  menu.addEventListener('toggle',()=>{if(menu.open)menu.querySelector('.artist-panel').scrollTop=0;});
+  $('artist-close').onclick=()=>{menu.open=false;summary.focus();};
+  document.addEventListener('pointerdown',event=>{if(menu.open&&!menu.contains(event.target))menu.open=false;});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&menu.open){event.preventDefault();event.stopImmediatePropagation();menu.open=false;summary.focus();}},true);
+  updateArtCaption();
+}
+initArtPicker();
 renderStats();
 let renderStage='准备场景',renderIssue=null;
 const lightweight=new URLSearchParams(location.search).get('graphics')==='lite'||matchMedia('(pointer: coarse)').matches;
-try{scene=createScene($('world'),select,lightweight);renderStage='设置初始世界';scene.home();scene.update(state);renderStage='绘制第一帧';await scene.ready;$('loading').hidden=true;if(state.tick>0)enter();if(loadIssue)toast(loadIssue);}
+try{scene=createScene($('world'),select,lightweight);renderStage='设置初始世界';scene.setArtStyle(artId);scene.home();scene.update(state);renderStage='绘制第一帧';await scene.ready;$('loading').hidden=true;if(state.tick>0)enter();if(loadIssue)toast(loadIssue);}
 catch(error){
   console.error(error);scene?.dispose();scene=null;
   renderIssue={stage:renderStage,code:error.code||error.name||'Error',message:String(error.message||error).slice(0,1000)};
