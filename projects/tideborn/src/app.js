@@ -373,6 +373,6 @@ window.addEventListener('storage',event=>{
 
 renderStats();
 try{scene=createScene($('world'),select);scene.home();scene.update(state);await scene.ready;$('loading').hidden=true;if(state.tick>0)enter();if(loadIssue)toast(loadIssue);}
-catch(error){console.error(error);$('loading').innerHTML='<p>这个浏览器暂时无法绘制三维群岛。</p><p>你仍可从上方「群岛图志」进入城镇，推进时间与阅读历史。</p>';$('intro').hidden=true;}
+catch(error){console.error(error);$('loading').innerHTML='<p>三维画面暂时无法启动，需要可用的 WebGL 2。</p><p>你仍可从上方「群岛图志」进入城镇，推进时间与阅读历史。</p>';$('world').append($('loading'));$('intro').hidden=true;}
 // Read-only diagnostics for local checks; user state is never exposed to another service.
 window.tideborn={snapshot:()=>structuredClone(state),renderStats:()=>scene?.stats(),soundStats:()=>sound.stats()};
