@@ -1,62 +1,48 @@
 <!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#111413">
-  <meta name="description" content="潮生：一片可探索、可干预、会留下历史的群岛。">
-  <title>潮生 · 在潮水之间，世界生长</title>
-  <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=mobile-4">
-</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111413"><title>潮生 · 共同世界</title><link rel="icon" href="./assets/mark.svg"><link rel="stylesheet" href="./shared/shared.css?v=decennial-1"></head>
 <body>
-  <a class="skip-link" href="#city-nav">跳到城镇导航</a>
-  <header class="topbar">
-    <button id="home" class="brand" aria-label="潮生，回到群岛全景"><img src="./assets/mark.svg" alt="" width="34" height="34"><span>潮生</span><span class="brand-en">Tideborn</span></button>
-    <nav class="main-nav" aria-label="世界导航">
-      <button id="atlas-button">群岛图志</button>
-      <button id="journal-button">年代记<span id="event-count"></span></button>
-      <button id="book-button">世界之书</button>
-      <button id="development-button">开发日志</button>
-      <button id="council-button">议事会</button>
-    </nav>
-    <div class="top-actions"><details id="language-menu"><summary aria-label="语言 / Language" translate="no">◎ <span id="language-name">Language</span></summary><div class="language-panel"><label for="language">语言</label><select id="language" translate="no"><option value="zh" lang="zh-CN">中文</option><option value="en" lang="en">English</option><option value="es" lang="es">Español</option><option value="fr" lang="fr">Français</option><option value="ar" lang="ar">العربية</option><option value="ja" lang="ja">日本語</option></select><p>部分档案与技术长文保留中文原文。语言不改变世界或存档。</p><p id="language-status" role="status"></p></div></details><button id="music-button">音乐</button><button id="sound" aria-pressed="false">声景 <span>关</span></button><button id="help-button" aria-label="操作说明">?</button></div>
-  </header>
-  <main class="world-shell">
-    <div id="world" tabindex="0" aria-label="群岛三维视图，方向键旋转，加减键缩放，Home 回到全景"></div>
-    <div id="loading" role="status"><span class="loading-mark"></span><p>正在绘制海岸，点亮灯塔…</p></div>
-    <section id="intro" class="intro" aria-label="进入潮生">
-      <h1>潮生</h1>
-      <p class="intro-line">在潮水之间，<br>世界生长。</p>
-      <p class="intro-copy">六座城，一片不断变化的海。<br>你可以做一个旅人，也可以改变历史。</p>
-      <button id="enter" class="primary">进入群岛 <span aria-hidden="true">↗</span></button>
-      <p class="intro-note">一个由人类思想的碎片孕育的世界</p>
-    </section>
-    <div class="map-tools" aria-label="地图工具">
-      <button id="zoom-in" aria-label="放大地图">+</button><button id="zoom-out" aria-label="缩小地图">−</button>
-      <button id="reset-camera" aria-label="回到全景" title="回到全景">⌂</button>
+<a class="skip" href="#life">打开人生手册</a>
+<header class="hud">
+  <button id="home" class="brand" aria-label="潮生 · 返回群岛全景" title="返回群岛全景"><img src="./assets/mark.svg" width="30" height="30" alt=""><span>潮生<small>共同世界</small></span></button>
+  <div class="world-clock"><span data-icon="sun"></span><div><p id="time">正在连接海潮…</p><span id="next-season">现实 1 小时 · 世界 1 季</span></div><div id="season-track" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div>
+  <div class="hud-right"><span id="purse" hidden><span data-icon="coin"></span><b id="purse-value">0</b><small>铜</small></span><button id="settings" class="icon-button" aria-label="设置" title="设置" data-icon="settings"></button></div>
+</header>
+<main id="game">
+  <section class="view" aria-label="共享群岛">
+    <div id="world" tabindex="0" aria-label="三维群岛，拖动旋转，双指缩放"></div>
+    <p id="render-status" role="status">正在点亮群岛…</p>
+    <div class="view-tools map-tools" aria-label="三维操作">
+      <button id="overview" class="icon-button" aria-label="群岛全景" title="群岛全景" data-icon="compass"></button>
+      <button id="zoom-in" class="icon-button" aria-label="放大" title="放大" data-icon="plus"></button>
+      <button id="zoom-out" class="icon-button" aria-label="缩小" title="缩小" data-icon="minus"></button>
+      <button id="art-open" class="icon-button" aria-label="切换画风" title="切换画风" data-icon="palette"></button>
+      <button id="music" class="icon-button" aria-label="开启潮音" title="开启潮音" aria-pressed="false" data-icon="volumeOff"></button>
     </div>
-    <div class="map-caption"><span id="view-title">长潮群岛</span><span id="view-subtitle">七座岛屿 · 六种生活</span></div>
-    <div class="map-settings">
-      <details id="artist-menu"><summary aria-label="画家：切换场景风格">画家 · <span id="artist-name">原貌</span></summary><section class="artist-panel" aria-label="场景画风"><div class="artist-heading"><h2>把群岛画成另一种模样</h2><button id="artist-close" aria-label="关闭画风面板">×</button></div><div id="artist-options"></div><p id="artist-description" aria-live="polite"></p><p id="artist-layer-note">数据图层保留原色；回到自然地貌后恢复画风。</p><p class="artist-footnote">绘画语言的实时演绎 · 5 种绘画 / 5 种漫画</p></section></details>
-      <label><span class="sr-only">地图图层</span><select id="layer"><option value="terrain">自然地貌</option><option value="trade">海上航线</option><option value="ecology">生态状况</option><option value="height">海拔层次</option></select></label>
-      <label><span class="sr-only">场景光照</span><select id="light"><option value="day">日光</option><option value="dusk">暮色</option><option value="night">夜航</option></select></label>
+    <button id="encounter-alert" class="world-prompt map-settings" hidden><span data-icon="mail"></span><span><strong id="prompt-title"></strong><small id="prompt-copy"></small></span><span data-icon="arrow"></span></button>
+    <div class="place map-caption"><span class="place-mark" data-icon="compass"></span><div><h1 id="place-name">潮生群岛</h1><p id="place-copy">六座城，一片共同经历的海。</p></div></div>
+    <span class="map-hint map-caption">拖动旋转 · 双指或按钮缩放</span>
+  </section>
+  <aside id="life" class="sheet" aria-label="航海手册" hidden>
+    <div class="sheet-head"><div><span id="sheet-symbol" data-icon="person"></span><h2 id="sheet-title" tabindex="-1">我的人生</h2></div><div class="sheet-controls"><button id="sheet-expand" class="icon-button" aria-label="展开手册" title="展开手册" aria-pressed="false" data-icon="expand"></button><button id="sheet-close" class="icon-button" aria-label="收起手册" title="收起手册" data-icon="close"></button></div></div>
+    <div class="sheet-scroll" id="sheet-scroll">
+      <section data-pane="atlas" hidden><p class="muted">沿着潮水，去看一座城。</p><button id="atlas-stories" class="story-entry"><span data-icon="book"></span>街巷与伙伴 · 翻阅故事</button><div id="atlas-cities" class="atlas-cities"></div><p class="fine">探索只移动视角，不会改变你的出生地。</p></section>
+      <section data-pane="life" hidden>
+        <section id="birth-panel"><h3 class="story-title">在潮声里降生</h3><p class="muted">选一座岛，给这一生一个名字。</p><form id="birth"><label for="name">你的名字</label><input id="name" name="name" maxlength="20" required autocomplete="off" placeholder="这一生，你叫什么"><button id="birth-appearance" class="look-trigger" type="button"></button><fieldset><legend>你的故乡</legend><div id="cities" class="cities"></div></fieldset><button type="submit" class="primary"><span data-icon="leaf"></span>在这里降生<span data-icon="arrow"></span></button></form><p class="fine">从零岁开始，与所有人共享同一条历史。幼年的决定由家人代为执行。</p></section>
+        <section id="person-panel" hidden><div class="person-banner"><div class="portrait" id="person-portrait"></div><div><h3 id="person-name" tabindex="-1"></h3><p id="person-detail" class="muted"></p><button id="person-appearance" type="button" class="appearance-link">更换人物造型</button></div></div><dl id="readings"></dl><button id="last-memory" class="story-entry" hidden></button><section id="encounter" class="encounter" hidden></section><p id="no-encounter" class="quiet-note">这一刻，日子平静。新的际遇会随岁月到来。</p><button id="story-library" class="story-library"><span data-icon="book"></span><span><strong>发现连续故事</strong><small id="story-library-copy"></small></span><span data-icon="arrow"></span></button><div id="season-actions"><h3>这一季，如何度过</h3><p id="pending" class="muted"></p><div id="choices" class="choices"></div></div><button id="legacy-link" class="primary" hidden><span data-icon="lineage"></span>开启家族传承<span data-icon="arrow"></span></button></section>
+      </section>
+      <section data-pane="stories" hidden><div id="story-book"></div></section>
+      <section data-pane="tournament" hidden><div id="tournament-content"></div></section>
+      <section data-pane="spirits" hidden><div id="spirit-content"></div></section>
+      <section data-pane="build" hidden><p id="build-context" class="muted">和故乡一起长大。</p><div id="projects"></div><p id="build-pending" class="fine"></p></section>
+      <section data-pane="lineage" hidden><div class="lineage-intro"><span data-icon="lineage"></span><h3>有人来到，有人留下。</h3><p class="muted">一生会结束，岛屿会记得。</p></div><p id="lineage-status" class="muted"></p><form id="inherit" hidden><label for="heir-name">后继者的名字</label><input id="heir-name" maxlength="20" required placeholder="让家族继续生活"><button id="heir-appearance" class="look-trigger" type="button"></button><p class="fine">继承一半积蓄、见识与手艺各 10%，向下取整。其余财产用于家庭安置与丧葬；岛屿设施和工程进度保留。</p><button class="primary" type="submit"><span data-icon="leaf"></span>交给下一代<span data-icon="arrow"></span></button></form><section id="ancestors"></section></section>
+      <section data-pane="history" hidden><div class="history-tabs" role="tablist" aria-label="历史范围"><button id="personal-history-tab" role="tab" aria-selected="true" aria-controls="personal-history">我的生平</button><button id="world-history-tab" role="tab" aria-selected="false" aria-controls="public-history" tabindex="-1">群岛年代</button></div><div id="personal-history" role="tabpanel" aria-labelledby="personal-history-tab"><p id="journal-empty" class="muted">降生之后，选择与影响会写在这里。</p><ol id="journal" class="journal"></ol><button id="older" class="secondary" hidden><span data-icon="book"></span>翻阅更早的生平</button></div><div id="public-history" role="tabpanel" aria-labelledby="world-history-tab" hidden><p id="world-count" class="muted"></p><ol id="history" class="journal"></ol><p class="fine">显示最近十二条群岛消息。</p></div></section>
+      <section data-pane="settings" hidden><h3>眼中的潮生</h3><label for="art">场景画风</label><select id="art"></select><p class="fine">画风只改变你看到的景色。</p><h3>世界的步调</h3><p id="clock-note" class="muted"></p><h3>关于这片海</h3><p class="muted">共享人生试运行。身份保存在当前浏览器；清除浏览器数据会失去身份入口，尚未接入正式账号。</p><p class="fine">目前寿命上限 90 岁，体力耗尽也会结束此生。婚姻、跨城迁居、小游戏与 AI 对话尚未实现。原单机存档保持独立。</p><p><a href="./solo.html">进入原单机世界</a></p></section>
     </div>
-    <div id="layer-legend" class="layer-legend" hidden></div>
-    <aside id="drawer" class="drawer" aria-label="探索详情" hidden>
-      <div class="drawer-top"><button id="back-to-world">← 回到群岛</button><button id="close-drawer" aria-label="关闭详情">×</button></div>
-      <div id="drawer-content"></div>
-    </aside>
-  </main>
-  <footer class="world-footer">
-    <div class="time-block"><span class="date-caption">长潮纪</span><strong id="year">208</strong><span id="season">雨生</span><button id="play" aria-label="让时间流动" aria-pressed="false">▶</button><button id="step" title="推进一季">下一季</button><button id="decade" title="推进十二年">十二年后 ↗</button></div>
-    <div class="world-pulse" aria-label="群岛近况"><span><b id="population">6,310</b> 居民</span><span><b id="ecology">82</b>% 生态</span><span id="tide-state">潮水渐涨</span></div>
-    <div class="footer-note"><span id="save-status">世界保存在此浏览器</span><button id="options-button" aria-label="世界设置">设置</button></div>
-    <div class="news-strip"><span class="news-label">海上传来</span><button id="latest-news">长潮纪 208 年，六座城邦共同打开海图。</button></div>
-  </footer>
-  <div id="toast" role="status" aria-live="polite" hidden></div>
-  <dialog id="modal" aria-labelledby="modal-title"><div class="modal-head"><h2 id="modal-title"></h2><button id="close-modal" aria-label="关闭窗口">×</button></div><div id="modal-body"></div></dialog>
-  <noscript><p class="noscript">潮生需要 JavaScript 才能让世界运行。<a href="docs/world-atlas.html">阅读世界图册与方法来源 ↗</a></p></noscript>
-  <script type="module" src="./src/app.js?v=mobile-4"></script>
-</body>
-</html>
+    <div class="sheet-status"><span id="connection" role="status" title="每15分钟同步；操作后、换季和已知际遇到期时补查。可随时手动刷新。">正在连接世界…</span><button id="refresh" class="icon-button" aria-label="刷新世界" title="刷新世界" data-icon="refresh"></button></div>
+  </aside>
+</main>
+<footer class="game-dock"><button id="identity" class="identity" title="打开我的人生"><span data-icon="person"></span><span><strong id="identity-name">尚未降生</strong><small id="identity-meta">在群岛里开始一生</small></span></button><nav id="game-nav" aria-label="游戏导航"><button data-panel="atlas" aria-label="群岛" aria-pressed="false"><span data-icon="compass"></span><span>群岛</span></button><button data-panel="life" aria-label="人生" aria-pressed="false"><span data-icon="person"></span><span>人生</span><i id="life-dot" hidden></i></button><button data-panel="spirits" aria-label="精灵" aria-pressed="false"><span data-icon="spirit"></span><span>精灵</span></button><button data-panel="build" aria-label="共建" aria-pressed="false"><span data-icon="build"></span><span>共建</span></button><button data-panel="lineage" aria-label="传承" aria-pressed="false"><span data-icon="lineage"></span><span>传承</span></button><button data-panel="history" aria-label="史册" aria-pressed="false"><span data-icon="book"></span><span>史册</span></button></nav><p class="dock-note">潮水不停，故事未完。<small>每小时一季 · 离线也会成长</small></p></footer>
+<p id="notice" role="status" hidden></p>
+<script type="module" src="./shared/app.js?v=shared-20261029-2"></script>
+</body></html>

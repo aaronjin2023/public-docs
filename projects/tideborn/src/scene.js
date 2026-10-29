@@ -33,7 +33,7 @@ const color=c=>new THREE.Color(c);
 const mat=(c,other={})=>new THREE.MeshStandardMaterial({color:c,roughness:1,...other});
 const dummy=new THREE.Object3D();
 
-export function createScene(container, onSelect, lightweight=false) {
+export function createScene(container, onSelect, lightweight=false, extensionFactory=null) {
   const scene=new THREE.Scene();
   scene.background=color('#c6d8d6');
   scene.fog=new THREE.FogExp2('#c6d8d6',.0018);
@@ -476,8 +476,11 @@ export function createScene(container, onSelect, lightweight=false) {
     frameCount++;
     if(resolveReady){resolveReady();resolveReady=rejectReady=null;}
   }
+  const extension=extensionFactory?.({scene,terrain,layouts,treeList,rockList});
   raf=requestAnimationFrame(render);
   return {
+    updateElements(data){extension?.update(data);},
+    focusElements(id){const p=extension?.point(id);if(!p)return false;selected=id;walkFocus=null;shipments.clearFocus();goalTarget.set(p.x,p.y+1,p.z);goalDistance=29;goalPolar=.65;goalAzimuth=.68;return true;},
     ready,
     setArtStyle(id){return art.setStyle(id);},
     focus(id){walkFocus=null;shipments.clearFocus();selected=id;const c=[...CITIES,...LANDMARKS].find(c=>c.id===id);if(c){goalTarget.set(c.x,elevation(c.x,c.z)+1,c.z);goalDistance=CITIES.some(city=>city.id===id)?72:55;goalPolar=.89;goalAzimuth=.68;}const p=id==='garden'?GARDEN.focus:id==='fold'?FOLD.focus:id==='bell'?BELL.focus:null;if(p){goalTarget.set(p.x,p.y,p.z);goalDistance=p.distance;goalPolar=p.polar;goalAzimuth=p.azimuth;}},
@@ -546,6 +549,7 @@ export function createScene(container, onSelect, lightweight=false) {
       updateNurseryFish(cityGroups[0].userData.traces.nursery,state.tick);
     },
     stats(){return {
+      elements:extension?.stats()??null,
       view:{selected,target:goalTarget.toArray(),distance:goalDistance,azimuth:goalAzimuth,polar:goalPolar},
       walk:walkFocus?{city:selected,stop:walkFocus,target:goalTarget.toArray(),camera:camera.position.toArray(),distance:goalDistance}:null,
       shipments:shipments.stats(),
@@ -562,6 +566,6 @@ export function createScene(container, onSelect, lightweight=false) {
       waterHeight:ocean.position.y,exposedSteps:oldPortSteps.filter(top=>top>ocean.position.y).length,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,trees:treeList.length,leafyTrees:treeList.filter(t=>t.alive).length,boats:boats.length,walkers:walkers.filter(w=>w.visible).length,frameCount,
       cities:cityGroups.map((g,i)=>({id:CITIES[i].id,homes:g.userData.houses.count,capacity:g.userData.buildingCount,publicFerry:g.userData.ferry?.visible??false,civicAccess:g.userData.civicAccess?.visible??false,foodStore:{seasons:g.userData.foodStore.userData.seasons,levels:g.userData.foodStore.userData.levels},field:fields.find(f=>f.ci===i)?{stage:fields.find(f=>f.ci===i).group.userData.stage,height:fields.find(f=>f.ci===i).group.userData.height,plots:layouts[i].fields.length}:null,civicTraces:Object.values(g.userData.traces).filter(t=>t.visible).map(t=>({choice:t.userData.choice,label:t.userData.label,firstReceiver:t.userData.firstReceiver??null})),trees:treeList.filter(t=>t.island===CITIES[i].id&&t.alive).length,construction:Object.fromEntries(Object.entries(g.userData.policies).map(([id,levels])=>[id,levels.filter(group=>group.visible).length]))})),
     };},
-    dispose(){cancelAnimationFrame(raf);observer.disconnect();art.dispose();renderer.dispose();labels.remove();canvas.remove();},
+    dispose(){extension?.dispose();cancelAnimationFrame(raf);observer.disconnect();art.dispose();renderer.dispose();labels.remove();canvas.remove();},
   };
 }
