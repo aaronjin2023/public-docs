@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="昼夜之间 BETWEEN。每周一刊，每期一种视角。阅读 2026 年 10 月 II《THE LONG RUN》与 10 月 I《RE:ORIGIN》。">
+  <meta name="description" content="昼夜之间 BETWEEN。每周一刊，每期一种视角。阅读 2026 年 11 月 I《人间未散场》、10 月 II《THE LONG RUN》与 10 月 I《RE:ORIGIN》。">
   <meta name="color-scheme" content="light">
   <title>昼夜之间 BETWEEN — 期刊</title>
   <style>
@@ -30,7 +30,7 @@
     .identity-name { font-size: 18px; letter-spacing: .1em; }
     .identity-line { font-size: 14px; }
     .masthead { margin: 28px 0 36px -.012em; font: 400 clamp(64px, 17.8vw, 248px)/.8 var(--serif); letter-spacing: -.065em; white-space: nowrap; }
-    .issue-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(32px, 5vw, 80px); padding-top: 4px; }
+    .issue-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(32px, 5vw, 80px); padding-top: 4px; }
     .issue { min-width: 0; scroll-margin-top: 24px; }
     .issue-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; border-top: 1px solid var(--ink); padding: 15px 0 16px; font-size: 14px; line-height: 1.5; }
     .issue-number { white-space: nowrap; }
@@ -42,6 +42,7 @@
     .issue-title { font: italic 400 clamp(32px, 4.1vw, 58px)/1.04 var(--serif); letter-spacing: -.035em; }
     .issue-title a { display: inline-block; padding-block: 4px; text-decoration: none; }
     .issue-title a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .14em; }
+    .issue-title-zh { font-family: "Songti SC", STSong, serif; font-style: normal; letter-spacing: .02em; }
     .issue-subject { margin-top: 10px; font-size: 17px; }
     .issue-line { margin-top: 19px; font-size: 16px; }
     .issue-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 30px; margin-top: 21px; padding-top: 8px; border-top: 1px solid var(--rule); }
@@ -51,7 +52,7 @@
     .footer-note { color: var(--muted); }
     @media (max-width: 900px) {
       .shell { width: calc(100% - 48px); }
-      .issue-list { gap: 32px; }
+      .issue-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
       .issue-date { gap: 9px; }
       .date-numeric { display: none; }
     }
@@ -98,6 +99,23 @@
     <h1 class="masthead" lang="en">BETWEEN</h1>
   </header>
   <main id="issues" class="issue-list shell" aria-label="昼夜之间期刊列表">
+    <article id="issue-2026-11-i" class="issue" aria-labelledby="issue-2026-11-i-title">
+      <header class="issue-meta">
+        <p class="issue-number" lang="en">I / WEEKLY</p>
+        <time class="issue-date" datetime="2026-11"><span lang="en">November 2026</span><span class="date-numeric">11月 I</span></time>
+      </header>
+      <a class="cover-link" href="issues/2026-11-i.html" aria-label="阅读《昼夜之间》2026 年 11 月 I：人间未散场">
+        <img src="assets/issue-2026-11-i-cover.jpg" width="900" height="1200" alt="《昼夜之间》11 月 I《人间未散场》封面：幽助身穿绿色立领，坐在街头墙边" decoding="async" fetchpriority="high">
+      </a>
+      <div class="issue-details">
+        <h2 id="issue-2026-11-i-title" class="issue-title issue-title-zh"><a href="issues/2026-11-i.html">人间未散场</a></h2>
+        <p class="issue-subject">幽游白书</p>
+        <p class="issue-line">越过生死，仍为人间而来。</p>
+        <nav class="issue-actions" aria-label="2026 年 11 月 I">
+          <a href="issues/2026-11-i.html">阅读本期</a>
+        </nav>
+      </div>
+    </article>
     <article id="issue-ii" class="issue" aria-labelledby="issue-ii-title">
       <header class="issue-meta">
         <p class="issue-number" lang="en">II / WEEKLY</p>
