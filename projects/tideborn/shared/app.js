@@ -12,7 +12,7 @@ import {icon,hydrateIcons} from './icons.js?v=game-1';
 import {appearanceOf,portraitSVG,OUTFITS} from './appearance.js';
 import {createTheatre} from './theatre.js?v=stories-1';
 import {createStoryBook} from './story-book.js';
-import {createWorldSync} from './world-sync.js?v=state-1';
+import {createWorldSync} from './world-sync.js?v=state-2';
 import {createStateReader} from './state-reader.js';
 import {API_BASE} from './deployment.js';
 const $=id=>document.getElementById(id),escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

@@ -34,7 +34,11 @@ export function createWorldSync({request,identity,active,visible=()=>[],onState,
     });return pending;
   }
   return {
-    refresh(resources=[...base(),...visible()]){const merged=[...inflight,...resources];cancel();return pull(merged);},
+    refresh(resources=[...base(),...visible()]){
+      // A local-only panel must preserve the request, clock and refresh deadline.
+      if(!resources.length&&identity()===owner&&(state||pending)){if(!pending)schedule();return pending??Promise.resolve(state);}
+      const merged=[...inflight,...resources];cancel();return pull(merged);
+    },
     pause(){paused=true;cancel();},
     resume(){paused=false;if(!active()||pending)return pending;if(!state||identity()!==owner||Date.now()>=nextPullAt||state.nextAt<=Date.now()+clockOffset||state.person?.encounter?.expiresAt<=Date.now()+clockOffset)return pull([...base(),...visible()]);onStatus(failures?'reconnecting':'connected');schedule();},
     close(){paused=true;cancel();},
