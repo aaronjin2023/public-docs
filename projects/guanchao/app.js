@@ -5,7 +5,7 @@ const esc = text => String(text ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<
 const stamp = value => value ? new Intl.DateTimeFormat('zh-CN', {timeZone:'Asia/Tokyo',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(value)) : '未知';
 const titles = {opportunity:'机会研究',editorial:'内容选题',news:'资讯阅读'};
 const priorities = {high:'高',medium:'中',low:'低'};
-let view = 'news', category = '', savedOnly = false, page = 1, selected, current, response, sources = new Map(), requestNumber = 0, timer;
+let view = 'news', category = '', savedOnly = false, page = 1, selected, current, response, sources = new Map(), requestNumber = 0, detailSequence = 0, timer;
 let reviewMode = false;
 const radarRoute = new URLSearchParams(location.search);
 let researchDimension = ['entities','people','mechanisms','needs','risks','regions','horizon','stage'].includes(radarRoute.get('dimension'))?radarRoute.get('dimension'):'mechanisms', researchSlice = (radarRoute.get('slice')||'').slice(0,80);
@@ -25,7 +25,7 @@ function navigation() {
 }
 async function load() {
   const sequence = ++requestNumber;
-  const params = new URLSearchParams({view,category,saved:savedOnly?'1':'0',q:$('search').value,hide_low:$('event-only').checked?'1':'0',page,dimension:researchDimension,slice:researchSlice});
+  const params = new URLSearchParams({view,category,saved:savedOnly?'1':'0',q:$('search').value,hide_low:$('event-only').checked?'1':'0',page,dimension:researchDimension,slice:researchSlice,days:$('relation-days').value});
   try {
     const data = await api(`/api/events?${params}`);
     if (sequence !== requestNumber) return;
@@ -33,7 +33,7 @@ async function load() {
     $('view-count').textContent = `${data.total} 条事件`;
     $('page-label').textContent = `${page} / ${Math.max(1,Math.ceil(data.total/data.size))}`;
     $('previous').disabled = page===1; $('next').disabled = page*data.size>=data.total;
-    if (!data.events.some(e=>e.id===selected)) selected=data.events.find(e=>['已分析','重要更新'].includes(e.state))?.id||data.events[0]?.id;
+    if (!current?.archived && !data.events.some(e=>e.id===selected)) selected=data.events.find(e=>['已分析','重要更新'].includes(e.state))?.id||data.events[0]?.id;
     $('events').innerHTML = data.events.length ? data.events.map(e=>{
       const rating=e.views?.[view];
       return `<button type="button" class="event-row" data-id="${esc(e.id)}" aria-pressed="${selected===e.id}" aria-controls="detail"><span class="row-top"><span>${esc(e.category)} · ${rating?`${priorities[rating.priority]}优先级`:'待判断'}</span><time datetime="${esc(e.updated_at)}">${stamp(e.updated_at)}</time></span><span class="event-title">${esc(e.title_zh)}</span><span class="row-reason">${esc(rating?.reason||e.summary)}</span><span class="row-meta"><span>${esc(e.state)}${e.saved?' · 已关注':''}</span><span>${esc(e.kind)}</span></span></button>`;
@@ -54,9 +54,10 @@ function metrics(article) {
   return Object.entries(newest.metrics).map(([k,v])=>`${names[k]||k} ${v}${['rank','probability_yes','volume_24h_usd'].includes(k)?`（前次 ${previous.metrics[k]??'—'}）`:`（${((v-(previous.metrics[k]??v))/hours).toFixed(1)}/小时）`}`).join(' · ')+`；间隔 ${hours.toFixed(2)} 小时`;
 }
 async function showDetail() {
-  const identity=selected;
+  if(current?.archived && current.id===selected)return;
+  const identity=selected, sequence=++detailSequence;
   const e=await api(`/api/events/${identity}`);
-  if(identity!==selected) return;
+  if(identity!==selected || sequence!==detailSequence) return;
   current=e;
   const refs=new Map((e.evidence||[]).map((a,i)=>[a.id,i+1]));
   const rating=e.views?.[view];
@@ -85,7 +86,7 @@ async function loadStatus() {
   sources=new Map(s.sources.map(r=>[r.id,r]));
   if(IS_STATIC) {
     $('sample-time').textContent=`数据快照 ${stamp(s.generated_at)} JST`;
-    $('system-note').textContent=`公开 ${s.events} 条已归类事件 · 本机已采集 ${s.collected} 条材料，${s.queued} 条待处理。最近成功分析 ${stamp(s.last_analysis_at)} JST。这里是定期发布的快照，不是实时采集；优先级属于编辑判断。`;
+    $('system-note').textContent=`公开 ${s.events} 条已归类事件 · 本机已采集 ${s.collected} 条材料，${s.queued} 条可处理，${s.queue_expired||0} 条已超分析窗口，${s.queue_quarantined||0} 条隔离。最近成功分析 ${stamp(s.last_analysis_at)} JST。这里是定期发布的快照，不是实时采集；优先级属于编辑判断。`;
     $('coverage-total').textContent=`快照中 ${s.sources.length} 个来源入口`;
     const states={ok:'读取成功',pending:'尚未读取',error:'读取失败',partial:'部分失败'};
     $('sources').innerHTML=s.sources.map(r=>`<div class="source-row"><span class="source-name">${esc(r.name)}</span><span class="source-state ${r.health!=='ok'?'stale':''}">${esc(states[r.health]||r.health)}（截至快照）<br>${esc(r.language)} / ${esc(r.region)}<br>成功 ${stamp(r.last_success)}</span></div>`).join('');
@@ -95,7 +96,7 @@ async function loadStatus() {
   }
   const fresh=s.sources.filter(r=>r.health==='ok'&&!r.overdue).length;
   $('sample-time').textContent=`本机检查 ${stamp(s.generated_at)} JST`;
-  $('system-note').textContent=`${s.events} 条事件 · ${s.queued} 条待处理材料 · 今日分析 ${s.batches_today}/${s.batch_limit} 批 · CLI ${s.calls_today}/${s.call_limit} 次。每 4 小时分析；未分析材料保留原始标题，优先级是编辑判断。${s.last_batch?.status==='failed'?' 最近模型批次失败，队列与上一版保留。':''}`;
+  $('system-note').textContent=`${s.events} 条事件 · ${s.queued} 条可处理 · ${s.queue_expired||0} 条超窗 · ${s.queue_quarantined||0} 条隔离 · 今日分析 ${s.batches_today}/${s.batch_limit} 批 · CLI ${s.calls_today}/${s.call_limit} 次。每 4 小时分析；未分析材料保留原始标题，优先级是编辑判断。${s.last_batch?.status==='failed'?' 最近模型批次失败，队列与上一版保留。':''}`;
   $('coverage-total').textContent=`${fresh}/${s.sources.length} 个入口正常`;
   const states={ok:'正常',pending:'待首次采集',error:'读取失败',partial:'部分失败'};
   const content={updated:'有更新',unchanged:'未变化',quiet:'暂无新内容',unknown:'未观测'};

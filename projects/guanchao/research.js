@@ -9,8 +9,9 @@ function researchClickEvents(root) {
 async function openResearchEvent(identity) {
   const node=researchData?.nodes.find(n=>n.event_id===identity);
   if(node?.archived) {
-    $('detail').innerHTML=`<button id="research-back" class="back-button" type="button">← 返回候选列表</button><h2>${esc(node.title)}</h2><p class="detail-summary">${esc(node.summary)}</p><p class="detail-copy">原事件已归档。以下为长期保留的研究摘要与来源引用，完整正文可能已过保留期。</p><section id="event-research"></section><h3>存档引用</h3>${node.evidence.map(e=>`<p class="detail-copy"><a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.title)} ↗</a><br>${esc(e.quote)}</p>`).join('')}`;
-    renderEventResearch({id:identity,research:node});
+    selected=identity;detailSequence++;current={id:identity,research:node,archived:true};
+    $('detail').innerHTML=`<button id="research-back" class="back-button" type="button">← 返回候选列表</button><h2>${esc(node.title)}</h2><p class="detail-summary">${esc(node.summary)}</p><p class="detail-copy">原事件已归档。以下为长期保留的研究摘要与来源引用，完整正文可能已过保留期。</p><section id="event-research"></section><h3>存档引用</h3>${node.evidence.map(e=>`<p class="detail-copy" id="evidence-${esc(e.article_id)}"><a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.title)} ↗</a><br>${esc(e.quote)}</p>`).join('')}`;
+    renderEventResearch(current);
     $('research-back').onclick=()=>document.body.classList.remove('reading-detail');
   } else {selected=identity;await showDetail();}
   if(matchMedia('(max-width:640px)').matches)document.body.classList.add('reading-detail');
@@ -63,16 +64,24 @@ function renderRelations() {
   $('relation-list').querySelectorAll('form').forEach(form=>form.onsubmit=async event=>{event.preventDefault();const fields=new FormData(form);try{await api('/api/research/review',{relation_id:form.dataset.relation,status:fields.get('status'),note:fields.get('note')});await loadResearch();}catch(e){form.querySelector('.review-result').textContent=e.message;}});
   $('relation-list').querySelectorAll('[data-relation-history]').forEach(b=>b.onclick=async()=>{try{const response=await api(`/api/research/history?id=${b.dataset.relationHistory}`);b.nextElementSibling.innerHTML=response.history.map(h=>`<p class="detail-copy">${stamp(h.created_at)} · ${esc(h.origin)} · ${esc(data.states[h.payload.status])}<br>${esc(h.payload.review_note||h.payload.reason)}</p>`).join('');}catch(e){b.nextElementSibling.textContent=e.message;}});
 }
+function researchEvidenceLinks(ids,event) {
+  return (ids||[]).map(id=>{
+    const source=event.research?.evidence.find(e=>e.article_id===id);
+    if(!source)return '<span class="local-note">引用材料暂不可用</span>';
+    const local=event.archived||(event.evidence||[]).some(e=>e.id===id);
+    return `<a href="${local?'#evidence-'+esc(id):esc(source.url)}" ${local?'':'target="_blank" rel="noopener noreferrer"'} aria-label="查看证据：${esc(source.title)}">[${esc(source.title)}]</a>`;
+  }).join(' ');
+}
 function renderEventResearch(event) {
   const box=$('event-research');if(!box)return;
   const node=event.research;
   if(!node){box.innerHTML='<h3>多角度切片</h3><p class="detail-copy">尚未切片，等待后续分析；不根据标题自动补出因果。</p>';return;}
   const labels=researchData?.dimensions||{entities:'主体',people:'受影响人群',mechanisms:'作用机制',needs:'需求假设',risks:'风险',regions:'地域',horizon:'时间尺度',stage:'事件阶段'};
-  box.innerHTML=`<h3>八维切片 · 编辑归纳</h3><dl class="slice-facts">${Object.entries(labels).map(([key,label])=>`<dt>${label}</dt><dd>${node.slices[key]?.length?node.slices[key].map(v=>`<button type="button" data-event-slice="${esc(v)}" data-dimension="${key}">${esc(v)}</button>`).join(' '):'未知'}</dd>`).join('')}</dl><h3>事件内的传导环节</h3><ol class="mechanism-chain">${node.chain.map(step=>`<li><span>${stepNames[step.status]}</span><p>${esc(step.statement)}</p></li>`).join('')}</ol><h3>后续观察问题</h3><p class="detail-copy">${esc(node.question)}</p><p class="local-note">${esc(node.origin||'研究分析')} · 需求与影响为假设，不能替代事实核实。</p>`;
+  box.innerHTML=`<h3>八维切片 · 编辑归纳</h3><dl class="slice-facts">${Object.entries(labels).map(([key,label])=>`<dt>${label}</dt><dd>${node.slices[key]?.length?node.slices[key].map(v=>`<button type="button" data-event-slice="${esc(v)}" data-dimension="${key}">${esc(v)}</button>`).join(' '):'未知'}</dd>`).join('')}</dl><h3>事件内的传导环节</h3><ol class="mechanism-chain">${node.chain.map(step=>`<li><span>${stepNames[step.status]}</span><p>${esc(step.statement)} ${researchEvidenceLinks(step.evidence_ids,event)}</p></li>`).join('')}</ol><h3>后续观察问题</h3><p class="detail-copy">${esc(node.question)}</p><p class="local-note">${esc(node.origin||'研究分析')} · 需求与影响为假设，不能替代事实核实。</p>`;
   box.querySelectorAll('[data-event-slice]').forEach(b=>b.onclick=()=>{researchDimension=b.dataset.dimension;researchSlice=b.dataset.eventSlice;$('slice-dimension').value=researchDimension;page=1;document.body.classList.remove('reading-detail');loadResearch();load();$('slice-heading').scrollIntoView();});
 }
 $('slice-dimension').onchange=()=>{researchDimension=$('slice-dimension').value;researchSlice='';page=1;loadResearch();load();};
-$('relation-days').onchange=loadResearch;$('relation-type').onchange=loadResearch;$('relation-status').onchange=loadResearch;
+$('relation-days').onchange=()=>{page=1;loadResearch();load();};$('relation-type').onchange=loadResearch;$('relation-status').onchange=loadResearch;
 $('threads-toggle').onclick=()=>{const open=$('threads-panel').hidden;$('threads-panel').hidden=!open;$('threads-toggle').setAttribute('aria-expanded',String(open));$('threads-toggle').textContent=open?'收起事件脉络':'展开事件脉络';};
 $('find-path').onclick=async()=>{try{const from=$('path-from').value,to=$('path-to').value;if(!from||!to||from===to){$('thread-path').textContent='请选择两个不同事件。';return;}const result=await api(`/api/research?${researchParams({from,to})}`);$('thread-path').innerHTML=result.paths.length?result.paths.map(p=>`<p class="path-result">${p.nodes.map((id,i)=>`${i?`<span class="path-kind"> ${['analogy','shared_context'].includes(result.relations.find(r=>r.id===p.relations[i-1])?.type)?'↔':'→'} ${esc(result.types[result.relations.find(r=>r.id===p.relations[i-1])?.type])} </span>`:''}${researchNodeLink(id)}`).join('')}</p>`).join('')+'<p class="detail-copy">这是一条分析路径，包含类比或假设，不能据此推出前者导致后者。</p>':`<p class="detail-copy">${result.path_search_limited?'搜索达到上限，可缩小切片再查。':'当前切片内未找到三步以内的有效路径；已否定关系不参与路径。'}</p>`;researchClickEvents($('thread-path'));}catch(e){$('thread-path').textContent=e.message;}};
 if(radarRoute.get('threads')==='1'){$('threads-panel').hidden=false;$('threads-toggle').setAttribute('aria-expanded','true');$('threads-toggle').textContent='收起事件脉络';}

@@ -54,8 +54,15 @@ function createGuanchaoStaticClient(getSnapshot, storage, storageKey) {
       const counts=Object.fromEntries(snapshot.domains.map(domain=>[domain,snapshot.events.filter(e=>e.category===domain).length]));
       let events=snapshot.events.map(eventValue);
       if(params.get('slice')){const ids=new Set(graph(snapshot,params).nodes.map(n=>n.event_id));events=events.filter(e=>ids.has(e.id));}
-      const query=(params.get('q')||'').toLocaleLowerCase();
-      events=events.filter(e=>(!params.get('category')||e.category===params.get('category'))&&(params.get('saved')!=='1'||e.saved)&&(params.get('hide_low')!=='1'||e.views?.[view]?.priority!=='low')&&(!query||(JSON.stringify(e)+' '+e.evidence.map(a=>snapshot.status.sources.find(s=>s.id===a.source_id)?.name||a.source_id).join(' ')).toLocaleLowerCase().includes(query)));
+      const normalize=text=>String(text).normalize('NFKC').toLowerCase();
+      const query=Array.from(normalize(params.get('q')||'')).slice(0,200).join('');
+      const searchable=e=>{
+        const parts=['title_zh','summary','category','tags','kind','analysis','opportunity','editorial','gap'].flatMap(key=>Array.isArray(e[key])?e[key]:[e[key]||'']);
+        parts.push(...(e.facts||[]).map(f=>f.text),...Object.values(e.views||{}).map(v=>v.reason||''));
+        for(const a of e.evidence)parts.push(a.title||'',a.source_id||'',snapshot.status.sources.find(s=>s.id===a.source_id)?.name||'');
+        return normalize(parts.join(' '));
+      };
+      events=events.filter(e=>(!params.get('category')||e.category===params.get('category'))&&(params.get('saved')!=='1'||e.saved)&&(params.get('hide_low')!=='1'||e.views?.[view]?.priority!=='low')&&(!query||searchable(e).includes(query)));
       const levels={high:2,medium:1,low:0};events.sort((a,b)=>(levels[b.views?.[view]?.priority]??-1)-(levels[a.views?.[view]?.priority]??-1)||b.updated_at.localeCompare(a.updated_at));
       const page=Math.max(1,Number(params.get('page'))||1),size=Math.min(50,Math.max(1,Number(params.get('size'))||15));
       return {events:events.slice((page-1)*size,page*size),total:events.length,all:snapshot.events.length,counts,saved:snapshot.events.filter(e=>saved.has(e.id)).length,page,size};
