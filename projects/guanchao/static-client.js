@@ -47,6 +47,14 @@ function createGuanchaoStaticClient(getSnapshot, storage, storageKey) {
       return {ok:true};
     }
     const eventValue=e=>({...e,saved:saved.has(e.id),feedback:null,research:snapshot.research.nodes.find(n=>n.event_id===e.id)||null});
+    if(url.pathname==='/api/reader') {
+      const events=snapshot.events.map(eventValue).map(e=>({...e,sources:e.evidence.map(a=>({id:a.source_id,name:snapshot.status.sources.find(s=>s.id===a.source_id)?.name||a.source_id}))}));
+      const research=Object.fromEntries(Object.keys(snapshot.research.dimensions).map(key=>{
+        const counts=new Map();for(const n of snapshot.research.nodes)for(const v of new Set(n.slices[key]||[]))counts.set(v,(counts.get(v)||0)+1);
+        return [key,{slices:[...counts].sort((a,b)=>b[1]-a[1]).map(([value,count])=>({value,count}))}];
+      }));
+      return {status:snapshot.status,events,threads:snapshot.research,research,details:Object.fromEntries(events.map(e=>[e.id,e])),pending_limit:0};
+    }
     if(url.pathname==='/api/status')return snapshot.status;
     if(url.pathname==='/api/research')return graph(snapshot,params);
     if(url.pathname==='/api/events') {
