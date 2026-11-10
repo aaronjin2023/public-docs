@@ -1,0 +1,1286 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>数的图鉴 — 从数一数，走到黎曼猜想</title>
+<meta name="description" content="每一个数都有一张画像。26 张概念图版、13 个可以动手的实验、238 个主题的数学星图，从计数出发，经过微积分，走向黎曼猜想。">
+<meta name="theme-color" content="#F4EFE6">
+<style>:root{
+  --paper:#F4EFE6;--paper-2:#EAE3D4;--paper-3:#DED5C2;--ink:#161A2B;--ink-2:#474D66;--ink-3:#8B8FA1;
+  --rule:rgba(22,26,43,.16);--vermilion:#E5482D;--cobalt:#2B46D9;--gold:#E7A823;--jade:#1E8F7A;--plum:#7A3FC4;
+  --night:#090D1E;--night-2:#111735;--night-3:#1B2350;--star:#F6ECCB;--mist:#AEB6DA;
+  --serif:"Songti SC","STSong","Noto Serif CJK SC","Source Han Serif SC","SimSun",serif;
+  --math:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua","Times New Roman","Songti SC",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);
+  --gutter:clamp(20px,5vw,72px);--max:1320px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.75 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4,p,figure,blockquote,ul,ol,dl,dd{margin:0}
+ul,ol{padding:0;list-style:none}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+a{color:inherit}
+svg{display:block}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px;border-radius:2px}
+.night :focus-visible,.night-page :focus-visible{outline-color:var(--gold)}
+.skip{position:absolute;left:-999px;top:8px;z-index:100;background:var(--ink);color:var(--paper);padding:10px 16px}
+.skip:focus{left:8px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--gutter)}
+.mono{font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+.math{font-family:var(--math);font-style:italic}
+.serif{font-family:var(--serif)}
+
+/* top bar */
+.bar{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px var(--gutter);transition:background .4s,color .4s,box-shadow .4s,transform .4s var(--ease)}
+.bar.scrolled{background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 1px 0 var(--rule)}
+.bar.dark{color:var(--star)}
+.bar.dark.scrolled{background:rgba(9,13,30,.78);box-shadow:0 1px 0 rgba(246,236,203,.14)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:.06em;min-height:44px}
+.brand svg{width:30px;height:30px;transition:transform .8s var(--ease)}
+.brand:hover svg{transform:rotate(90deg)}
+.bar nav{display:flex;gap:4px}
+.bar nav a{position:relative;text-decoration:none;font-size:15px;padding:10px 14px;min-height:44px;display:flex;align-items:center}
+.bar nav a::after{content:"";position:absolute;left:14px;right:14px;bottom:8px;height:2px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
+.bar nav a:hover::after,.bar nav a[aria-current]::after{transform:scaleX(1)}
+.bar .go{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border:1.5px solid currentColor;border-radius:999px;text-decoration:none;font-size:15px;transition:background .25s,color .25s}
+.bar .go:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.bar.dark .go:hover{background:var(--star);color:var(--night);border-color:var(--star)}
+@media(max-width:820px){.bar nav{display:none}}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 26px;border-radius:999px;font-weight:600;font-size:16px;text-decoration:none;border:1.5px solid var(--ink);transition:transform .25s var(--spring),background .25s,color .25s,box-shadow .25s}
+.btn.solid{background:var(--ink);color:var(--paper)}
+.btn.solid:hover{background:var(--vermilion);border-color:var(--vermilion);transform:translateY(-2px);box-shadow:0 10px 24px -10px var(--vermilion)}
+.btn.line:hover{background:var(--ink);color:var(--paper);transform:translateY(-2px)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn .arr{transition:transform .3s var(--ease)}
+.btn:hover .arr{transform:translateX(4px)}
+.night .btn,.night-page .btn{border-color:var(--star);color:var(--star)}
+.night .btn.solid,.night-page .btn.solid{background:var(--gold);border-color:var(--gold);color:var(--night)}
+.night .btn.solid:hover,.night-page .btn.solid:hover{background:var(--star);border-color:var(--star);box-shadow:0 10px 30px -10px var(--gold)}
+.night .btn.line:hover,.night-page .btn.line:hover{background:var(--star);color:var(--night)}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:999px;border:1.5px solid var(--rule);font-size:15px;background:transparent;transition:background .2s,color .2s,border-color .2s,transform .2s var(--spring)}
+.chip:hover{border-color:var(--ink);transform:translateY(-1px)}
+.chip[aria-pressed="true"],.chip[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.night .chip,.night-page .chip{border-color:rgba(246,236,203,.22);color:var(--star)}
+.night .chip:hover,.night-page .chip:hover{border-color:var(--star)}
+.night .chip[aria-pressed="true"],.night-page .chip[aria-pressed="true"]{background:var(--star);color:var(--night);border-color:var(--star)}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease);transition-delay:var(--d,0s)}
+.rv.in{opacity:1;transform:none}
+.split .ch{display:inline-block;opacity:0;transform:translateY(.6em) rotate(4deg);transition:opacity .7s var(--ease),transform .9s var(--spring);transition-delay:calc(var(--i)*38ms + var(--d,0s))}
+.split.in .ch{opacity:1;transform:none}
+
+/* drawer dialog */
+dialog.sheet{border:0;padding:0;margin:0 0 0 auto;height:100dvh;max-height:100dvh;width:min(720px,100vw);max-width:100vw;background:var(--paper);color:var(--ink);overflow:hidden}
+dialog.sheet::backdrop{background:rgba(9,13,30,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+dialog.sheet[open]{animation:sheet-in .55s var(--ease)}
+dialog.sheet[open]::backdrop{animation:fade-in .4s}
+dialog.sheet.closing{animation:sheet-out .3s ease-in forwards}
+@keyframes sheet-in{from{transform:translateX(60px);opacity:0}}
+@keyframes sheet-out{to{transform:translateX(60px);opacity:0}}
+@keyframes fade-in{from{opacity:0}}
+.sheet-scroll{height:100%;overflow-y:auto;overscroll-behavior:contain}
+.sheet-top{position:sticky;top:0;z-index:3;display:flex;justify-content:space-between;align-items:center;padding:12px 20px 12px 28px;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+.x{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:24px;line-height:1;transition:background .2s,transform .3s var(--spring)}
+.x:hover{background:var(--ink);color:var(--paper);transform:rotate(90deg)}
+
+.foot{background:var(--night);color:var(--mist);padding:56px 0 40px;font-size:15px}
+.foot .wrap{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:32px}
+.foot b{display:block;color:var(--star);font-family:var(--serif);font-size:22px;margin-bottom:8px;letter-spacing:.06em}
+.foot h4{color:var(--star);font-size:13px;font-family:var(--mono);letter-spacing:.1em;margin-bottom:10px;font-weight:500}
+.foot a{color:var(--mist);text-decoration:none;display:block;padding:5px 0;border-bottom:1px solid transparent;width:fit-content}
+.foot a:hover{color:var(--star);border-color:var(--star)}
+.foot small{grid-column:1/-1;border-top:1px solid rgba(246,236,203,.14);padding-top:20px;font-size:13px;line-height:1.8}
+@media(max-width:820px){.foot .wrap{grid-template-columns:1fr}}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0s!important}
+  .rv,.split .ch{opacity:1;transform:none}
+}
+
+sup{font-size:.68em;line-height:0;vertical-align:.5em}
+h1,h2,h3{text-wrap:balance}
+.split{text-wrap:wrap} /* per-character boxes defeat the line-breaking rules that balance relies on */
+/* ───────── hero ───────── */
+.hero{position:relative;padding:clamp(108px,13vh,150px) 0 56px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(60% 50% at 82% 30%,rgba(231,168,35,.18),transparent 70%),
+  linear-gradient(var(--rule) 1px,transparent 1px) 0 0/100% 56px,
+  linear-gradient(90deg,var(--rule) 1px,transparent 1px) 0 0/56px 100%;
+  mask-image:linear-gradient(180deg,#000 55%,transparent);-webkit-mask-image:linear-gradient(180deg,#000 55%,transparent);opacity:.55;pointer-events:none}
+.hero .wrap{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,560px);gap:clamp(28px,5vw,80px);align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;color:var(--ink-2)}
+.eyebrow::before{content:"";width:28px;height:1.5px;background:var(--vermilion)}
+.hero h1{font-family:var(--serif);font-weight:900;font-size:clamp(44px,7.2vw,104px);line-height:1.08;letter-spacing:-.01em;margin:22px 0 26px}
+.hero h1 em{font-style:normal;color:var(--vermilion);position:relative;white-space:nowrap}
+.hero h1 em::after{content:"";position:absolute;left:0;right:0;bottom:.06em;height:.09em;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform 1.1s var(--ease) .9s;z-index:-1}
+.hero h1.in em::after{transform:scaleX(1)}
+.lede{font-size:clamp(17px,1.5vw,20px);color:var(--ink-2);max-width:32em}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin:34px 0 40px}
+.tally{display:flex;flex-wrap:wrap;gap:0;border-top:1.5px solid var(--ink)}
+.tally div{flex:1 1 110px;padding:14px 16px 0 0}
+.tally b{display:block;font-family:var(--math);font-size:38px;line-height:1.1;font-weight:400}
+.tally span{font-size:13px;color:var(--ink-2)}
+
+/* portrait plate */
+.plate{position:relative;background:#FBF8F1;border:1.5px solid var(--ink);padding:18px 22px 20px;box-shadow:10px 10px 0 var(--ink);transition:box-shadow .5s var(--ease),transform .5s var(--ease)}
+.plate::before,.plate::after{content:"";position:absolute;width:14px;height:14px;border:1.5px solid var(--ink);background:var(--paper)}
+.plate::before{left:-8px;top:-8px}.plate::after{right:-8px;bottom:-8px}
+.plate[data-kind=prime]{box-shadow:10px 10px 0 var(--vermilion)}
+.plate[data-kind=composite]{box-shadow:10px 10px 0 var(--cobalt)}
+.pt-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--rule);padding-bottom:10px}
+.pt-kind{font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:.1em;padding:3px 12px;border-radius:999px;background:var(--ink);color:var(--paper);transition:background .4s}
+[data-kind=prime] .pt-kind{background:var(--vermilion)}[data-kind=composite] .pt-kind{background:var(--cobalt)}
+.pt-main{display:grid;grid-template-columns:auto 1fr;gap:8px 20px;align-items:center;margin:8px 0 4px}
+.pt-num{font-family:var(--math);font-size:clamp(84px,10vw,132px);line-height:.95;font-variant-numeric:lining-nums;min-width:1.6ch}
+.pt-cn{font-family:var(--serif);font-size:20px;color:var(--ink-2);letter-spacing:.2em}
+.pt-dots{width:100%;height:auto;overflow:visible}
+.pt-dots circle{transition:transform .75s var(--spring),fill .4s,opacity .35s;transform:translate(160px,105px) scale(0)}
+.pt-shape{font-size:14px;color:var(--ink-2);text-align:center;min-height:1.75em}
+.pt-facts{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:15px;border-top:1px solid var(--rule);padding-top:12px;margin-top:8px}
+.pt-facts dt{color:var(--ink-3);font-size:13px;padding-top:2px}
+.pt-facts dd{font-family:var(--math);font-size:17px;overflow-wrap:anywhere}
+.pt-tags{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 8px;min-height:30px}
+.pt-tags span{font-size:13px;padding:3px 10px;border:1px solid var(--ink);border-radius:999px;animation:tag-in .45s var(--spring) both}
+@keyframes tag-in{from{transform:scale(.6);opacity:0}}
+.pt-note{font-family:var(--serif);font-size:16px;line-height:1.6;min-height:3.2em;color:var(--ink)}
+.pt-strip{display:grid;grid-template-columns:repeat(11,1fr);gap:2px;margin:12px 0 10px}
+.pt-strip button,.pt-strip i{height:44px;font-family:var(--math);font-size:15px;display:grid;place-items:center;border-bottom:2px solid var(--rule);color:var(--ink-3);transition:color .2s,background .2s}
+.pt-strip button.p{color:var(--vermilion);border-color:var(--vermilion);font-weight:700}
+.pt-strip button.now{background:var(--ink);color:var(--paper);border-color:var(--ink);font-size:18px}
+.pt-strip button:hover:not(.now):not(:disabled){background:var(--paper-2);color:var(--ink)}
+@media(max-width:560px){.pt-strip{grid-template-columns:repeat(5,1fr)}.pt-strip>:nth-child(-n+3),.pt-strip>:nth-last-child(-n+3){display:none}}
+.pt-ctrl{display:flex;align-items:center;gap:8px}
+.pt-ctrl .round{width:44px;height:44px;flex:none;border-radius:50%;border:1.5px solid var(--ink);font-size:20px;display:grid;place-items:center;transition:background .2s,color .2s,transform .2s var(--spring)}
+.pt-ctrl .round:hover{background:var(--ink);color:var(--paper);transform:scale(1.08)}
+.pt-ctrl input{flex:1;min-width:0}
+.pt-more{display:flex;gap:8px;margin-top:10px}
+.pt-more button{flex:1;min-height:44px;border:1.5px solid var(--rule);border-radius:999px;font-size:14px;transition:border-color .2s,background .2s,color .2s}
+.pt-more button:hover{border-color:var(--ink)}
+.pt-more button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+
+input[type=range]{-webkit-appearance:none;appearance:none;height:44px;background:transparent;cursor:pointer;width:100%}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--ink);border-radius:2px}
+input[type=range]::-moz-range-track{height:3px;background:var(--ink);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--vermilion);border:3px solid #FBF8F1;box-shadow:0 0 0 1.5px var(--ink);margin-top:-10.5px;transition:transform .2s var(--spring)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--vermilion);border:3px solid #FBF8F1;box-shadow:0 0 0 1.5px var(--ink)}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.25)}
+
+/* ticker */
+.ticker{border-block:1.5px solid var(--ink);overflow:hidden;background:var(--ink);color:var(--paper)}
+.ticker div{display:flex;width:max-content;animation:tick 60s linear infinite}
+.ticker:hover div{animation-play-state:paused}
+.ticker span{font-family:var(--math);font-size:19px;padding:12px 26px;white-space:nowrap;display:flex;align-items:center;gap:52px}
+.ticker span::after{content:"✦";color:var(--gold);font-size:12px}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+/* ───────── sections ───────── */
+.sec{padding:clamp(72px,10vw,136px) 0}
+.sec-head{display:grid;grid-template-columns:auto 1fr;gap:8px 28px;align-items:end;margin-bottom:clamp(28px,4vw,52px)}
+.sec-no{font-family:var(--math);font-size:clamp(64px,9vw,128px);line-height:.8;color:transparent;-webkit-text-stroke:1.5px var(--ink);font-style:italic}
+.sec-head h2{font-family:var(--serif);font-weight:900;font-size:clamp(32px,4.6vw,64px);line-height:1.15}
+.sec-head p{grid-column:2;color:var(--ink-2);max-width:36em}
+@media(max-width:640px){.sec-head{grid-template-columns:1fr}.sec-head p{grid-column:1}}
+
+/* atlas */
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:28px}
+.tools .search{margin-left:auto;position:relative;flex:1 1 220px;max-width:340px}
+.tools input{width:100%;min-height:44px;border:0;border-bottom:1.5px solid var(--ink);background:transparent;padding:0 4px 0 30px;font-size:16px;border-radius:0}
+.tools input:focus{outline:0;border-bottom-color:var(--vermilion);box-shadow:0 2px 0 var(--vermilion)}
+.tools .search::before{content:"";position:absolute;left:4px;top:13px;width:13px;height:13px;border:1.5px solid var(--ink);border-radius:50%}
+.tools .search::after{content:"";position:absolute;left:17px;top:27px;width:7px;height:1.5px;background:var(--ink);transform:rotate(45deg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px}
+.concept{--sp-bg:#FBF8F1;position:relative;display:flex;flex-direction:column;text-align:left;background:#FBF8F1;border:1.5px solid var(--ink);padding:14px 16px 18px;transition:transform .45s var(--spring),box-shadow .35s var(--ease),background .3s}
+.concept[hidden]{display:none}
+.concept:hover,.concept:focus-visible{transform:translate(-4px,-6px) rotate(-.6deg);box-shadow:8px 10px 0 var(--g,var(--ink))}
+.concept:nth-child(even):hover{transform:translate(-4px,-6px) rotate(.6deg)}
+.concept[data-group=number]{--g:var(--cobalt)}.concept[data-group=relation]{--g:var(--jade)}.concept[data-group=change]{--g:var(--vermilion)}.concept[data-group=frontier]{--g:var(--gold)}
+.c-top{display:flex;justify-content:space-between;align-items:center;color:var(--ink-3)}
+.c-top i{width:9px;height:9px;border-radius:50%;background:var(--g)}
+.concept .spec{width:100%;aspect-ratio:1;max-height:190px;margin:6px auto 8px}
+.c-name{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-top:1px solid var(--rule);padding-top:10px}
+.c-name b{font-family:var(--serif);font-size:23px;font-weight:900}
+.c-name span{font-family:var(--math);font-style:italic;color:var(--ink-2);font-size:16px;white-space:nowrap}
+.concept p{font-size:14.5px;color:var(--ink-2);line-height:1.6;margin-top:4px}
+.c-lab{position:absolute;right:-1.5px;top:34px;background:var(--ink);color:var(--paper);font-size:12px;padding:2px 9px;letter-spacing:.08em}
+.no-results{grid-column:1/-1;padding:44px 0;text-align:center;color:var(--ink-2);font-family:var(--serif);font-size:20px}
+
+/* specimen motion */
+.spec .sp-pop,.spec .sp-rise,.spec .sp-pulse{transform-box:fill-box;transform-origin:center}
+.spec .sp-rise{transform-origin:bottom}
+.spec .sp-draw{stroke-dasharray:1;stroke-dashoffset:0}
+.concept:hover .sp-pop,.concept:focus-visible .sp-pop,.spec.play .sp-pop{animation:sp-pop .6s var(--spring) both;animation-delay:calc(var(--i,0)*45ms)}
+.concept:hover .sp-rise,.concept:focus-visible .sp-rise,.spec.play .sp-rise{animation:sp-rise .7s var(--spring) both;animation-delay:calc(var(--i,0)*45ms)}
+.concept:hover .sp-draw,.concept:focus-visible .sp-draw,.spec.play .sp-draw{animation:sp-draw 1.3s var(--ease) both;animation-delay:calc(var(--i,0)*60ms)}
+.concept:hover .sp-pulse,.spec.play .sp-pulse{animation:sp-pulse 1.1s ease-in-out infinite}
+.concept:hover .sp-spin,.spec.play .sp-spin{animation:sp-spin 1.4s var(--ease) both}
+.concept:hover .sp-rock,.spec.play .sp-rock{animation:sp-rock 1.8s ease-in-out infinite alternate}
+.concept:hover .sp-march,.spec.play .sp-march{animation:sp-march 1s linear infinite}
+@keyframes sp-pop{from{transform:scale(0)}}
+@keyframes sp-rise{from{transform:scaleY(0)}}
+@keyframes sp-draw{from{stroke-dashoffset:1}}
+@keyframes sp-pulse{50%{transform:scale(1.5)}}
+@keyframes sp-spin{from{transform:rotate(90deg)}}
+@keyframes sp-rock{from{transform:rotate(-9deg)}to{transform:rotate(6deg)}}
+@keyframes sp-march{to{stroke-dashoffset:-14}}
+
+/* ───────── lab ───────── */
+.lab{background:var(--paper-2);border-block:1.5px solid var(--ink)}
+.lab-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 14px;margin:0 -2px 18px;scrollbar-width:thin;scroll-snap-type:x proximity}
+.lab-tabs button{flex:none;scroll-snap-align:start;min-height:64px;padding:8px 18px 8px 10px;display:grid;grid-template-columns:44px auto;gap:0 10px;align-items:center;text-align:left;border:1.5px solid var(--ink);background:#FBF8F1;transition:transform .3s var(--spring),background .25s,color .25s,box-shadow .25s}
+.lab-tabs button i{grid-row:1/3;width:44px;height:44px;border-radius:50%;background:var(--paper-2);display:grid;place-items:center;font-family:var(--math);font-size:15px;font-style:italic;transition:background .25s,color .25s,transform .5s var(--spring)}
+.lab-tabs button b{font-size:16px;line-height:1.2}.lab-tabs button small{font-size:12.5px;color:var(--ink-3);line-height:1.2}
+.lab-tabs button:hover{transform:translateY(-3px);box-shadow:4px 4px 0 var(--ink)}
+.lab-tabs button[aria-selected=true]{background:var(--ink);color:var(--paper);box-shadow:4px 4px 0 var(--vermilion)}
+.lab-tabs button[aria-selected=true] i{background:var(--vermilion);color:#fff;transform:rotate(-8deg)}
+.lab-tabs button[aria-selected=true] small{color:var(--paper-3)}
+.stage{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.85fr);background:#FBF8F1;border:1.5px solid var(--ink);box-shadow:10px 10px 0 var(--ink)}
+.lab-vis{min-width:0;padding:clamp(14px,2.5vw,32px);border-right:1.5px solid var(--ink);display:grid;align-content:center;min-height:380px;position:relative;animation:vis-in .5s var(--ease)}
+@keyframes vis-in{from{opacity:0;transform:scale(.98)}}
+.lab-vis svg{width:100%;height:auto;max-height:70vh;font-family:var(--sans)}
+.lab-vis canvas{width:100%;display:block}
+.lab-side{padding:clamp(18px,2.5vw,32px);display:flex;flex-direction:column;gap:14px}
+.lab-side h3{font-family:var(--serif);font-size:30px;font-weight:900;line-height:1.2}
+.lab-ask{background:var(--paper-2);border-left:4px solid var(--gold);padding:12px 14px;font-size:15.5px;line-height:1.65}
+.lab-ask b{display:block;font-size:12px;letter-spacing:.12em;color:var(--ink-3);font-family:var(--mono);font-weight:500}
+.lab-range span{display:flex;justify-content:space-between;font-size:14.5px}
+.lab-range output{font-family:var(--math);font-size:17px}
+.lab-chips,.lab-actions{display:flex;flex-wrap:wrap;gap:8px}
+.lab-chips .chip{min-height:44px;font-size:14.5px;padding:0 14px}
+.btn.small{min-height:46px;padding:0 20px;font-size:15px;align-self:flex-start}
+.btn.ghost{border-color:var(--rule)}
+.btn.ghost:hover{border-color:var(--ink)}
+.lab-hint{font-size:13.5px;color:var(--ink-3);line-height:1.6}
+.lab-out{margin-top:auto;border-top:1.5px solid var(--ink);padding-top:14px;display:grid;gap:6px}
+.lab-out b{font-family:var(--serif);font-size:22px;line-height:1.35}
+.lab-out span{font-size:15px;color:var(--ink-2);line-height:1.7}
+.lab-read{font-size:15px;border-bottom:1.5px solid var(--ink);align-self:flex-start;min-height:44px;display:flex;align-items:center;gap:6px}
+.lab-read:hover{color:var(--vermilion);border-color:var(--vermilion)}
+@media(max-width:900px){.stage{grid-template-columns:1fr}.lab-vis{border-right:0;border-bottom:1.5px solid var(--ink);min-height:0}}
+.handle{cursor:grab;touch-action:none}.handle:active{cursor:grabbing}
+.lab-svg{touch-action:pan-y}
+.sieve{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:4px;max-width:560px;margin:0 auto;width:100%}
+.sieve span{aspect-ratio:1;display:grid;place-items:center;font-family:var(--math);font-size:clamp(11px,1.5vw,16px);background:var(--paper-2);transition:background .3s,color .3s,transform .4s var(--spring)}
+.sieve.dense{gap:2px}.sieve.dense span{font-size:12px}.sieve.tiny span{font-size:0}
+.sieve .out{color:var(--ink-3);background:color-mix(in srgb,var(--x,#8B8FA1) 16%,#FBF8F1);text-decoration:line-through;text-decoration-color:var(--x,#8B8FA1)}
+.sieve .one{color:var(--ink-3);background:transparent;outline:1px dashed var(--rule)}
+.sieve .is-prime{background:var(--vermilion);color:#fff;font-weight:700;text-decoration:none}
+.sieve .lead{transform:scale(1.3);z-index:1;box-shadow:0 0 0 3px var(--gold)}
+.coin{position:absolute;right:20px;top:16px;width:58px;height:58px;z-index:1;transform-style:preserve-3d}
+.coin i{position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--serif);font-weight:900;font-size:22px;backface-visibility:hidden;border:2px solid var(--ink)}
+.coin i:first-child{background:var(--gold)}.coin i:last-child{background:var(--paper-3);transform:rotateY(180deg)}
+.coin[data-face=t]{transform:rotateY(180deg)}
+.coin.flip{animation:flip-h .6s var(--ease)}.coin.flip[data-face=t]{animation-name:flip-t}
+@keyframes flip-h{from{transform:rotateY(-720deg) translateY(-30px)}}
+@keyframes flip-t{from{transform:rotateY(-540deg) translateY(-30px)}}
+
+/* ───────── star chart teaser ───────── */
+.teaser{background:var(--night);color:var(--star);position:relative;overflow:hidden}
+.teaser canvas{position:absolute;inset:0;width:100%;height:100%}
+.teaser .wrap{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;padding-block:clamp(64px,9vw,120px)}
+.teaser h2{font-family:var(--serif);font-weight:900;font-size:clamp(32px,4.4vw,60px);line-height:1.15;margin:16px 0 18px}
+.teaser p{color:var(--mist);max-width:30em;margin-bottom:28px}
+.teaser .eyebrow{color:var(--mist)}.teaser .eyebrow::before{background:var(--gold)}
+.mini{width:100%;height:auto;overflow:visible}
+.mini circle{transition:r .3s}
+.mini .lnk{stroke:rgba(174,182,218,.22);stroke-width:.6}
+.mini-wrap{position:relative}
+.mini-wrap a{position:absolute;inset:0;border-radius:50%}
+.mini-rot{transform-origin:50% 50%;animation:slow-spin 240s linear infinite}
+@keyframes slow-spin{to{transform:rotate(360deg)}}
+@media(max-width:820px){.teaser .wrap{grid-template-columns:1fr}}
+
+/* ───────── route map ───────── */
+.route .sec-head{margin-bottom:12px}
+.rmap{position:relative;margin-top:20px}
+.rmap svg{width:100%;height:auto;overflow:visible;font-family:var(--sans)}
+.rmap .rail{fill:none;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.rmap .rail.bg{stroke:var(--paper-3)}
+.rmap .st{cursor:pointer;outline:0}
+.rmap .st circle{fill:#FBF8F1;stroke:var(--ink);stroke-width:3;transition:r .35s var(--spring),fill .35s,stroke .35s}
+.rmap .st text{transition:opacity .5s,fill .3s;opacity:.35}
+.rmap .st .t1{font-family:var(--serif);font-weight:900;font-size:25px;fill:var(--ink)}
+.rmap .st .t2{font-size:15px;fill:var(--ink-2)}
+.rmap .st.on text{opacity:1}
+.rmap .st.on circle{fill:var(--c)}
+.rmap .st:hover circle,.rmap .st:focus-visible circle{r:15;stroke:var(--c)}
+.rmap .st:hover .t1,.rmap .st:focus-visible .t1{fill:var(--c)}
+.rmap .st:focus-visible .t1{text-decoration:underline}
+.rmap .badge rect{fill:var(--gold);stroke:var(--ink);stroke-width:1.5}
+.rmap .badge text{font-size:14px;font-weight:700;fill:var(--ink)}
+.rmap .legend text{font-size:14px;fill:var(--ink-2)}
+.route-note{color:var(--ink-2);font-size:15px;max-width:44em;margin-top:18px}
+.dusk{height:260px;background:linear-gradient(180deg,var(--paper) 0%,#F3D7B0 30%,#E59A6E 52%,#8C4F78 72%,#2A2458 88%,var(--night) 100%);position:relative;overflow:hidden}
+.dusk::before{content:"";position:absolute;left:50%;top:44%;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#FFF3D0 0,#F6C56B 55%,rgba(246,197,107,0) 70%);transform:translate(-50%,-50%)}
+.dusk::after{content:"";position:absolute;left:0;right:0;top:52%;bottom:0;background:linear-gradient(180deg,rgba(140,79,120,.0),rgba(9,13,30,.0));border-top:1.5px solid rgba(22,26,43,.5)}
+
+/* ───────── horizon ───────── */
+.night{background:var(--night);color:var(--star);position:relative}
+.horizon{overflow:hidden;padding-bottom:clamp(72px,9vw,120px)}
+.horizon>canvas{position:absolute;inset:0;width:100%;height:100%}
+.horizon .wrap{position:relative}
+.hz{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,520px);gap:clamp(28px,5vw,72px);align-items:center;padding-top:clamp(40px,6vw,80px)}
+.hz .eyebrow{color:var(--mist)}.hz .eyebrow::before{background:var(--gold)}
+.hz h2{font-family:var(--serif);font-weight:900;font-size:clamp(30px,4.4vw,62px);line-height:1.14;margin:18px 0 22px}
+.hz p{color:var(--mist);max-width:34em}
+.hz blockquote{font-family:var(--serif);font-size:clamp(22px,2.4vw,32px);line-height:1.5;color:var(--star);border-left:3px solid var(--gold);padding:6px 0 6px 22px;margin:26px 0}
+.hz blockquote em{font-style:normal;color:var(--gold)}
+.hz-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.strip{width:100%;height:auto;overflow:visible;font-family:var(--sans)}
+.strip .zero{fill:var(--gold);opacity:0;transform-box:fill-box;transform-origin:center;transform:scale(0);transition:opacity .5s,transform .7s var(--spring);transition-delay:calc(var(--i)*160ms + .3s);cursor:pointer}
+.strip.in .zero{opacity:1;transform:none}
+.strip .halo{fill:none;stroke:var(--gold);opacity:0}
+.strip.in .halo{animation:halo 3.2s ease-out infinite;animation-delay:calc(var(--i)*160ms + 1s)}
+@keyframes halo{0%{opacity:.7;r:5}70%,100%{opacity:0;r:22}}
+.strip .cline{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 2s var(--ease)}
+.strip.in .cline{stroke-dashoffset:0}
+.strip text{fill:var(--mist);font-size:15px}
+.strip .zl{fill:var(--star);font-family:var(--math);font-size:15px;opacity:0;transition:opacity .5s;transition-delay:calc(var(--i)*160ms + .6s)}
+.strip.in .zl{opacity:.9}
+.known{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:clamp(48px,7vw,88px);border-top:1px solid rgba(246,236,203,.25)}
+.known section{padding:26px 28px 6px 0;border-right:1px solid rgba(246,236,203,.14)}
+.known section+section{padding-left:28px}.known section:last-child{border-right:0}
+.known h3{font-family:var(--serif);font-size:24px;display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.known h3 i{width:12px;height:12px;border-radius:50%;flex:none}
+.known li{color:var(--mist);font-size:15.5px;line-height:1.7;padding:9px 0;border-top:1px dashed rgba(246,236,203,.14)}
+.known li b{color:var(--star);font-weight:600}
+.src{font-size:14px;color:var(--mist);margin-top:30px}
+.src a{color:var(--star)}
+@media(max-width:900px){.hero .wrap,.hz{grid-template-columns:1fr}.known{grid-template-columns:1fr}.known section,.known section+section{padding:22px 0 6px;border-right:0}}
+
+/* ───────── guide sheet ───────── */
+.g-hero{--sp-bg:var(--paper-2);display:grid;grid-template-columns:200px 1fr;gap:24px;align-items:center;padding:28px 28px 26px;background:var(--paper-2);border-bottom:1.5px solid var(--ink)}
+.g-hero .spec{width:200px;height:200px}
+.g-hero .sym{font-family:var(--math);font-style:italic;font-size:22px;color:var(--vermilion)}
+.g-hero h2{font-family:var(--serif);font-weight:900;font-size:clamp(38px,6vw,56px);line-height:1.1;margin:4px 0 10px}
+.g-hero p{color:var(--ink-2);font-size:17px}
+.g-body{padding:28px;display:grid;gap:26px}
+.g-plain{font-family:var(--serif);font-size:clamp(20px,2.4vw,24px);line-height:1.7}
+.g-plain::first-letter{font-size:2.6em;float:left;line-height:.95;padding:.08em .12em 0 0;color:var(--vermilion);font-weight:900}
+.g-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid var(--ink)}
+.g-grid section{padding:18px 20px 20px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.g-grid section:nth-child(2n){border-right:0}.g-grid section:nth-last-child(-n+2){border-bottom:0}
+.g-grid h3{font-size:12.5px;font-family:var(--mono);letter-spacing:.12em;color:var(--ink-3);font-weight:500;margin-bottom:8px;display:flex;gap:8px;align-items:center}
+.g-grid h3 i{font-family:var(--math);font-size:18px;color:var(--vermilion)}
+.g-grid p{font-size:16px;line-height:1.75}
+.g-grid .warn{background:color-mix(in srgb,var(--vermilion) 7%,transparent)}
+.g-quiz{border:1.5px solid var(--ink);background:#FBF8F1;box-shadow:6px 6px 0 var(--gold)}
+.g-quiz summary{list-style:none;cursor:pointer;padding:18px 20px;display:grid;gap:8px}
+.g-quiz summary::-webkit-details-marker{display:none}
+.g-quiz summary small{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--ink-3)}
+.g-quiz summary b{font-family:var(--serif);font-size:21px;line-height:1.5}
+.g-quiz summary span{font-size:14.5px;color:var(--vermilion);font-weight:600}
+.g-quiz[open] summary span{display:none}
+.g-quiz p{padding:0 20px 20px;font-size:16.5px;animation:rise .5s var(--ease)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}}
+.g-fact{border-left:3px solid var(--gold);padding:4px 0 4px 16px;font-size:15.5px;color:var(--ink-2)}
+.g-fact b{color:var(--ink)}
+.g-links h3{font-size:12.5px;font-family:var(--mono);letter-spacing:.12em;color:var(--ink-3);font-weight:500;margin-bottom:10px}
+.g-links div{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.g-links .chip{text-decoration:none}
+.g-links .chip.out{border-style:dashed}
+.g-actions{display:flex;flex-wrap:wrap;gap:10px;padding-top:6px}
+.g-src{font-size:14px;color:var(--ink-2)}
+@media(max-width:600px){.g-hero{grid-template-columns:1fr;text-align:left}.g-hero .spec{width:150px;height:150px}.g-grid{grid-template-columns:1fr}.g-grid section{border-right:0!important;border-bottom:1px solid var(--rule)!important}.g-grid section:last-child{border-bottom:0!important}.g-body{padding:22px 20px}}
+
+.rmap[data-narrow=true] svg{max-width:460px}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到主要内容</a>
+<header class="bar" id="bar">
+  <a class="brand" href="#top" aria-label="数的图鉴，回到顶部"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 2v14h14A14 14 0 0 0 16 2Z" fill="#E5482D"/><path d="M16 16H2a14 14 0 0 0 14 14Z" fill="#2B46D9"/><circle cx="16" cy="16" r="3" fill="#E7A823"/></svg><span>数的图鉴</span></a>
+  <nav aria-label="主导航"><a href="#atlas">图鉴</a><a href="#lab">实验</a><a href="#map">路线</a><a href="#horizon">远方</a></nav>
+  <a class="go" href="knowledge.html">数学星图 <span aria-hidden="true">✦</span></a>
+</header>
+
+<main id="main">
+<section class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow mono rv">Atlas Numerorum · 第一卷 数学</p>
+      <h1 class="split">每一个数，<br>都有一张<em>画像</em>。</h1>
+      <p class="lede rv" style="--d:.5s">从数一数开始，经过微积分，一直走到一个一百六十多年没人解开的问题。这里的每一页，都可以动手改一改。</p>
+      <div class="hero-cta rv" style="--d:.65s"><a class="btn solid" href="#atlas">翻开图鉴 <span class="arr" aria-hidden="true">→</span></a><a class="btn line" href="#lab">先玩一个实验</a></div>
+      <div class="tally rv" style="--d:.8s">
+        <div><b data-count="26">26</b><span>张概念图版</span></div>
+        <div><b data-count="13">13</b><span>个动手实验</span></div>
+        <div><b data-count="238">238</b><span>个星图主题</span></div>
+        <div><b>1</b><span>个未解的远方</span></div>
+      </div>
+    </div>
+    <figure class="plate rv" id="portrait" style="--d:.3s" aria-label="数的画像：拖动滑块，查看 1 到 200 每个数的样子">
+      <div class="pt-head"><span class="mono pt-no">No. 012</span><span class="pt-kind">合数</span></div>
+      <div class="pt-main">
+        <div><div class="pt-num" aria-hidden="true">12</div><div class="pt-cn" aria-hidden="true">十二</div></div>
+        <div><svg class="pt-dots" viewBox="0 0 320 210" aria-hidden="true"></svg><p class="pt-shape"></p></div>
+      </div>
+      <dl class="pt-facts"><dt>拆成素数</dt><dd class="pt-factor"></dd><dt>全部因数</dt><dd class="pt-divs"></dd><dt>二进制</dt><dd class="pt-bin"></dd></dl>
+      <div class="pt-tags"></div>
+      <p class="pt-note"></p>
+      <div class="pt-strip" role="group" aria-label="附近的数，红色是素数"></div>
+      <div class="pt-ctrl"><button type="button" class="round pt-prev" aria-label="上一个数">−</button><input class="pt-range" type="range" min="1" max="200" value="12" aria-label="选择一个数，1 到 200"><button type="button" class="round pt-next" aria-label="下一个数">+</button></div>
+      <div class="pt-more"><button type="button" class="pt-rand">随便翻一页</button><button type="button" class="pt-tour" aria-pressed="false"><span>自动翻页</span></button></div>
+      <p class="sr pt-live" aria-live="polite"></p>
+    </figure>
+  </div>
+</section>
+
+<div class="ticker" aria-hidden="true"><div id="ticker"></div></div>
+
+<section class="sec" id="atlas">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no" aria-hidden="true">1</span><h2 class="split">先认识它们的样子。</h2><p class="rv">26 张图版。每一张都从一个问题讲起：它是什么，生活里在哪，准确地怎么说，哪里容易弄错，从哪里来，往哪里去。</p></div>
+    <div class="tools rv">
+      <div role="group" aria-label="按类别筛选" id="filters" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      <label class="search"><span class="sr">搜索图版</span><input id="search" type="search" placeholder="搜一搜：分数、素数、极限…" autocomplete="off"></label>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<section class="sec lab" id="lab">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no" aria-hidden="true">2</span><h2 class="split">先猜，再动手。</h2><p class="rv">13 个实验，全部是当场算出来的。改变一个量，看看数学会怎么回答你。</p></div>
+    <div class="lab-tabs" role="tablist" aria-label="数学实验" id="lab-tabs"></div>
+    <div class="stage" id="experiment" role="tabpanel" tabindex="0">
+      <div class="lab-vis" id="lab-vis"></div>
+      <div class="lab-side" id="lab-side"></div>
+    </div>
+  </div>
+</section>
+
+<section class="teaser" aria-labelledby="teaser-h">
+  <canvas id="teaser-stars" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div>
+      <p class="eyebrow mono rv">数学星图</p>
+      <h2 id="teaser-h" class="split">数学，<br>比一条路宽得多。</h2>
+      <p class="rv">18 个分支、238 个主题，排成一张从中心向外展开的星图：越靠外，走得越远。每颗星都写着一个问题、一个目标，以及它连着谁。</p>
+      <a class="btn solid rv" href="knowledge.html">展开星图 <span class="arr" aria-hidden="true">→</span></a>
+    </div>
+    <div class="mini-wrap rv" style="--d:.2s"><svg class="mini" id="mini" viewBox="-108 -108 216 216" aria-hidden="true"></svg><a href="knowledge.html" aria-label="打开数学星图"></a></div>
+  </div>
+</section>
+
+<section class="sec route" id="map">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-no" aria-hidden="true">3</span><h2 class="split">两条线，在一个函数相遇。</h2><p class="rv">一条从素数出发，一条从变化出发。微积分是途中的里程碑，不是终点。往下滚动，路线会一站一站亮起来；每一站都可以点开。</p></div>
+    <div class="rmap" id="rmap"></div>
+    <p class="route-note rv">这是一条推荐路线，不是唯一的顺序。素数那条线从小学就能出发；14 岁理解微积分是我们设定的里程碑，不是跳过基础的理由。高阶站点目前提供导读，完整课程仍在建设。</p>
+  </div>
+</section>
+<div class="dusk" aria-hidden="true"></div>
+
+<section class="night horizon" id="horizon">
+  <canvas id="horizon-stars" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="hz">
+      <div>
+        <p class="eyebrow mono rv">远方 · 一个未解的问题</p>
+        <h2 class="split">素数的秘密，<br>为什么指向一条线？</h2>
+        <p class="rv">2、3、5、7、11……素数的间隔时近时远。ζ 函数把全体素数和复平面连在一起，而黎曼在 1859 年问了一个极其精确的问题：</p>
+        <blockquote class="rv">ζ 函数的<em>每一个</em>非平凡零点，<br>实部都是 <em>1/2</em> 吗？</blockquote>
+        <p class="rv">「零点」是让函数值变成 0 的输入；「实部是 1/2」是说它们在复平面上排成一条竖线。右图里的金色亮点，是按公式算出来的前 11 个零点。</p>
+        <div class="hz-cta rv"><button type="button" class="btn solid" data-concept="riemann">一步步读懂它 <span class="arr" aria-hidden="true">→</span></button><button type="button" class="btn line" data-open-lab="music">用零点拼出素数</button></div>
+      </div>
+      <figure class="rv" style="--d:.2s"><svg class="strip rv" viewBox="0 0 500 540" role="img" aria-label="复平面上的临界带：实部在 0 和 1 之间的竖条，正中是实部为二分之一的临界线，线上标出计算得到的前 11 个非平凡零点。"><rect x="155.0" y="20" width="190.0" height="450" fill="rgba(174,182,218,.10)"/><line x1="155.0" y1="20" x2="155.0" y2="470" stroke="rgba(174,182,218,.35)" stroke-dasharray="3 6"/><line x1="345.0" y1="20" x2="345.0" y2="470" stroke="rgba(174,182,218,.35)" stroke-dasharray="3 6"/><line x1="20" y1="470" x2="480" y2="470" stroke="#AEB6DA" stroke-width="1.5"/><line class="cline" pathLength="1" x1="250.0" y1="470" x2="250.0" y2="14" stroke="#E7A823" stroke-width="3"/><line x1="147.0" y1="388.0" x2="155.0" y2="388.0" stroke="#AEB6DA"/><text x="141.0" y="393.0" text-anchor="end">10i</text><line x1="147.0" y1="306.0" x2="155.0" y2="306.0" stroke="#AEB6DA"/><text x="141.0" y="311.0" text-anchor="end">20i</text><line x1="147.0" y1="224.00000000000003" x2="155.0" y2="224.00000000000003" stroke="#AEB6DA"/><text x="141.0" y="229.00000000000003" text-anchor="end">30i</text><line x1="147.0" y1="142.0" x2="155.0" y2="142.0" stroke="#AEB6DA"/><text x="141.0" y="147.0" text-anchor="end">40i</text><line x1="147.0" y1="60.00000000000006" x2="155.0" y2="60.00000000000006" stroke="#AEB6DA"/><text x="141.0" y="65.00000000000006" text-anchor="end">50i</text><text x="155.0" y="496" text-anchor="middle" >0</text><text x="250.0" y="496" text-anchor="middle" fill="#E7A823" style="fill:#E7A823;font-size:19px">½</text><text x="345.0" y="496" text-anchor="middle" >1</text><circle cx="345.0" cy="470" r="5" fill="none" stroke="#E5482D" stroke-width="2"/><text x="357.0" y="458" style="font-size:13px">极点 s = 1</text><circle cx="37.19999999999999" cy="470" r="4" fill="#AEB6DA"/><text x="37.19999999999999" y="496" text-anchor="middle" style="font-size:13px">−2、−4…</text><text x="37.19999999999999" y="516" text-anchor="middle" style="font-size:13px">平凡零点</text><text x="250.0" y="528" text-anchor="middle" style="font-size:13px">实部 Re(s)</text><text x="163.0" y="40" style="font-size:13px">临界带</text><text x="264.0" y="29.600000000000023" style="fill:#E7A823">临界线 Re(s) = ½</text><circle class="halo" style="--i:0" cx="250.0" cy="354.1" r="5"/><circle class="zero" style="--i:0" cx="250.0" cy="354.1" r="5.5"><title>零点 ½ + 14.1347i</title></circle><text class="zl" style="--i:0" x="266.0" y="359.1">½ + 14.135i</text><circle class="halo" style="--i:1" cx="250.0" cy="297.6" r="5"/><circle class="zero" style="--i:1" cx="250.0" cy="297.6" r="5.5"><title>零点 ½ + 21.0220i</title></circle><text class="zl" style="--i:1" x="266.0" y="302.6">½ + 21.022i</text><circle class="halo" style="--i:2" cx="250.0" cy="264.9" r="5"/><circle class="zero" style="--i:2" cx="250.0" cy="264.9" r="5.5"><title>零点 ½ + 25.0109i</title></circle><text class="zl" style="--i:2" x="266.0" y="269.9">½ + 25.011i</text><circle class="halo" style="--i:3" cx="250.0" cy="220.5" r="5"/><circle class="zero" style="--i:3" cx="250.0" cy="220.5" r="5.5"><title>零点 ½ + 30.4249i</title></circle><text class="zl" style="--i:3" x="266.0" y="225.5">½ + 30.425i</text><circle class="halo" style="--i:4" cx="250.0" cy="199.9" r="5"/><circle class="zero" style="--i:4" cx="250.0" cy="199.9" r="5.5"><title>零点 ½ + 32.9351i</title></circle><text class="zl" style="--i:4" x="266.0" y="204.9">½ + 32.935i</text><circle class="halo" style="--i:5" cx="250.0" cy="161.8" r="5"/><circle class="zero" style="--i:5" cx="250.0" cy="161.8" r="5.5"><title>零点 ½ + 37.5862i</title></circle><circle class="halo" style="--i:6" cx="250.0" cy="134.5" r="5"/><circle class="zero" style="--i:6" cx="250.0" cy="134.5" r="5.5"><title>零点 ½ + 40.9187i</title></circle><circle class="halo" style="--i:7" cx="250.0" cy="114.7" r="5"/><circle class="zero" style="--i:7" cx="250.0" cy="114.7" r="5.5"><title>零点 ½ + 43.3271i</title></circle><circle class="halo" style="--i:8" cx="250.0" cy="76.4" r="5"/><circle class="zero" style="--i:8" cx="250.0" cy="76.4" r="5.5"><title>零点 ½ + 48.0052i</title></circle><circle class="halo" style="--i:9" cx="250.0" cy="61.9" r="5"/><circle class="zero" style="--i:9" cx="250.0" cy="61.9" r="5.5"><title>零点 ½ + 49.7738i</title></circle><circle class="halo" style="--i:10" cx="250.0" cy="35.6" r="5"/><circle class="zero" style="--i:10" cx="250.0" cy="35.6" r="5.5"><title>零点 ½ + 52.9703i</title></circle></svg></figure>
+    </div>
+    <div class="known">
+      <section class="rv"><h3><i style="background:var(--jade)"></i>已经证明</h3><ul>
+        <li><b>所有非平凡零点都在临界带里</b>：实部严格介于 0 和 1 之间（1896）。</li>
+        <li><b>零点左右对称</b>：如果 ρ 是零点，1 − ρ 也是。临界线正是对称轴。</li>
+        <li><b>临界线上有无穷多个零点</b>（哈代，1914）。</li>
+        <li><b>至少五分之二的零点在临界线上</b>（康瑞，1989）。</li>
+      </ul></section>
+      <section class="rv" style="--d:.1s"><h3><i style="background:var(--gold)"></i>已经算过</h3><ul>
+        <li><b>高度 3 × 10¹² 以内的零点</b>，大约 12.4 万亿个，全部在临界线上（普拉特与特鲁吉安，2021）。</li>
+        <li>再往上的若干区段也抽查过数十亿个，没有发现例外。</li>
+        <li>这些是<b>证据</b>，不是证明：零点有无穷多个。</li>
+      </ul></section>
+      <section class="rv" style="--d:.2s"><h3><i style="background:var(--vermilion)"></i>还不知道</h3><ul>
+        <li><b>是否每一个零点都在线上</b>。这就是猜想本身。</li>
+        <li>甚至不知道能否找到一个小于 1 的数，使所有零点的实部都不超过它。</li>
+        <li>相邻零点的间距，为什么看起来像随机矩阵的特征值。</li>
+      </ul></section>
+    </div>
+    <p class="src rv">问题的现状以克雷数学研究所的<a href="https://www.claymath.org/millennium/Riemann-Hypothesis/" target="_blank" rel="noopener noreferrer">官方说明</a>为准：未解决。图中零点由本页用欧拉–麦克劳林公式计算，与公开数表的前几位一致。</p>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div><b>数的图鉴</b><p>从一个小问题，走向更大的世界。<br>数学先行，知识继续生长。</p></div>
+    <div><h4>在这里</h4><a href="#atlas">概念图版</a><a href="#lab">动手实验</a><a href="#map">推荐路线</a><a href="knowledge.html">数学星图</a></div>
+    <div><h4>依据</h4><a href="https://www.claymath.org/millennium/" target="_blank" rel="noopener noreferrer">克雷数学研究所 · 千禧年问题</a><a href="https://msc2020.org/" target="_blank" rel="noopener noreferrer">MSC2020 数学学科分类</a><a href="knowledge.html#browse">在线浏览知识目录</a></div>
+    <small>本地原型，尚未发布。高阶概念目前是导读，不是完整课程；学习顺序是教学设计，尚未经过儿童试学验证。页面不加载任何外部资源，外部链接仅在点击时访问。</small>
+  </div>
+</footer>
+
+<dialog class="sheet" id="guide" aria-labelledby="concept-title">
+  <div class="sheet-scroll">
+    <div class="sheet-top"><span class="mono" id="guide-crumb"></span><button type="button" class="x" data-close aria-label="关闭图版">×</button></div>
+    <div id="concept-content"></div>
+  </div>
+</dialog>
+
+<script>const DATA={"groups":{"number":"数的家族","relation":"关系与形状","change":"变化与无穷","frontier":"走向远方"},"guides":[{"id":"natural","name":"自然数","symbol":"1 2 3","group":"number","short":"从「有几个」开始认识数。","plain":"把积木一个一个数过去，1、2、3……这是我们认识数的第一种方式。","life":"盒子里有 6 块积木。这里的 6 回答「有多少块」；排队时的「第 6 个」回答的是另一个问题：顺序。","precise":"自然数用于计数。本图鉴采用含 0 的约定：0、1、2、3……；有些书从 1 开始，阅读时先看约定。每个自然数都有唯一的「下一个」，所以自然数没有最大的。","mistake":"计数要一个物体对应一次报数，不漏、不重复。数字的写法（比如「6」「六」「VI」）和它表示的数量是两件事。","history":"人类最早的计数痕迹是刻痕。非洲出土的伊尚戈骨距今约两万年，上面有成组的刻痕。","question":"六块积木换个摆法，数量会变吗？","answer":"不会。只要没有增加或拿走，改变排列不改变数量。这件事叫「数量守恒」。","next":["zero","integer","prime"]},{"id":"zero","name":"零","symbol":"0","group":"number","short":"「没有」，也是一个数。","plain":"盘子里的苹果吃完了，还剩几个？0 个。0 让我们能把「什么也没有」写下来，并且拿它来计算。","life":"在 105 里，中间的 0 表示「十位上没有」。没有它，105 和 15 就分不清了。温度计上的 0°C 则是一个约定的起点，不表示「没有温度」。","precise":"对任何数 a：a + 0 = a，a × 0 = 0。0 是偶数，既不是正数也不是负数。0 不能作除数：a ÷ 0 没有定义。","mistake":"「0 不能除」不是规定得太死。如果 6 ÷ 0 = x，就要有 x × 0 = 6，可任何数乘 0 都是 0。而 0 ÷ 0 又会让任何 x 都满足，无法确定唯一结果。","history":"巴比伦人和玛雅人用过表示空位的记号。把 0 当成真正的数并写下运算规则，见于印度数学家婆罗摩笈多公元 628 年的著作。","question":"0 是偶数吗？","answer":"是。偶数是能被 2 整除的整数，0 ÷ 2 = 0，没有余数。在数轴上它也正好排在 −1 和 1 两个奇数之间。","next":["integer","decimal"]},{"id":"integer","name":"整数","symbol":"−2 −1 0 1","group":"number","short":"零的左边，也有数。","plain":"以 0 为起点，向右表示增加，向左表示减少。负数让我们把两种方向都说清楚。","life":"气温 −3°C，表示比 0°C 低 3°C。地下 2 层、欠 5 元、海平面以下 100 米，都可以用负数表示。","precise":"整数包含负整数、0 和正整数：……−2、−1、0、1、2……。整数加、减、乘整数还是整数，但相除不一定是整数。","mistake":"−5 比 −2 小。数轴上越靠左越小，不能只比较负号后面的数字。另外，「负负得正」来自运算律必须保持成立，不是随意的规定。","history":"中国《九章算术》（约公元 1 世纪成书）已经用红、黑两色算筹表示正负数并给出加减规则；欧洲直到 17 世纪还有数学家把负数叫作「荒谬的数」。","question":"气温从 −3°C 升到 2°C，升了多少？","answer":"升了 5°C：从 −3 到 0 是 3，再从 0 到 2 是 2。","next":["fraction","rational"]},{"id":"fraction","name":"分数","symbol":"¾","group":"number","short":"一个整体，也可以分着数。","lab":"fraction","plain":"把一个整体平均分成 4 份，取其中 3 份，就是 3/4。","life":"一张饼平均切成 4 块，吃掉 3 块，吃了这张饼的 3/4。注意「平均」两个字：每块必须一样大。","precise":"分数 a/b 表示 a 除以 b，b 不能为 0。它也可以看成 a 个 1/b。分数可以大于 1，比如 5/4。分子分母同乘一个不为 0 的数，分数的大小不变。","mistake":"分母越大，每一份越小：1/8 比 1/4 小。比较两个分数时，要先确认它们说的是同一个整体。","history":"古埃及人主要用分子为 1 的「单位分数」，莱因德纸草书（约公元前 1650 年）里把 2/5 写成 1/3 + 1/15。","question":"同一个整体的 1/2 和 2/4，哪个更大？","answer":"一样大。把每一半再平均分成两份，总共 4 份，原来的一半就成了其中 2 份。","next":["decimal","rational"]},{"id":"decimal","name":"小数","symbol":"0.75","group":"number","short":"把一份十等分，再十等分。","plain":"小数点右边第一位数的是十分之一，第二位数的是百分之一。0.75 就是 75 个百分之一。","life":"0.75 米就是 75 厘米，因为 1 米被等分成 100 厘米。价签上的 9.90 元是 9 元 9 角。","precise":"十进制小数用 10、100、1000……作为分母。0.75 = 75/100 = 3/4。有的分数写成小数会无限循环，例如 1/3 = 0.333……。","mistake":"位数多不代表更大：0.8 = 0.80，比 0.75 大。比较时要按相同数位对齐。还有，0.999…… 与 1 是同一个数，不是「差一点点」。","history":"中国很早就使用十进分数。欧洲的小数记法由荷兰人斯蒂文在 1585 年推广，小数点的写法在 17 世纪才普及。","question":"0.5 和 0.50 一样大吗？","answer":"一样大。5 个十分之一，正好是 50 个百分之一。","next":["rational","irrational"]},{"id":"rational","name":"有理数","symbol":"a/b","group":"number","short":"能写成两个整数的比。","plain":"1/2、−3/4，连 5 也可以写成 5/1。它们的共同点：都能写成整数除以整数。","life":"两个人平分 3 块同样大的饼干，每人得到 3/2 块，也就是 1.5 块。","precise":"有理数是可以写成 a/b 的数，其中 a、b 是整数且 b ≠ 0。有理数的小数展开要么有限，要么从某一位起循环；反过来也成立。","mistake":"无限小数不一定是无理数。1/3 = 0.333…… 无限但循环，所以是有理数。「有理」的原意是「可比」，与「讲道理」无关。","history":"「有理数」译自 rational，词根 ratio 是「比」。任意两个有理数之间还有有理数，但它们没有铺满数轴。","question":"整数 −7 也是有理数吗？","answer":"是，因为 −7 = −7/1。所有整数都是有理数。","next":["irrational","cardinality"]},{"id":"irrational","name":"无理数","symbol":"√2","group":"number","short":"有些长度，写不成整数比。","lab":"zoom","plain":"边长为 1 的正方形，对角线长是 √2。这个长度真实存在，却写不成两个整数的比。","life":"A4 纸的长宽比就是 √2：对折以后，形状和原来一样。这正是 A 系列纸张的设计原理。","precise":"无理数是不能表示为整数之比的实数，小数展开无限且不循环。√2、π、e 都是无理数。有理数和无理数合起来就是实数。","mistake":"√2 ≈ 1.414 只是近似。1.414 是有限小数，是有理数，它的平方是 1.999396，不是 2。","history":"相传公元前 5 世纪毕达哥拉斯学派的希帕索斯发现了 √2 不可公度，动摇了「万物皆（整）数」的信念。证明用反证法：假设 √2 = a/b 是最简分数，会推出 a、b 都是偶数。","question":"计算器显示的 π 的那几位小数，是 π 的全部吗？","answer":"不是。屏幕显示的是有限位近似。π 的小数展开不会结束，也不会循环。","next":["cardinality","limit","pythagoras"]},{"id":"prime","name":"素数","symbol":"2 3 5 7","group":"number","short":"整数世界里的乘法积木。","lab":"sieve","plain":"有些大于 1 的整数，除了 1 和它自己，没有别的正因数。它们叫素数，也叫质数。","life":"12 颗珠子能排成 3 行 4 颗的长方形；7 颗珠子只能排成一行。7 是素数，12 不是。","precise":"素数是恰好有两个不同正因数的正整数。2 是唯一的偶素数。每个大于 1 的整数都能唯一地分解成素数的乘积（不计顺序），这叫算术基本定理。","mistake":"1 只有一个正因数，所以不是素数；如果把 1 算进去，分解就不唯一了。奇数不一定是素数：9 = 3 × 3，91 = 7 × 13。","history":"公元前 3 世纪埃拉托色尼发明了筛法。2024 年 10 月发现的梅森素数 2¹³⁶²⁷⁹⁸⁴¹ − 1 有四千一百多万位，是当时已知最大的素数。","question":"1 到 10 中，哪些数是素数？","answer":"2、3、5、7。素数不是等间隔出现的，这个小小的观察会一路通向黎曼猜想。","next":["infinite-primes","prime-counting"]},{"id":"infinite-primes","name":"素数无穷多","symbol":"p₁p₂…pₙ+1","group":"number","short":"素数永远数不完，而且能证明。","plain":"素数越往后越稀，会不会有最后一个？不会。两千多年前就有人证明了这件事。","life":"把 2、3、5 乘起来再加 1，得到 31。31 除以 2、3、5 都余 1，所以它的素因数一定不在 2、3、5 之中：我们得到了一个新素数。","precise":"欧几里得的证明：任给有限个素数 p₁、…、pₙ，令 N = p₁p₂…pₙ + 1。N 大于 1，必有素因数 q；q 不可能是任何一个 pᵢ（否则 q 整除 1）。所以任何有限的清单都不完整。","mistake":"N 本身不一定是素数：2×3×5×7×11×13 + 1 = 30031 = 59 × 509。证明只说 N 有一个清单之外的素因数。","history":"出自欧几里得《几何原本》第九卷命题 20（约公元前 300 年）。它常被当作「优美的证明」的第一个例子。","question":"检查了一百万个数都成立，算不算证明了「对所有数成立」？","answer":"不算。有限次检查只是证据。欧几里得的论证对任何有限清单都有效，这才覆盖了无穷多种情况。","next":["prime-counting","zeta"]},{"id":"complex","name":"复数","symbol":"a+bi","group":"number","short":"给数轴，再加一个方向。","lab":"complex","plain":"实数排在一条线上。加入一个满足 i² = −1 的新单位 i，数就可以铺满一张平面。","life":"把指向 1 的箭头逆时针转 90°，它指向 i；再转 90°，指向 −1。「乘以 i」就是「转 90°」，所以乘两次得到 −1。","precise":"复数写成 a + bi，a、b 为实数。a 是实部，b 是虚部，对应复平面上的点 (a, b)。两个复数相乘：长度相乘，角度相加。","mistake":"2 + 3i 的虚部是 3，不是 3i。复数之间不能像实数那样比较大小，只能比较它们到原点的距离（模）。","history":"16 世纪意大利数学家解三次方程时不得不使用负数的平方根。「虚数」这个带贬义的名字来自笛卡尔；19 世纪初高斯等人给出了复平面的几何解释。","question":"复数 2 + 3i 的实部和虚部分别是什么？","answer":"实部是 2，虚部是 3。黎曼猜想里的「实部为 1/2」，说的就是复平面上的横坐标。","next":["euler-formula","complex-analysis"]},{"id":"power","name":"幂","symbol":"2³","group":"relation","short":"把重复相乘，写得更简洁。","plain":"2³ 表示 3 个 2 相乘：2 × 2 × 2 = 8。右上角的小数字说明乘了几次。","life":"一个细胞每次分裂成 2 个，分裂 3 次后有 2³ = 8 个，分裂 10 次后有 1024 个。","precise":"n 是正整数时，aⁿ 表示 n 个 a 相乘。同底数相乘，指数相加：aᵐ × aⁿ = aᵐ⁺ⁿ。为了让这条规律继续成立，规定 a⁰ = 1、a⁻ⁿ = 1/aⁿ（a ≠ 0）。","mistake":"2³ 不是 2 × 3。前者是 8，后者是 6。还有 (−2)² = 4，而 −2² = −4：负号在不在括号里结果不同。","history":"用右上角小数字表示指数的写法，由笛卡尔在 1637 年的《几何学》中确立。","question":"3² 是 6，还是 9？","answer":"是 9。3² = 3 × 3，不是 3 × 2。","next":["exponential","variable"]},{"id":"variable","name":"变量","symbol":"x","group":"relation","short":"让一个字母，代表许多可能。","plain":"还不知道一个数是多少，或者想同时讨论很多种情况时，先用 x 表示它。","life":"一支笔 3 元，买 x 支花 3x 元。x 变了，总价也跟着变。","precise":"变量是在指定范围内取值的符号。在具体的等式或函数里，要说明它代表什么量、可以取哪些值。","mistake":"同一个问题里，同一个字母代表同一个数，不能一会儿是 2、一会儿是 5。3x 表示 3 乘 x，不是「三十几」。","history":"公元 9 世纪花拉子米的著作给了「代数」（algebra）这个名字，但他全用文字叙述。用字母表示已知量和未知量，由法国人韦达在 1591 年系统地引入。","question":"每支笔 3 元，买 x 支。x = 4 时总价是多少？","answer":"3 × 4 = 12 元。把变量换成具体的数，就能算出这一次的结果。","next":["function"]},{"id":"function","name":"函数","symbol":"y=x²","group":"relation","short":"输入一个数，规则给出一个结果。","plain":"想象一台守规矩的机器：输入 3，规则是「自己乘自己」，输出就是 9。同样的输入，永远得到同样的输出。","life":"边长为 x 的正方形，面积是 x²。边长变了，面积按同一条规则跟着变。","precise":"函数给定义域里的每个输入指定唯一一个输出。y = x² 是一个例子。不同的输入可以有相同的输出。","mistake":"「每个输入只有一个输出」不等于「不同输入的输出一定不同」：(−2)² 和 2² 都是 4。函数也不一定能写成公式，一张表、一幅图都可以表示函数。","history":"「函数」一词由莱布尼茨在 17 世纪末使用，记号 f(x) 来自欧拉（1734 年）。中文译名出自李善兰 1859 年的译著。","question":"规则 y = x²，输入 4 和 −4，输出分别是什么？","answer":"都是 16。每个输入各有一个确定的输出，两个输出可以相同。","next":["exponential","limit"]},{"id":"exponential","name":"指数增长","symbol":"2ˣ","group":"relation","short":"每次翻倍，和每次加二，差得很远。","plain":"每次加 2：2、4、6、8、10。每次乘 2：2、4、8、16、32。开头差不多，后面天差地别。","life":"一张 0.1 毫米厚的纸，如果能对折 42 次，厚度会超过地球到月球的距离。相传棋盘上第一格放 1 粒米、每格翻倍，64 格一共要 2⁶⁴ − 1 粒，约 1845 亿亿粒。","precise":"指数函数 y = aˣ（a > 0，a ≠ 1）每前进固定的一步，就乘上固定的倍数。它的反函数是对数：log₂ 8 = 3，因为 2³ = 8。","mistake":"指数增长不等于「增长得快」。它在开头可以很慢，关键是「按比例增长」。现实中的指数增长迟早会受资源限制而放缓。","history":"纳皮尔 1614 年发表对数表，把乘法变成加法，大大减轻了天文计算的负担。拉普拉斯说它「让天文学家的寿命延长了一倍」。","question":"池塘里的浮萍每天面积翻一倍，第 30 天铺满池塘。第几天铺满一半？","answer":"第 29 天。因为再过一天翻倍，正好铺满。","next":["euler-formula","prime-counting"]},{"id":"pythagoras","name":"勾股定理","symbol":"a²+b²=c²","group":"relation","short":"直角三角形三条边的秘密。","lab":"pythagoras","plain":"直角三角形里，两条直角边各自为边作正方形，面积加起来，正好等于斜边上的正方形的面积。","life":"边长 3、4、5 的三角形一定是直角三角形。木工和建筑工人至今还用「3-4-5」来检查墙角是不是直角。","precise":"直角三角形的两条直角边为 a、b，斜边为 c，则 a² + b² = c²。反过来，三边满足这个等式的三角形一定是直角三角形。","mistake":"定理只对直角三角形成立。还有，√(a² + b²) 不等于 a + b：直角边是 3 和 4 时，斜边是 5，不是 7。","history":"巴比伦泥板 Plimpton 322（约公元前 1800 年）列有多组勾股数；中国《周髀算经》记有「勾三股四弦五」，三国时期赵爽用「弦图」给出了证明。已知的证明有数百种。","question":"直角边是 6 和 8，斜边是多少？","answer":"10。因为 6² + 8² = 36 + 64 = 100 = 10²。它是 3-4-5 放大两倍。","next":["irrational","complex"]},{"id":"probability","name":"概率","symbol":"P(A)","group":"relation","short":"给「有多可能」一个数。","lab":"coin","plain":"抛一枚均匀的硬币，正面朝上的概率是 1/2。概率用 0 到 1 之间的数，衡量一件事发生的可能性。","life":"天气预报说「降水概率 30%」，意思是在相似的天气条件下，大约每 10 次里有 3 次下雨，不是说「今天 30% 的时间在下雨」。","precise":"如果所有结果等可能，事件 A 的概率 = A 包含的结果数 ÷ 全部结果数。概率为 0 到 1；一件事发生与不发生的概率之和是 1。","mistake":"硬币没有记忆。连续 5 次正面之后，下一次正面的概率仍是 1/2。认为「该出反面了」是著名的赌徒谬误。","history":"概率论起于 1654 年帕斯卡与费马讨论赌局奖金如何分配的通信。1933 年柯尔莫哥洛夫给出了它的公理体系。","question":"同时掷两枚骰子，点数和为 7 与点数和为 2，哪个更可能？","answer":"和为 7 更可能。36 种等可能的结果里，和为 7 有 6 种，和为 2 只有 (1,1) 这 1 种。","next":["cardinality"]},{"id":"limit","name":"极限","symbol":"lim","group":"change","short":"越来越接近时，会走向哪里？","plain":"0.9、0.99、0.999……和 1 的距离越来越小，想要多小就能有多小。极限描述的就是这种趋势。","life":"把一条光滑曲线不断放大，很小的一段会越来越像直线。这是理解「某一刻的变化」的入口。","precise":"说数列的极限是 L，意思是：不管你要求多小的误差，从某一项开始，后面所有项与 L 的差都小于这个误差。","mistake":"不要把极限说成「永远到不了」。每个有限的 0.99…9 都小于 1，但无限循环小数 0.999…… 就等于 1。极限是一个确定的数，不是一个过程。","history":"古希腊的「穷竭法」和刘徽的「割圆术」（公元 263 年）已经有极限的想法。严格的定义由柯西和魏尔斯特拉斯在 19 世纪完成。","question":"0.9、0.99、0.999 与 1 的差依次是多少？","answer":"0.1、0.01、0.001。想让差更小，就继续增加 9 的个数。","next":["derivative","series"]},{"id":"derivative","name":"导数","symbol":"f′(x)","group":"change","short":"这一刻，究竟变得有多快？","lab":"derivative","plain":"一段时间里走了多远，可以算出平均速度。把这段时间越缩越短，平均速度就接近「这一刻的速度」。","life":"位置 s = t² 米时，从 1 秒到 1+h 秒的平均速度是 2 + h 米/秒。h 趋近 0 时，它趋近 2 米/秒。汽车仪表盘上显示的就是这种瞬时速度。","precise":"导数是差商 [f(x+h) − f(x)] / h 在 h 趋近 0 时的极限（如果存在）。f(x) = x² 的导数是 2x。几何上，它是曲线在该点切线的斜率。","mistake":"不能直接把 h = 0 代入差商，那样会得到 0 ÷ 0。我们研究的是 h ≠ 0 时趋近的结果。也不是所有函数处处可导，比如 |x| 在 0 处有个尖角。","history":"牛顿（称为「流数」）和莱布尼茨在 17 世纪后半叶各自独立创立了微积分。今天使用的 dy/dx 记号来自莱布尼茨。","question":"位置 s = t²，在 t = 1 秒时的瞬时速度是多少？","answer":"2 米/秒。平均速度 2 + h 在 h 趋近 0 时趋近 2。","next":["integral"]},{"id":"integral","name":"积分","symbol":"∫","group":"change","short":"把许多小小的变化，累积起来。","lab":"integral","plain":"速度每一刻都在变，就把时间切成很多小段。每段用「速度 × 时间」估计路程，再全部加起来。","life":"速度 v = 2t 米/秒，0 到 1 秒走过的路程可以用越来越细的矩形估计，最后得到 1 米。","precise":"定积分是分割越来越细时矩形面积之和的极限。微积分基本定理说：积分与求导互为逆运算，所以 ∫₀¹ 2t dt = 1² − 0² = 1。","mistake":"有限个矩形通常只是近似。曲线在横轴下方时，积分取负值；所以速度的积分是位移，不一定是路程。","history":"阿基米德用穷竭法求出了抛物线弓形的面积。积分号 ∫ 是莱布尼茨 1675 年引入的，它是拉长的字母 S，代表「求和」（summa）。","question":"速度的单位是米/秒，乘上秒再加起来，单位是什么？","answer":"米。积分把每一小段的变化累积起来，这也解释了速度怎样连接到位置。","next":["series"]},{"id":"series","name":"无穷级数","symbol":"Σ","group":"change","short":"一直加下去，结果会怎样？","lab":"series","plain":"先拿半张纸，再拿四分之一张，再拿八分之一张……每次拿的越来越少，总量越来越接近一整张。","life":"1/2 + 1/4 + 1/8 + …… 的和是 1。古希腊的芝诺用类似的无穷步骤「论证」跑得快的阿基里斯追不上乌龟；级数告诉我们，无穷多段时间加起来可以是有限的。","precise":"无穷级数的和，定义为部分和的极限。这个极限存在且有限，就说级数收敛。","mistake":"「每一项趋近 0」还不够。1 + 1/2 + 1/3 + 1/4 + …… 的每一项都趋近 0，总和却可以超过任何数，只是增长得极慢。","history":"调和级数发散，由法国学者奥雷姆约 1350 年证明：把项分组，每组之和都不小于 1/2。1 + 1/4 + 1/9 + …… = π²/6 则由欧拉在 1734 年得出。","question":"1/2 + 1/4 + 1/8 这前三项加起来，已经等于 1 了吗？","answer":"还没有，是 7/8。有限的部分和与整个级数的极限，是两件要区分的事。","next":["zeta","euler-formula"]},{"id":"cardinality","name":"无穷的大小","symbol":"ℵ₀","group":"change","short":"无穷和无穷，也能比大小。","plain":"偶数只是自然数的一半吗？把每个自然数 n 和 2n 配对：1↔2、2↔4、3↔6……谁也不落下。按「能否一一配对」来比，它们一样多。","life":"希尔伯特旅馆有无穷多个房间，全部住满。来了一位新客人怎么办？请每位客人搬到下一号房间，1 号房就空出来了。","precise":"两个集合能一一对应，就说它们基数相同。自然数、整数、有理数的基数相同（可数无穷）。康托尔证明实数不能与自然数一一对应：实数是「更大」的无穷。","mistake":"无穷不是一个很大的数，不能照搬有限数的直觉。「部分小于整体」对无穷集合不成立，这正是无穷集合的特征。","history":"康托尔 1874 年证明实数不可数，1891 年给出著名的对角线论证。他的理论当时遭到激烈反对，后来成为现代数学的基础。","question":"0 到 1 之间的实数，和所有实数，哪个更多？","answer":"一样多。存在把 (0,1) 一一对应到整条数轴的函数，比如 y = tan(π(x − 1/2))。","next":["limit"]},{"id":"euler-formula","name":"欧拉公式","symbol":"e^{iπ}+1=0","group":"frontier","short":"指数、旋转和圆，写进一个等式。","lab":"euler","plain":"把「连续增长」的想法用到虚数方向上，增长就变成了旋转。转半圈，正好从 1 走到 −1。","life":"银行按年利率 100% 计息。一年结一次，1 元变 2 元；结算越来越频繁，最后趋近 e ≈ 2.718 元。把利率换成虚数 iπ，同样的复利过程会沿着圆弧走到 −1。","precise":"对任何实数 θ：e^{iθ} = cos θ + i·sin θ，它是单位圆上角度为 θ（弧度）的点。取 θ = π 得 e^{iπ} + 1 = 0。","mistake":"e^{iπ} 不是「e 自乘 iπ 次」。指数为复数时，eᶻ 是用极限或幂级数重新定义的，定义保证了原来的运算律继续成立。","history":"欧拉 1748 年在《无穷分析引论》中发表了这个公式。它把 0、1、e、i、π 五个最重要的常数连在一起。","question":"e^{iπ/2} 等于多少？","answer":"等于 i。角度 π/2 是四分之一圈，对应单位圆上的点 (0, 1)。","next":["complex-analysis","zeta"]},{"id":"complex-analysis","name":"复分析","symbol":"f(z)","group":"frontier","short":"研究复平面上的函数。","plain":"当输入和输出都是复数时，函数就是「平面到平面」的规则。复分析研究其中特别光滑的一类。","life":"把一张小方格纸交给函数 z ↦ z²：远离 0 的地方，每个小方格被旋转、缩放，但直角仍是直角。这种保持角度的性质叫共形。","precise":"复导数要求从复平面上所有方向趋近时，差商都趋于同一个值。在一个区域里处处复可微的函数叫全纯函数。解析延拓把一个全纯函数唯一地接续到更大的区域。","mistake":"解析延拓不是把一个发散的级数硬算出一个和。先要确认原来的表示在哪里有效，再谈延拓出去的函数。","history":"19 世纪由柯西、黎曼、魏尔斯特拉斯建立。它的一个惊人结论：一个全纯函数在一小段曲线上的值，就决定了它在整个连通区域上的值。","question":"一个级数在某个输入处不收敛，还能直接用它算函数值吗？","answer":"不能。需要别的有效表示或解析延拓。这正是从级数走向黎曼 ζ 函数时要过的桥。","next":["zeta"]},{"id":"prime-counting","name":"素数定理","symbol":"π(x)~x/ln x","group":"frontier","short":"素数很乱，数量却有规律。","lab":"count","plain":"单个素数何时出现难以预料，但「到 x 为止一共有多少个素数」却出奇地有规律。","life":"1000 以内有 168 个素数，100 万以内有 78498 个。在 x 附近，大约每 ln x 个数里有一个素数：数越大，素数越稀，但稀得很有规矩。","precise":"记 π(x) 为不超过 x 的素数个数。素数定理说 π(x) 与 x/ln x 的比值趋于 1。对数积分 Li(x) 是更好的近似。这里的 π 是函数名，与圆周率无关。","mistake":"「比值趋于 1」不代表「差很小」。π(x) 与近似值的差可以越来越大，只是比 x 本身增长得慢。这个差究竟多大，正是黎曼猜想要回答的。","history":"高斯十五六岁时从素数表中猜到了这个规律。1896 年阿达马和德拉瓦莱普桑各自独立证明，用的正是黎曼 ζ 函数。","question":"1 到 100 之间有多少个素数？x/ln x 给出的估计是多少？","answer":"有 25 个。100/ln 100 ≈ 21.7，Li(100) ≈ 29.1。估计值不精确，但数量级是对的。","next":["zeta","riemann"]},{"id":"zeta","name":"ζ 函数","symbol":"ζ(s)","group":"frontier","short":"把无穷级数，连接到素数。","lab":"zeta","source":"https://www.claymath.org/wp-content/uploads/2022/05/riemann.pdf","plain":"把 1、1/2ˢ、1/3ˢ、1/4ˢ……全部相加，得到一个随 s 变化的函数。奇妙的是，它又能写成只涉及素数的乘积。","life":"s = 2 时，1 + 1/4 + 1/9 + 1/16 + …… = π²/6。欧拉发现它也等于对所有素数 p 把 1/(1 − 1/p²) 连乘。对全体整数求和，变成了对全体素数求积。","precise":"ζ(s) = Σ n⁻ˢ 在 Re(s) > 1 时收敛，并等于欧拉乘积 ∏ (1 − p⁻ˢ)⁻¹。通过解析延拓，ζ 可以定义在除 s = 1 以外的整个复平面上；s = 1 是它唯一的极点。","mistake":"在 Re(s) ≤ 1 的地方不能再用原来的级数求和。ζ(−1) = −1/12 是延拓后函数的值；级数 1 + 2 + 3 + …… 本身发散，并不「等于」−1/12。","history":"欧拉在 18 世纪研究了实数 s 的情形。1859 年黎曼把 s 换成复数，发现零点的位置控制着素数的分布。","question":"研究实部为 1/2 的输入时，可以直接对 Σ n⁻ˢ 求和吗？","answer":"不可以。这个级数只在实部大于 1 时收敛。临界带里的 ζ 要用延拓后有效的公式计算，本页的实验用的是欧拉–麦克劳林求和。","next":["riemann"]},{"id":"riemann","name":"黎曼猜想","symbol":"Re(s)=½","group":"frontier","short":"数的旅程，走到一个未解的问题。","lab":"music","source":"https://www.claymath.org/millennium/Riemann-Hypothesis/","plain":"素数的间隔忽长忽短。一个提出了一百六十多年的猜想，把它们的分布和复平面上的一条直线联系在一起。","life":"让函数值等于 0 的输入叫零点。ζ 在 −2、−4、−6…… 处有「平凡零点」；其余的零点都落在实部介于 0 和 1 之间的「临界带」里。猜想说：它们其实全在正中间那条线上。","precise":"黎曼猜想：ζ 函数的每一个非平凡零点 ρ 都满足 Re(ρ) = 1/2。它等价于：素数个数 π(x) 与 Li(x) 的差不超过 √x · ln x 的常数倍，也就是说素数的分布「尽可能均匀」。它至今没有被证明，也没有被推翻。","mistake":"已经用计算机验证了前 10¹³ 个零点都在临界线上，但这不是证明：猜想说的是全部无穷多个。数学史上有过算到极大的数才出现反例的猜想。","history":"黎曼 1859 年在他唯一一篇数论论文里提出，并写道证明它「暂时放在一边」。1900 年希尔伯特把它列为 23 个问题之一，2000 年克雷数学研究所把它列为七个千禧年大奖难题之一。","question":"计算机检查了十万亿个零点，能代替「所有零点」的证明吗？","answer":"不能。有限的验证只是证据。我们的目标，是能准确说出这个问题、理解它为什么与素数有关，并明白它为什么仍然开放。","next":[]}],"mini":{"colors":["#77a7ee","#777fee","#9777ee","#be77ee","#e677ee","#ee77ce","#ee77a7","#ee777f","#ee9777","#eebe77","#eee677","#ceee77","#a7ee77","#7fee77","#77ee97","#77eebe","#77eee6","#77ceee"],"nodes":[[1.1,-6.9,0,1],[5.4,-17.4,0,1],[1.8,-24.9,0,0],[9.8,-21.8,0,0],[7.5,-27.5,0,0],[3.7,-32.4,0,0],[5.8,-38.3,0,0],[13.5,-36.5,0,1],[2.0,-43.2,0,0],[10.7,-42.0,0,1],[1.7,-50.2,0,0],[13.0,-30.3,0,1],[6.9,-46.9,0,1],[16.9,-41.7,0,1],[10.1,-52.2,0,1],[17.4,-52.4,0,0],[8.8,-58.3,0,0],[13.9,-47.3,0,0],[20.2,-46.9,0,0],[21.4,-32.8,1,1],[22.4,-38.9,1,0],[27.3,-42.7,1,0],[33.9,-50.7,1,0],[26.1,-28.6,1,0],[27.3,-34.8,1,0],[32.0,-30.7,1,0],[32.4,-38.3,1,0],[27.9,-48.9,1,0],[38.9,-47.0,1,0],[33.3,-44.4,1,0],[38.2,-40.4,1,0],[37.9,-55.4,1,0],[-10.5,16.9,10,0],[-32.4,17.0,11,0],[-33.6,23.1,11,0],[-38.6,26.8,11,0],[37.1,-34.2,1,0],[-13.2,-45.8,17,0],[40.9,-27.7,2,1],[44.1,-43.7,1,0],[-2.6,-18.9,17,0],[-5.3,-46.8,17,0],[-6.9,-24.6,17,0],[-18.8,-48.5,17,0],[-9.9,-51.0,17,0],[-21.4,-55.4,17,0],[-15.5,-53.7,17,1],[-10.3,-57.2,17,0],[-3.9,-52.9,17,0],[-1.4,-58.6,17,0],[-15.3,-66.1,17,0],[-15.8,13.5,10,0],[-15.6,20.4,10,0],[-21.6,22.2,10,0],[-28.1,38.9,10,0],[-15.9,-59.9,17,0],[-38.6,17.4,11,0],[-6.5,-62.1,17,0],[45.7,-31.6,2,0],[51.0,-41.4,2,0],[-21.5,-62.5,17,0],[43.0,-21.8,2,1],[46.0,-37.8,2,1],[51.3,-29.1,2,0],[54.7,-21.0,2,0],[52.3,-35.2,2,0],[-8.9,-67.8,17,0],[49.0,-23.3,2,0],[57.2,-31.1,2,0],[51.5,-8.8,3,0],[56.0,-13.1,3,0],[59.7,-24.6,2,0],[57.9,-38.0,2,0],[63.3,-29.7,2,0],[60.1,-17.7,3,1],[55.3,-1.2,3,1],[60.9,-9.3,3,1],[65.0,-21.4,3,0],[71.0,-19.7,3,0],[66.4,-35.1,2,1],[-29.7,45.5,10,0],[-34.2,39.8,10,0],[-40.3,35.2,10,0],[-35.9,45.8,10,1],[-40.2,41.4,10,0],[-36.7,51.9,10,0],[-42.6,22.1,11,0],[-34.2,33.6,10,0],[-45.4,44.8,10,0],[-3.5,38.4,8,0],[1.6,43.6,8,1],[-4.6,44.5,8,0],[4.6,51.5,8,0],[7.6,58.9,8,0],[-0.6,62.7,8,0],[-1.4,49.9,8,0],[1.7,57.0,8,1],[-6.7,61.4,8,0],[5.3,64.6,8,0],[-7.9,67.5,8,0],[-8.2,50.6,8,0],[-4.3,55.4,8,0],[-10.4,56.4,8,0],[-44.5,28.8,11,0],[-48.0,33.9,11,0],[-54.1,33.3,11,0],[-53.9,27.1,11,0],[-48.5,24.0,11,0],[-56.7,38.9,11,0],[-42.2,10.5,12,1],[-59.5,29.9,11,0],[-48.0,12.6,12,0],[-53.7,6.7,12,0],[-47.7,5.0,12,0],[-54.2,12.9,12,0],[-57.8,18.0,12,0],[61.2,-3.1,3,1],[-65.4,8.1,12,0],[-65.0,20.1,12,0],[-71.5,18.9,12,0],[-59.8,5.6,12,0],[-43.6,-30.6,15,0],[-50.8,-32.8,15,0],[-62.6,14.0,12,0],[-68.8,13.3,12,0],[54.8,10.2,4,0],[60.8,11.6,4,0],[66.7,9.6,4,0],[-69.6,3.5,12,0],[-73.0,8.7,12,0],[-45.0,-36.6,15,0],[-51.1,-39.0,15,0],[-46.1,-42.7,15,0],[-56.4,-35.8,15,0],[-40.0,-41.9,15,0],[-57.2,-42.0,15,0],[-51.9,-45.2,15,0],[-54.8,-50.7,15,0],[-46.9,-48.9,15,0],[60.6,3.1,3,0],[66.3,-12.5,3,0],[72.6,-7.7,3,0],[66.6,-6.1,3,0],[71.7,3.8,3,0],[73.2,-13.9,3,0],[66.5,0.3,3,0],[74.4,-1.8,3,0],[77.1,-18.7,3,0],[65.3,15.9,4,0],[71.3,14.1,4,0],[76.7,11.2,4,0],[62.4,21.4,4,0],[78.1,17.2,4,0],[79.0,23.4,4,0],[83.9,15.2,4,0],[72.9,22.1,4,0],[54.3,29.6,5,1],[58.9,33.7,5,0],[64.6,31.1,5,0],[63.2,38.4,5,0],[68.8,35.7,5,0],[73.0,40.2,5,0],[76.6,35.1,5,0],[64.5,46.8,5,0],[70.7,45.9,5,0],[78.9,42.1,5,0],[58.1,41.9,5,0],[66.1,52.9,5,0],[72.3,51.9,5,0],[33.8,54.8,6,0],[36.5,60.3,6,1],[47.1,56.5,6,0],[40.9,64.7,6,0],[51.8,60.5,6,0],[46.4,67.6,6,0],[54.9,65.9,6,1],[61.1,65.2,6,0],[44.1,73.4,6,0],[52.3,71.5,6,0],[49.3,76.9,6,0],[41.4,79.0,6,0],[58.6,70.8,6,1],[-17.9,51.3,9,0],[63.9,74.2,6,0],[46.2,82.9,6,0],[52.4,82.2,6,0],[38.7,70.5,6,0],[-61.4,-29.4,14,0],[-69.4,-20.3,14,0],[-75.4,-22.5,14,0],[-66.4,-25.7,14,0],[-72.4,-28.3,14,0],[-67.3,-31.8,14,0],[-78.6,-28.1,14,0],[-73.6,-35.3,14,0],[-69.1,-13.0,13,0],[-68.7,-39.1,14,0],[-62.7,-36.0,14,0],[-16.3,58.4,9,0],[-25.4,50.0,9,0],[-22.0,56.0,9,0],[-33.5,58.7,9,0],[-16.0,64.6,9,0],[-22.0,62.6,9,0],[-21.4,68.7,9,0],[-28.2,62.3,9,0],[-34.4,64.8,9,0],[-28.2,55.6,9,0],[-29.4,-51.8,16,0],[-38.5,-53.3,16,0],[-47.5,-55.0,16,0],[-25.3,73.6,9,0],[-44.1,-60.2,16,0],[-38.0,-59.4,16,0],[-37.8,-70.5,16,0],[-35.5,-47.9,16,0],[-32.1,-57.4,16,0],[-42.2,-66.1,16,0],[-35.0,-64.9,16,0],[-29.0,-63.4,16,0],[-48.5,-64.8,16,0],[-56.9,-4.9,13,0],[-50.6,-4.4,13,0],[-63.2,-11.1,13,0],[-74.4,-1.7,13,0],[-72.4,-7.5,13,0],[-63.1,-4.9,13,0],[-77.4,-11.1,13,0],[-74.2,-16.4,13,0],[19.7,57.0,7,0],[13.8,58.8,7,0],[26.4,77.4,7,0],[23.7,70.8,7,0],[18.8,80.2,7,0],[21.7,64.9,7,0],[17.9,74.1,7,0],[31.0,92.8,7,0],[23.4,97.2,7,0]],"edges":[[0,1],[1,2],[0,3],[1,3],[5,7],[7,8],[7,9],[2,9],[9,10],[3,11],[4,11],[11,12],[7,12],[9,12],[6,13],[11,13],[12,14],[13,14],[14,15],[12,15],[13,16],[9,17],[13,17],[9,18],[6,19],[19,20],[11,20],[11,23],[19,24],[13,24],[19,25],[13,25],[0,32],[7,35],[19,37],[12,37],[37,38],[11,38],[13,38],[38,39],[0,40],[44,46],[43,46],[13,46],[0,51],[46,59],[46,60],[19,61],[37,61],[61,62],[13,62],[61,63],[62,65],[61,67],[61,68],[61,69],[0,69],[62,71],[70,74],[8,74],[61,75],[23,75],[22,75],[75,76],[67,76],[76,77],[74,78],[38,79],[59,79],[62,79],[78,79],[0,81],[32,83],[61,83],[80,83],[83,85],[19,86],[11,89],[89,90],[90,92],[92,96],[80,96],[90,97],[14,100],[13,101],[19,104],[62,108],[7,109],[32,109],[33,109],[109,110],[0,111],[9,112],[109,113],[109,114],[61,114],[75,116],[43,116],[18,116],[116,117],[75,126],[83,127],[109,128],[46,134],[75,139],[76,140],[116,142],[76,142],[75,144],[76,145],[61,145],[74,149],[116,151],[38,156],[75,156],[61,156],[156,157],[38,158],[79,165],[75,169],[90,170],[169,170],[143,170],[170,171],[38,172],[79,172],[173,175],[162,175],[175,176],[175,178],[175,179],[170,180],[175,180],[179,181],[180,181],[53,181],[51,181],[181,183],[181,185],[76,187],[61,187],[38,189],[38,200],[83,202],[61,209],[61,221],[76,223],[116,223],[109,227],[90,229],[96,229],[181,237]]},"topics":{"natural":{"name":"自然数与计数","pre":[],"fact":"自然数是否包含 0 是约定问题：本图鉴采用含 0 的约定（与中国现行教材、ISO 80000-2 一致），有些书从 1 开始。"},"zero":{"name":"零与空的数量","pre":["natural"],"fact":"把零当作一个可以参与运算的数，最早的系统规则见于印度数学家婆罗摩笈多公元 628 年的著作。"},"place-value":{"name":"位值与进位制","pre":["zero"]},"ordering":{"name":"大小比较与数轴","pre":["natural","zero"]},"addition":{"name":"加法与减法","pre":["place-value","ordering"]},"multiplication":{"name":"乘法与除法","pre":["addition"]},"operation-laws":{"name":"运算律与运算顺序","pre":["multiplication"]},"fraction":{"name":"分数","pre":["multiplication"]},"equivalent-fractions":{"name":"等价分数与分数运算","pre":["fraction","operation-laws"]},"decimal":{"name":"小数","pre":["fraction","place-value"],"fact":"0.999… = 1 不是近似，是相等：它是 0.9、0.99、0.999… 这个数列的极限。"},"ratio":{"name":"比例、比率与百分比","pre":["equivalent-fractions","decimal"]},"integer":{"name":"负数与整数","pre":["ordering","addition"]},"rational":{"name":"有理数与循环小数","pre":["integer","fraction","decimal"],"fact":"有理数虽然稠密，却是可数的，可以排成一列逐个数完；在数轴上它们的总「长度」是 0。"},"power":{"name":"幂与指数运算","pre":["operation-laws","integer"]},"irrational":{"name":"无理数","pre":["rational","power"],"fact":"√2 是无理数的证明用反证法：若 √2 = a/b 为最简分数，则 a、b 都得是偶数，矛盾。π 的无理性由兰伯特于 1761 年证明。"},"real":{"name":"实数与稠密性","pre":["irrational","rational"]},"root":{"name":"根式与分数指数","pre":["power","real"]},"estimation":{"name":"估计、近似与科学记数法","pre":["decimal","power"]},"units":{"name":"单位与量纲","pre":["multiplication","decimal"]},"variable":{"name":"变量与代数式","pre":["operation-laws"]},"equality":{"name":"等式与等价变形","pre":["variable","integer"]},"linear-equation":{"name":"一元一次方程","pre":["equality","equivalent-fractions"]},"inequality":{"name":"不等式与区间","pre":["linear-equation","real"]},"absolute-value":{"name":"绝对值与距离","pre":["integer","ordering"]},"polynomial":{"name":"多项式与恒等式","pre":["variable","power","operation-laws"]},"arithmetic-geometric":{"name":"等差数列与等比数列","pre":["variable","power"]},"factorization":{"name":"因式分解","pre":["polynomial"]},"polynomial-division":{"name":"多项式除法与余数定理","pre":["polynomial","factorization"]},"quadratic-equation":{"name":"一元二次方程","pre":["factorization","root","linear-equation"]},"systems":{"name":"方程组","pre":["linear-equation"]},"rational-expression":{"name":"分式与分式方程","pre":["factorization","equivalent-fractions"]},"radical-equation":{"name":"根式方程","pre":["root","quadratic-equation"]},"sets":{"name":"集合与分类","pre":["natural"]},"counting-rules":{"name":"分类计数与分步计数","pre":["addition","multiplication","sets"]},"permutations":{"name":"排列","pre":["counting-rules"]},"combinations":{"name":"组合","pre":["permutations","fraction"]},"binomial":{"name":"二项式与组合系数","pre":["polynomial","combinations"]},"coordinates":{"name":"坐标与解析几何","pre":["variable","rational"]},"complex":{"name":"复数与复平面","pre":["coordinates","integer","power"],"fact":"16 世纪卡尔达诺和邦贝利为了解三次方程不得不使用负数的平方根。「虚数」这个带贬义的名字来自笛卡尔，但复数与实数一样「真实」。"},"fundamental-theorem-algebra":{"name":"代数基本定理","pre":["complex","polynomial-division"]},"shapes":{"name":"形状、位置与空间直觉","pre":["natural"]},"length":{"name":"长度、周长与测量","pre":["units","shapes"]},"angle":{"name":"角、平行与垂直","pre":["shapes"]},"area":{"name":"面积与体积","pre":["length","multiplication"]},"triangles":{"name":"三角形与全等","pre":["angle","length"]},"similarity":{"name":"相似与尺度变换","pre":["triangles","ratio"]},"pythagoras":{"name":"勾股定理","pre":["triangles","area","power"],"fact":"a² + b² = c²。中国称勾股定理，《周髀算经》记有「勾三股四弦五」；巴比伦泥板 Plimpton 322（约公元前 1800 年）已列出多组勾股数。已知的证明有数百种。"},"circle":{"name":"圆、π 与圆周关系","pre":["length","area","ratio"]},"transformations":{"name":"平移、旋转与对称","pre":["coordinates","angle"]},"solids":{"name":"立体、展开图与投影","pre":["shapes","area"]},"conics":{"name":"圆锥曲线","pre":["coordinates","quadratic-equation"]},"patterns":{"name":"规律、猜想与反例","pre":["natural"]},"logic-statements":{"name":"命题与逻辑联结","pre":["patterns"]},"quantifiers":{"name":"全称、存在与否定","pre":["logic-statements","sets"]},"proof":{"name":"直接证明与推理链","pre":["logic-statements","quantifiers","equality"]},"geometric-proof":{"name":"几何证明与作图","pre":["triangles","similarity","proof"]},"graphs":{"name":"图、路径与网络","pre":["sets","counting-rules"]},"polyhedra":{"name":"多面体与欧拉公式","pre":["solids","graphs"]},"unit-circle":{"name":"单位圆与弧度","pre":["circle","coordinates","ratio"]},"trigonometry":{"name":"三角函数","pre":["unit-circle","similarity","pythagoras"]},"solving-triangles":{"name":"正弦定理与余弦定理","pre":["trigonometry","pythagoras"]},"function":{"name":"函数","pre":["variable","coordinates"]},"exponential":{"name":"指数函数与增长","pre":["function","power"],"fact":"一张纸对折 42 次，理想厚度会超过地月距离：0.1 毫米 × 2⁴² ≈ 44 万千米。指数增长在开头看起来很慢。"},"domain-range":{"name":"定义域、值域与复合","pre":["function","sets"]},"inverse-function":{"name":"反函数","pre":["domain-range","linear-equation"]},"logarithm":{"name":"对数","pre":["exponential","inverse-function"]},"fractal":{"name":"分形与自相似","pre":["similarity","logarithm"]},"linear-function":{"name":"一次函数与斜率","pre":["function","ratio"]},"quadratic-function":{"name":"二次函数","pre":["function","quadratic-equation"]},"sequence":{"name":"数列与递推变化","pre":["function","natural"]},"sequence-limit":{"name":"数列极限","pre":["sequence","absolute-value","inequality"]},"e-constant":{"name":"自然常数 e","pre":["exponential","sequence-limit"]},"function-transform":{"name":"函数图像与变换","pre":["linear-function","quadratic-function","transformations"]},"polar-parametric":{"name":"参数方程与极坐标","pre":["trigonometry","coordinates"]},"series":{"name":"无穷级数","pre":["sequence-limit","equivalent-fractions"],"fact":"调和级数 1+1/2+1/3+… 发散（奥雷姆约 1350 年的分组证明），但发散得极慢：前一百万项的和还不到 14.4。"},"limit":{"name":"函数极限","pre":["function","absolute-value","inequality"],"fact":"ε–δ 定义由柯西和魏尔斯特拉斯在 19 世纪完成，比牛顿、莱布尼茨创立微积分晚了一百多年。"},"derivative":{"name":"导数与瞬时变化率","pre":["limit","linear-function"],"fact":"(xⁿ)′ = n·xⁿ⁻¹。可导一定连续，连续不一定可导：|x| 在 0 处连续但不可导；魏尔斯特拉斯 1872 年给出处处连续却处处不可导的函数。"},"derivative-rules":{"name":"求导法则与复合函数","pre":["derivative","domain-range","trigonometry","logarithm","e-constant"]},"taylor":{"name":"泰勒展开与幂级数","pre":["series","derivative-rules"]},"euler-formula":{"name":"复指数与欧拉公式","pre":["complex","trigonometry","exponential","taylor"],"fact":"e^{iθ} = cos θ + i·sin θ。取 θ = π 得到 e^{iπ} + 1 = 0，把 0、1、e、i、π 五个常数放进了一个等式。"},"contradiction":{"name":"反证法与逆否命题","pre":["proof"]},"induction":{"name":"数学归纳法","pre":["proof","natural"]},"relations":{"name":"关系与等价类","pre":["sets","proof"]},"cardinality":{"name":"基数、可数与不可数","pre":["sets","function","contradiction"],"fact":"康托尔 1874 年证明实数不可数，1891 年给出对角线论证。他还证明任何集合的幂集都比它本身「更大」，所以无穷有无穷多种大小。"},"axioms":{"name":"公理系统与形式语言","pre":["proof","relations"]},"set-theory":{"name":"集合论公理与选择公理","pre":["axioms","cardinality"]},"algorithms":{"name":"算法与不变量","pre":["patterns","variable"]},"computability":{"name":"可计算性与判定","pre":["algorithms","logic-statements"]},"incompleteness":{"name":"完备性、独立性与不完备性","pre":["axioms","computability","quantifiers"]},"divisibility":{"name":"整除、因数与倍数","pre":["multiplication","integer"]},"prime":{"name":"素数与合数","pre":["divisibility"]},"gcd":{"name":"最大公因数与欧几里得算法","pre":["divisibility"]},"prime-factorization":{"name":"算术基本定理","pre":["prime","gcd","proof"]},"modular":{"name":"余数与同余","pre":["divisibility","relations"]},"crt":{"name":"中国剩余定理","pre":["modular","gcd"]},"diophantine":{"name":"整数方程与贝祖等式","pre":["gcd","linear-equation","proof"]},"infinite-primes":{"name":"素数有无穷多个","pre":["prime-factorization","contradiction"],"fact":"欧几里得《几何原本》第九卷命题 20。注意：把前几个素数相乘再加 1，得到的数不一定是素数（2·3·5·7·11·13+1 = 30031 = 59×509），但它一定有一个新的素因数。"},"fermat-euler":{"name":"费马小定理与欧拉定理","pre":["modular","prime","induction"]},"quadratic-residue":{"name":"平方剩余与二次互反","pre":["modular","fermat-euler"]},"cryptography":{"name":"数论与密码","pre":["modular","fermat-euler","algorithms"]},"continued-fractions":{"name":"连分数与有理逼近","pre":["gcd","irrational"]},"perfect-mersenne":{"name":"完全数与梅森素数","pre":["prime-factorization","power"]},"arithmetic-functions":{"name":"算术函数与默比乌斯反演","pre":["prime-factorization","counting-rules"]},"pigeonhole":{"name":"抽屉原理与容斥","pre":["counting-rules","sets","proof"]},"recurrence":{"name":"递推与生成函数","pre":["variable","induction","polynomial"]},"fibonacci":{"name":"斐波那契数列与黄金比","pre":["recurrence","ratio","quadratic-equation"]},"trees":{"name":"树与网络算法","pre":["graphs","induction"]},"graph-coloring":{"name":"平面图、着色与四色定理","pre":["graphs","proof"]},"complexity":{"name":"复杂度与计算资源","pre":["algorithms","exponential","logarithm"]},"probability":{"name":"事件与概率","pre":["fraction","sets","counting-rules"],"fact":"生日问题：23 个人中至少两人同一天生日的概率就超过 50%（约 50.7%）。"},"information":{"name":"编码、信息与纠错","pre":["counting-rules","logarithm","probability"]},"data":{"name":"数据、图表与抽样","pre":["natural","ratio"]},"descriptive-statistics":{"name":"平均数、中位数与离散程度","pre":["data","decimal"]},"conditional-probability":{"name":"条件概率与贝叶斯公式","pre":["probability","ratio"]},"random-variable":{"name":"随机变量与分布","pre":["probability","function"]},"expectation":{"name":"期望与方差","pre":["random-variable","descriptive-statistics"]},"integral":{"name":"定积分与累积","pre":["limit","area","units"]},"continuous-distribution":{"name":"连续分布与密度","pre":["random-variable","integral"]},"limit-theorems":{"name":"大数定律与中心极限定理","pre":["expectation","sequence-limit","continuous-distribution"]},"inference":{"name":"估计、置信区间与检验","pre":["data","expectation","limit-theorems"]},"regression":{"name":"回归、相关与因果","pre":["data","linear-function","descriptive-statistics"]},"vectors":{"name":"向量与线性组合","pre":["coordinates","ratio","real"]},"matrices":{"name":"矩阵与线性方程组","pre":["vectors","systems"]},"stochastic-process":{"name":"随机过程与马尔可夫链","pre":["conditional-probability","matrices","expectation"]},"bayesian":{"name":"贝叶斯推断","pre":["conditional-probability","continuous-distribution"]},"real-completeness":{"name":"实数完备性与确界","pre":["real","proof","sets"]},"rigorous-limits":{"name":"严格极限与 ε–δ 语言","pre":["limit","sequence-limit","quantifiers","real-completeness"]},"measure":{"name":"测度与可测集合","pre":["sets","cardinality","rigorous-limits"]},"measure-probability":{"name":"概率的公理化","pre":["probability","measure"]},"brownian":{"name":"随机游走与布朗运动","pre":["stochastic-process","limit-theorems"]},"vector-space":{"name":"向量空间、基与维数","pre":["vectors","sets","proof"]},"linear-map":{"name":"线性映射与秩","pre":["matrices","vector-space"]},"determinant":{"name":"行列式与体积缩放","pre":["matrices","area"]},"eigen":{"name":"特征值与特征向量","pre":["linear-map","polynomial"]},"inner-product":{"name":"内积、正交与投影","pre":["vectors","pythagoras"]},"spectral-theorem":{"name":"对称矩阵与谱定理","pre":["eigen","inner-product"]},"least-squares":{"name":"最小二乘与奇异值分解","pre":["inner-product","linear-map","eigen"]},"quadratic-form":{"name":"二次型与正定性","pre":["inner-product","eigen","spectral-theorem"]},"tensor":{"name":"多线性与张量入口","pre":["vector-space","linear-map"]},"continuity":{"name":"连续性","pre":["limit","domain-range"]},"mean-value":{"name":"中值定理","pre":["derivative","continuity"]},"derivative-applications":{"name":"单调、极值与局部近似","pre":["derivative-rules","inequality","mean-value"]},"fundamental-theorem":{"name":"微积分基本定理","pre":["integral","derivative","continuity"]},"integration-methods":{"name":"积分方法与应用","pre":["fundamental-theorem","derivative-rules"]},"improper-integral":{"name":"反常积分","pre":["integration-methods","limit"]},"multivariable":{"name":"多元函数与偏导数","pre":["derivative","vectors","function"]},"multiple-integral":{"name":"多重积分与变量替换","pre":["integration-methods","multivariable","determinant"]},"vector-calculus":{"name":"向量分析与积分定理","pre":["multiple-integral","vectors","multivariable"]},"compactness":{"name":"紧致与一致连续","pre":["rigorous-limits","continuity"]},"series-tests":{"name":"级数判别与绝对收敛","pre":["series","rigorous-limits","improper-integral"]},"uniform-convergence":{"name":"函数列与一致收敛","pre":["series-tests","compactness"]},"riemann-integrability":{"name":"黎曼可积性","pre":["integral","rigorous-limits"]},"lebesgue":{"name":"勒贝格积分","pre":["measure","uniform-convergence"]},"lp-space":{"name":"Lᵖ 空间与泛函分析入口","pre":["lebesgue","vector-space","inner-product"]},"functional-analysis":{"name":"希尔伯特空间与算子","pre":["lp-space","eigen"]},"fourier":{"name":"傅里叶与调和分析","pre":["series-tests","trigonometry","inner-product","integration-methods"]},"complex-analysis":{"name":"复函数与复导数","pre":["complex","limit","function"]},"holomorphic":{"name":"全纯与柯西–黎曼条件","pre":["complex-analysis","multivariable"]},"complex-integral":{"name":"复积分与路径","pre":["complex","integration-methods","trigonometry"]},"cauchy":{"name":"柯西定理与积分公式","pre":["complex-integral","holomorphic","proof"]},"analytic-series":{"name":"解析函数与幂级数","pre":["cauchy","taylor","uniform-convergence"]},"identity-theorem":{"name":"恒等定理与唯一性","pre":["analytic-series","proof"]},"analytic-continuation":{"name":"解析延拓","pre":["identity-theorem"]},"singularities":{"name":"零点、极点与洛朗级数","pre":["analytic-series","complex-integral"]},"residue":{"name":"留数与围道积分","pre":["singularities","cauchy"]},"argument-principle":{"name":"辐角原理与零点计数","pre":["residue","euler-formula"]},"conformal":{"name":"共形映射与黎曼映射定理","pre":["holomorphic","transformations"]},"infinite-product":{"name":"整函数与无穷乘积","pre":["analytic-series","singularities"]},"riemann-surface":{"name":"多值函数与黎曼面","pre":["analytic-continuation","logarithm"]},"asymptotics":{"name":"渐近、数量级与误差界","pre":["limit","logarithm","absolute-value"]},"prime-counting":{"name":"素数计数与素数定理","pre":["prime","asymptotics","integration-methods"],"fact":"π(100)=25，π(1000)=168，π(10⁶)=78498。素数定理：π(x) ~ x/ln x（1896 年证明）。高斯十五六岁时就从素数表中猜到了这个规律。Li(x) 是比 x/ln x 好得多的近似。"},"chebyshev-psi":{"name":"切比雪夫函数与冯·曼戈尔特函数","pre":["prime-counting","prime-factorization"]},"dirichlet-series":{"name":"狄利克雷级数","pre":["series-tests","complex","euler-formula"]},"euler-product":{"name":"欧拉乘积","pre":["prime-factorization","dirichlet-series"]},"dirichlet-primes":{"name":"算术级数中的素数","pre":["modular","euler-product"]},"zeta":{"name":"黎曼 ζ 函数","pre":["euler-product","analytic-continuation"],"fact":"ζ(2) = π²/6（巴塞尔问题，欧拉 1734 年解决）；ζ(4) = π⁴/90。ζ(3) 是无理数（阿佩里 1978），但 ζ(5) 是否无理至今不知道。"},"zero-free-region":{"name":"素数定理的证明思路","pre":["zeta","chebyshev-psi","residue"]},"gamma-function":{"name":"Γ 函数与特殊函数","pre":["improper-integral","analytic-continuation"]},"functional-equation":{"name":"ζ 函数的函数方程","pre":["zeta","gamma-function","fourier"]},"critical-strip":{"name":"平凡零点、临界带与临界线","pre":["zeta","singularities","functional-equation"]},"explicit-formula":{"name":"显式公式与素数误差","pre":["prime-counting","residue","zeta","chebyshev-psi","infinite-product"]},"riemann":{"name":"黎曼猜想","pre":["critical-strip","explicit-formula","quantifiers","patterns"],"fact":"黎曼 1859 年在一篇不到十页的论文中提出，这是他唯一一篇数论论文。它等价于 π(x) = Li(x) + O(√x·ln x)（冯·科赫 1901）。希尔伯特 1900 年把它列入 23 个问题，克雷研究所 2000 年把它列入千禧年问题。"},"groups":{"name":"群与对称","pre":["relations","proof","transformations"]},"l-functions":{"name":"L 函数与广义黎曼猜想","pre":["riemann","modular","groups","dirichlet-primes"]},"zero-statistics":{"name":"零点的计数与间距","pre":["critical-strip","argument-principle","random-variable"]},"rh-progress":{"name":"黎曼猜想的已知进展","pre":["riemann","zero-statistics"]},"modular-forms":{"name":"模形式","pre":["fourier","conformal","groups"]},"ode":{"name":"微分方程与初值","pre":["derivative","function","integration-methods"]},"separable-ode":{"name":"可分离变量与线性方程","pre":["ode","logarithm"]},"second-order-ode":{"name":"二阶线性方程与振动","pre":["separable-ode","complex","trigonometry"]},"ode-systems":{"name":"方程组与相平面","pre":["ode","matrices","eigen"]},"stability":{"name":"平衡、稳定与分岔","pre":["ode-systems","derivative-applications"]},"pde":{"name":"偏微分方程","pre":["multivariable","multiple-integral","ode"]},"boundary-value":{"name":"边值问题与傅里叶方法","pre":["pde","fourier"]},"chaos":{"name":"混沌与非线性动力学","pre":["stability","recurrence"]},"optimization":{"name":"约束与优化","pre":["derivative-applications","multivariable","inequality"]},"control":{"name":"控制与优化决策","pre":["ode-systems","optimization"]},"existence-uniqueness":{"name":"解的存在与唯一","pre":["ode","rigorous-limits"]},"homomorphism":{"name":"同态、子群与商群","pre":["groups","relations"]},"rings":{"name":"环、理想与整除","pre":["groups","polynomial"]},"fields":{"name":"域与域扩张","pre":["rings","complex"]},"finite-fields":{"name":"有限域","pre":["fields","modular"]},"algebraic-transcendental":{"name":"代数数与超越数","pre":["fields","cardinality"]},"galois":{"name":"伽罗瓦理论","pre":["fields","homomorphism"]},"representation":{"name":"表示论","pre":["groups","linear-map","eigen"]},"algebraic-number-theory":{"name":"代数数论入口","pre":["fields","rings","prime-factorization"]},"category":{"name":"范畴与结构之间的映射","pre":["homomorphism","linear-map"]},"elliptic-curves":{"name":"椭圆曲线","pre":["conics","groups","diophantine"]},"metric":{"name":"度量与拓扑空间","pre":["sets","real-completeness","absolute-value"]},"topological-properties":{"name":"连通、紧致与连续映射","pre":["metric","compactness","function"]},"manifold":{"name":"流形与局部坐标","pre":["topological-properties","multivariable"]},"lie-groups":{"name":"李群与李代数","pre":["groups","manifold","matrices"]},"euler-characteristic":{"name":"欧拉示性数与曲面分类","pre":["polyhedra","topological-properties"]},"homotopy":{"name":"路径、洞与基本群","pre":["topological-properties","groups"]},"differential-geometry":{"name":"曲线、曲面与曲率","pre":["manifold","vector-calculus","inner-product"]},"non-euclidean":{"name":"非欧几何","pre":["geometric-proof","transformations","circle"]},"linear-algebra-homology":{"name":"链复形的线性代数","pre":["linear-map","homomorphism"]},"algebraic-topology":{"name":"代数拓扑入口","pre":["homotopy","homomorphism","linear-algebra-homology"]},"algebraic-geometry":{"name":"代数几何入口","pre":["rings","conics","topological-properties"]},"knots":{"name":"纽结理论","pre":["topological-properties","polynomial"]},"riemannian-geometry":{"name":"黎曼几何","pre":["differential-geometry","tensor"]},"modeling":{"name":"数学建模与模型检验","pre":["function","units","data"]},"numerical-error":{"name":"数值误差与稳定性","pre":["estimation","algorithms","absolute-value"]},"numerical-methods":{"name":"求根、插值与数值积分","pre":["numerical-error","derivative","integral"]},"convexity":{"name":"凸性、线性规划与对偶","pre":["optimization","linear-map"]},"numerical-ode":{"name":"微分方程的数值模拟","pre":["ode","numerical-error"]},"monte-carlo":{"name":"蒙特卡洛与随机模拟","pre":["expectation","algorithms","modeling"]},"game-theory":{"name":"博弈与决策","pre":["probability","systems","optimization"]},"math-of-data":{"name":"数据学习的数学基础","pre":["least-squares","regression","optimization"]},"goldbach-twin":{"name":"哥德巴赫猜想与孪生素数猜想","pre":["prime","infinite-primes","patterns"]},"collatz":{"name":"3n+1 问题","pre":["algorithms","patterns","recurrence"]},"fermat-last":{"name":"费马大定理","pre":["diophantine","elliptic-curves","modular-forms"]},"kepler":{"name":"开普勒猜想","pre":["solids","optimization"]},"poincare":{"name":"庞加莱猜想","pre":["homotopy","manifold","riemannian-geometry"]},"p-vs-np":{"name":"P 与 NP","pre":["complexity","computability"]},"navier-stokes":{"name":"纳维–斯托克斯方程","pre":["pde","vector-calculus"]},"bsd":{"name":"BSD 猜想","pre":["elliptic-curves","l-functions"]},"millennium":{"name":"千禧年大奖难题","pre":["riemann","p-vs-np","poincare","navier-stokes","bsd"]}}};</script>
+<script>const ZEROS=[14.134725,21.02204,25.010858,30.424876,32.935062,37.586178,40.918719,43.327073,48.005151,49.773832,52.970321,56.446248,59.347044,60.831779,65.112544,67.079811,69.546402,72.067158,75.704691,77.14484,79.337375,82.910381,84.735493,87.425275,88.809111,92.491899,94.651344,95.870634,98.831194,101.317851,103.725538,105.446623,107.168611,111.029536,111.874659,114.320221,116.22668,118.790783,121.370125,122.946829,124.256819,127.516684,129.578704,131.087689,133.497737,134.75651,138.116042,139.736209,141.123707,143.111846,146.000982,147.422765,150.05352,150.925258,153.024694,156.112909,157.597592,158.849988,161.188964,163.03071,165.537069,167.18444,169.094515,169.911976,173.411537,174.754192,176.441434,178.377408,179.916484,182.207078,184.874468,185.598784,187.228923,189.416159,192.026656,193.079727,195.265397,196.876482,198.01531,201.264752,202.493595,204.189672,205.394697,207.906259,209.57651,211.690863,213.347919,214.547045,216.169539,219.067596,220.714919,221.430706,224.007,224.983325,227.421444,229.337413,231.250189,231.987235,233.693404,236.52423];
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// escaped text with ^{…} turned into a real superscript
+const mx = s => esc(s).replace(/\^\{([^}]*)\}/g, '<sup>$1</sup>');
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const fmt = (v, d = 3) => Number(v).toFixed(d);
+const TAU = Math.PI * 2;
+
+/* reveal on scroll + split headings into characters */
+function initReveal(root = document) {
+  $$('.split', root).forEach(el => {
+    if (el.dataset.done) return; el.dataset.done = 1;
+    let i = 0;
+    const walk = node => {
+      if (node.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        for (const ch of node.textContent) {
+          if (ch === ' ' || ch === '\n') { frag.append(' '); continue; }
+          const s = document.createElement('span'); s.className = 'ch'; s.style.setProperty('--i', i++); s.textContent = ch; s.setAttribute('aria-hidden', 'true'); frag.append(s);
+        }
+        node.replaceWith(frag);
+      } else if (node.nodeType === 1 && node.tagName !== 'BR') [...node.childNodes].forEach(walk);
+    };
+    el.setAttribute('aria-label', el.textContent.trim());
+    [...el.childNodes].forEach(walk);
+  });
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold: .15, rootMargin: '0px 0px -6% 0px'});
+  $$('.rv,.split', root).forEach(el => io.observe(el));
+}
+
+/* drawer dialogs with closing animation and focus return */
+function openSheet(dialog, opener) {
+  dialog._opener = opener || document.activeElement;
+  if (!dialog.open) dialog.showModal();
+  const sc = $('.sheet-scroll', dialog); if (sc) sc.scrollTop = 0;
+}
+function closeSheet(dialog) {
+  if (!dialog.open) return;
+  const done = () => { dialog.classList.remove('closing'); dialog.close(); dialog._opener && dialog._opener.focus && dialog._opener.focus({preventScroll: true}); dialog.dispatchEvent(new Event('sheetclosed')); };
+  if (REDUCED.matches) return done();
+  dialog.classList.add('closing');
+  dialog.addEventListener('animationend', done, {once: true});
+}
+function wireSheet(dialog) {
+  dialog.addEventListener('cancel', e => { e.preventDefault(); closeSheet(dialog); });
+  dialog.addEventListener('click', e => { if (e.target === dialog) closeSheet(dialog); });
+  $$('[data-close]', dialog).forEach(b => b.addEventListener('click', () => closeSheet(dialog)));
+}
+
+/* canvas helper: DPR-aware, returns ctx and logical size */
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1);
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (cv.width !== w * d || cv.height !== h * d) { cv.width = w * d; cv.height = h * d; }
+  const c = cv.getContext('2d'); c.setTransform(d, 0, 0, d, 0, 0);
+  return {c, w, h};
+}
+
+/* twinkling starfield used by night sections */
+function starfield(cv, density = 1) {
+  let stars = [], raf = 0, on = false;
+  const seed = n => { let x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x); };
+  const draw = t => {
+    const {c, w, h} = fitCanvas(cv);
+    const n = Math.round(w * h / 5200 * density);
+    if (stars.length !== n) stars = Array.from({length: n}, (_, i) => ({x: seed(i + 1), y: seed(i + 7.3), r: .4 + seed(i + 3.1) * 1.3, p: seed(i + 9.9) * TAU, s: .4 + seed(i + 5.5) * 1.2}));
+    c.clearRect(0, 0, w, h);
+    for (const s of stars) {
+      const a = REDUCED.matches ? .7 : .45 + .55 * Math.sin(s.p + t / 1000 * s.s);
+      c.globalAlpha = a * .9; c.fillStyle = s.r > 1.4 ? '#F6ECCB' : '#AEB6DA';
+      c.beginPath(); c.arc(s.x * w, s.y * h, s.r, 0, TAU); c.fill();
+    }
+    c.globalAlpha = 1;
+    if (on && !REDUCED.matches) raf = requestAnimationFrame(draw);
+  };
+  new IntersectionObserver(es => { on = es[0].isIntersecting; cancelAnimationFrame(raf); if (on) raf = requestAnimationFrame(draw); }).observe(cv);
+  addEventListener('resize', () => { if (!on || REDUCED.matches) requestAnimationFrame(draw); });
+}
+
+function barScroll(bar, darkSelector) {
+  const darks = darkSelector ? $$(darkSelector) : [];
+  const f = () => {
+    bar.classList.toggle('scrolled', scrollY > 24);
+    if (darks.length) bar.classList.toggle('dark', darks.some(el => { const r = el.getBoundingClientRect(); return r.top <= 40 && r.bottom > 40; }));
+  };
+  addEventListener('scroll', f, {passive: true}); f();
+}
+/* Number theory and zeta helpers. ZEROS (imaginary parts of the first non-trivial zeros) is injected by build.py. */
+const NT = (() => {
+  const sieve = n => { const s = new Uint8Array(n + 1).fill(1); s[0] = s[1] = 0; for (let i = 2; i * i <= n; i++) if (s[i]) for (let j = i * i; j <= n; j += i) s[j] = 0; return s; };
+  const factor = n => { const f = []; for (let p = 2; p * p <= n; p++) { let k = 0; while (n % p === 0) { n /= p; k++; } if (k) f.push([p, k]); } if (n > 1) f.push([n, 1]); return f; };
+  const divisors = n => { const d = []; for (let i = 1; i * i <= n; i++) if (n % i === 0) { d.push(i); if (i * i !== n) d.push(n / i); } return d.sort((a, b) => a - b); };
+  const isPrime = n => n > 1 && factor(n).length === 1 && factor(n)[0][1] === 1;
+  const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+  const sup = k => String(k).split('').map(c => SUP[c]).join('');
+  const factorText = n => n < 2 ? String(n) : factor(n).map(([p, k]) => k > 1 ? p + sup(k) : p).join(' × ');
+  const CN = '零一二三四五六七八九';
+  const chinese = n => { if (n < 10) return CN[n]; if (n < 20) return '十' + (n % 10 ? CN[n % 10] : ''); if (n < 100) return CN[n / 10 | 0] + '十' + (n % 10 ? CN[n % 10] : ''); const h = n / 100 | 0, r = n % 100; return CN[h] + '百' + (r === 0 ? '' : r < 10 ? '零' + CN[r] : (r < 20 ? '一' : '') + chinese(r)); };
+  /* logarithmic integral li(x) by the convergent series; Li(x) = li(x) - li(2) */
+  const li = x => { const L = Math.log(x); let s = 0.5772156649015329 + Math.log(L), term = 1; for (let k = 1; k < 200; k++) { term *= L / k; s += term / k; if (term / k < 1e-14) break; } return s; };
+  const Li = x => li(x) - 1.045163780117493;
+  /* zeta(s) for s = re + i*im by Euler–Maclaurin summation; accurate to ~1e-9 for |im| <= 300, s != 1 */
+  const B = [1 / 6, -1 / 30, 1 / 42, -1 / 30, 5 / 66, -691 / 2730, 7 / 6];
+  const zeta = (re, im) => {
+    const N = Math.ceil(Math.abs(im)) + 24, lnN = Math.log(N);
+    let sr = 0, si = 0;
+    for (let n = 1; n < N; n++) { const l = Math.log(n), m = Math.exp(-re * l); sr += m * Math.cos(im * l); si -= m * Math.sin(im * l); }
+    const m = Math.exp(-re * lnN), cr = m * Math.cos(im * lnN), ci = -m * Math.sin(im * lnN); // N^-s
+    sr += cr / 2; si += ci / 2;
+    // N^(1-s)/(s-1)
+    const ar = cr * N, ai = ci * N, dr = re - 1, di = im, dd = dr * dr + di * di;
+    sr += (ar * dr + ai * di) / dd; si += (ai * dr - ar * di) / dd;
+    // Bernoulli corrections: B2k/(2k)! * s(s+1)...(s+2k-2) * N^(-s-2k+1)
+    let pr = re, pi = im, pw = 1 / N, fact = 2; // product s, power N^-1, (2k)!
+    for (let k = 1; k <= B.length; k++) {
+      const tr = pr * cr - pi * ci, ti = pr * ci + pi * cr, c = B[k - 1] / fact * pw;
+      sr += tr * c; si += ti * c;
+      const a = re + 2 * k - 1, b = re + 2 * k; // multiply product by (s+2k-1)(s+2k)
+      let qr = pr * a - pi * im, qi = pr * im + pi * a; pr = qr * b - qi * im; pi = qr * im + qi * b;
+      pw /= N * N; fact *= (2 * k + 1) * (2 * k + 2);
+    }
+    return [sr, si];
+  };
+  /* Chebyshev psi(x) exactly, and its approximation from the first K zeros (von Mangoldt explicit formula) */
+  const psiExact = xs => { const max = Math.ceil(xs[xs.length - 1]) + 1, s = sieve(max), jumps = []; for (let p = 2; p <= max; p++) if (s[p]) for (let q = p; q <= max; q *= p) jumps.push([q, Math.log(p)]); jumps.sort((a, b) => a[0] - b[0]); return xs.map(x => { let v = 0; for (const [q, l] of jumps) { if (q > x) break; v += l; } return v; }); };
+  const psiZeros = (x, K) => { const L = Math.log(x), r = Math.sqrt(x); let s = 0; for (let k = 0; k < K; k++) { const g = ZEROS[k]; s += (0.5 * Math.cos(g * L) + g * Math.sin(g * L)) / (0.25 + g * g); } return x - 2 * r * s - Math.log(TAU) - 0.5 * Math.log(1 - 1 / (x * x)); };
+  return {sieve, factor, divisors, isPrime, factorText, chinese, li, Li, zeta, psiExact, psiZeros, sup};
+})();
+/* One drawn specimen per guide. viewBox 0 0 200 200; colours come from CSS variables so plates work on paper and night. */
+const SPEC = (() => {
+  const C = {ink: 'var(--sp-ink,#161A2B)', a: 'var(--sp-a,#2B46D9)', b: 'var(--sp-b,#E5482D)', c: 'var(--sp-c,#E7A823)', soft: 'var(--sp-soft,rgba(22,26,43,.14))'};
+  const P = (d, s = C.ink, w = 2, extra = '') => `<path d="${d}" fill="none" stroke="${s}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+  const T = (x, y, t, size = 16, fill = C.ink, extra = '') => `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}" text-anchor="middle" font-family="var(--math)" font-style="italic" ${extra}>${t}</text>`;
+  const dot = (x, y, r = 5, f = C.a, extra = '') => `<circle cx="${x}" cy="${y}" r="${r}" fill="${f}" ${extra}/>`;
+  const axis = (y = 150) => P(`M18 ${y}H182`, C.ink, 1.5) + P(`M176 ${y - 5}l6 5-6 5`, C.ink, 1.5);
+  const pie = (cx, cy, r, n, k) => { let s = ''; for (let i = 0; i < n; i++) { const a0 = -Math.PI / 2 + i * TAU / n, a1 = a0 + TAU / n; s += `<path class="sp-pop" style="--i:${i}" d="M${cx} ${cy}L${cx + r * Math.cos(a0)} ${cy + r * Math.sin(a0)}A${r} ${r} 0 0 1 ${cx + r * Math.cos(a1)} ${cy + r * Math.sin(a1)}Z" fill="${i < k ? C.a : C.soft}" stroke="var(--sp-bg,#F4EFE6)" stroke-width="3"/>`; } return s; };
+  const S = {
+    natural: () => { let s = ''; [[70, 70], [100, 70], [130, 70], [70, 100], [100, 100], [130, 100]].forEach(([x, y], i) => s += dot(x, y, 11, i % 2 ? C.a : C.b, `class="sp-pop" style="--i:${i}"`)); return s + T(100, 160, '6', 34); },
+    zero: () => `<ellipse cx="100" cy="92" rx="42" ry="58" fill="none" stroke="${C.ink}" stroke-width="9" class="sp-draw" pathLength="1"/>` + dot(100, 92, 5, C.b, 'class="sp-pulse"') + P('M30 176H170', C.soft, 2, 'stroke-dasharray="3 7"'),
+    integer: () => { let s = axis(110); for (let i = -3; i <= 3; i++) { const x = 100 + i * 24; s += P(`M${x} 104v12`, C.ink, 1.5) + T(x, 138, i < 0 ? '−' + -i : i, 14, i < 0 ? C.b : i ? C.a : C.ink); } return s + P('M100 84Q64 50 28 84', C.b, 2.5, 'class="sp-draw" pathLength="1"') + P('M34 76l-6 8 10 1', C.b, 2.5) + dot(100, 110, 5, C.ink); },
+    fraction: () => pie(100, 96, 66, 4, 3),
+    decimal: () => { let s = ''; for (let i = 0; i < 10; i++) for (let j = 0; j < 10; j++) { const on = j * 10 + i < 75; s += `<rect x="${35 + i * 13}" y="${35 + j * 13}" width="11" height="11" fill="${on ? C.a : C.soft}" class="${on ? 'sp-pop' : ''}" style="--i:${j}"/>`; } return s; },
+    rational: () => { let s = axis(120); [[0, '0'], [1, '1'], [2, '2']].forEach(([v, t]) => { const x = 30 + v * 70; s += P(`M${x} 112v16`, C.ink, 2) + T(x, 148, t, 15); }); [[1, 2], [1, 3], [2, 3], [3, 2], [1, 4], [3, 4], [5, 4], [5, 3], [4, 3], [7, 4]].forEach(([a, b], i) => { const x = 30 + a / b * 70; s += dot(x, 120 - b * 14, 4, i % 2 ? C.b : C.a, `class="sp-pop" style="--i:${i}"`) + P(`M${x} ${120 - b * 14 + 5}V114`, C.soft, 1); }); return s + T(100, 44, 'a / b', 22); },
+    irrational: () => `<rect x="46" y="46" width="108" height="108" fill="${C.soft}" stroke="${C.ink}" stroke-width="2"/>` + P('M46 154L154 46', C.b, 3.5, 'class="sp-draw" pathLength="1"') + T(100, 176, '1', 16) + T(32, 106, '1', 16) + `<text x="118" y="112" font-size="26" fill="${C.b}" font-family="var(--math)" font-style="italic">√2</text>`,
+    prime: () => { let s = ''; const pr = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31]; for (let n = 1; n <= 36; n++) { const i = (n - 1) % 6, j = (n - 1) / 6 | 0, on = pr.includes(n); s += `<circle cx="${45 + i * 22}" cy="${45 + j * 22}" r="${on ? 8 : 4}" fill="${on ? C.b : C.soft}" class="${on ? 'sp-pop' : ''}" style="--i:${j}"/>`; } return s; },
+    'infinite-primes': () => { let s = ''; [2, 3, 5, 7, 11].forEach((p, i) => s += `<rect x="${24 + i * 26}" y="80" width="22" height="34" fill="${C.a}" class="sp-pop" style="--i:${i}"/>` + T(35 + i * 26, 103, p, 14, '#fff')); return s + `<rect x="158" y="80" width="22" height="34" fill="${C.b}" class="sp-pulse"/>` + T(169, 103, '+1', 13, '#fff') + T(100, 150, '2·3·5·7·11 + 1 = 2311', 14) + P('M24 62H180', C.ink, 1.5) + T(100, 52, '总有新的素数', 13, C.ink, 'font-style="normal" font-family="var(--sans)"'); },
+    complex: () => P('M100 20V180M20 100H180', C.ink, 1.5) + `<circle cx="100" cy="100" r="56" fill="none" stroke="${C.soft}" stroke-width="2"/>` + P('M100 100L156 100', C.a, 3.5) + `<g class="sp-spin" style="transform-origin:100px 100px">${P('M100 100L100 44', C.b, 3.5)}${dot(100, 44, 6, C.b)}</g>` + dot(156, 100, 6, C.a) + T(164, 122, '1', 16) + T(118, 40, 'i', 20, C.b) + P('M130 100A30 30 0 0 0 100 70', C.c, 2.5, 'class="sp-draw" pathLength="1"'),
+    power: () => { let s = ''; [[100, 30]].forEach(([x, y]) => s += dot(x, y, 7, C.ink)); const lv = [[100], [60, 140], [40, 80, 120, 160], [30, 50, 70, 90, 110, 130, 150, 170]]; lv.forEach((row, j) => row.forEach((x, i) => { if (j) s += P(`M${lv[j - 1][i / 2 | 0]} ${30 + (j - 1) * 46}L${x} ${30 + j * 46}`, C.soft, 2); })); lv.forEach((row, j) => row.forEach((x, i) => s += dot(x, 30 + j * 46, j === 3 ? 7 : 6, j === 3 ? C.b : C.a, `class="sp-pop" style="--i:${j * 2}"`))); return s; },
+    variable: () => `<rect x="52" y="52" width="96" height="96" fill="none" stroke="${C.ink}" stroke-width="2.5" stroke-dasharray="6 8" class="sp-march"/>` + `<text x="100" y="126" font-size="76" text-anchor="middle" font-family="var(--math)" font-style="italic" fill="${C.a}">x</text>` + T(100, 176, '3x = 12', 16),
+    function: () => axis(160) + P('M100 20V172', C.ink, 1.5) + P('M40 22Q100 290 160 22', C.a, 3.5, 'class="sp-draw" pathLength="1"') + dot(136, 78, 6, C.b, 'class="sp-pulse"') + P('M136 78V160M136 78H100', C.b, 1.5, 'stroke-dasharray="4 5"') + T(60, 40, 'y = x²', 16, C.a),
+    exponential: () => axis(164) + P('M24 20V170', C.ink, 1.5) + P('M26 160C100 158 150 120 170 24', C.b, 3.5, 'class="sp-draw" pathLength="1"') + P('M26 160L170 110', C.a, 2.5, 'stroke-dasharray="5 6"') + T(140, 46, '2ˣ', 20, C.b) + T(160, 132, '2x', 16, C.a),
+    pythagoras: () => `<path d="M70 130L130 130L70 50Z" fill="${C.soft}" stroke="${C.ink}" stroke-width="2.5"/><rect x="70" y="130" width="60" height="60" fill="${C.a}" opacity=".85" class="sp-pop" style="--i:1" transform="translate(0 -1)"/><rect x="-10" y="50" width="80" height="80" fill="${C.c}" opacity=".9" class="sp-pop" style="--i:2"/><path d="M130 130L70 50L150 -10L210 70Z" fill="${C.b}" opacity=".85" class="sp-pop" style="--i:3"/>` + P('M70 118h12v12', C.ink, 1.5),
+    probability: () => { let s = ''; const bars = [1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1]; bars.forEach((v, i) => s += `<rect x="${24 + i * 14}" y="${160 - v * 20}" width="11" height="${v * 20}" fill="${i === 5 ? C.b : C.a}" class="sp-rise" style="--i:${i}"/>`); return s + axis(162) + T(101, 30, '7', 20, C.b); },
+    limit: () => { let s = axis(120); [0, .9, .99, .999, .9999].forEach((v, i) => { const x = 24 + [0, 90, 126, 142, 150][i]; s += dot(x, 120, 6 - i, C.a, `class="sp-pop" style="--i:${i * 2}"`); }); return s + P('M156 96V144', C.b, 3) + T(156, 164, '1', 18, C.b) + T(84, 84, '0.9, 0.99, 0.999 …', 14); },
+    derivative: () => axis(164) + P('M28 20V170', C.ink, 1.5) + P('M28 160Q110 160 172 30', C.a, 3.5) + `<g class="sp-rock" style="transform-origin:116px 118px">${P('M60 166L172 70', C.b, 2.5)}</g>` + dot(116, 118, 6, C.b),
+    integral: () => { let s = axis(164) + P('M28 20V170', C.ink, 1.5); for (let i = 0; i < 8; i++) { const h = (i + .5) / 8 * 120; s += `<rect x="${30 + i * 17}" y="${164 - h}" width="15" height="${h}" fill="${C.a}" opacity="${.35 + i * .08}" class="sp-rise" style="--i:${i}"/>`; } return s + P('M30 164L166 44', C.b, 3); },
+    series: () => { let s = `<rect x="30" y="30" width="140" height="140" fill="none" stroke="${C.ink}" stroke-width="2"/>`; const R = [[30, 30, 70, 140, C.a], [100, 30, 70, 70, C.b], [100, 100, 35, 70, C.c], [135, 100, 35, 35, C.a], [135, 135, 17.5, 35, C.b], [152.5, 135, 17.5, 17.5, C.c]]; R.forEach(([x, y, w, h, f], i) => s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}" opacity=".88" stroke="var(--sp-bg,#F4EFE6)" stroke-width="2" class="sp-pop" style="--i:${i * 2}"/>`); return s + T(65, 108, '½', 26, '#fff') + T(135, 72, '¼', 20, '#fff'); },
+    cardinality: () => { let s = ''; for (let i = 0; i < 5; i++) { s += T(34 + i * 33, 62, i + 1, 18, C.a) + T(34 + i * 33, 148, 2 * (i + 1), 18, C.b) + P(`M${34 + i * 33} 72V126`, C.ink, 1.5, `class="sp-draw" pathLength="1" style="--i:${i}"`); } return s + T(184, 62, '…', 18) + T(184, 148, '…', 18) + T(100, 186, 'ℵ₀', 20); },
+    'euler-formula': () => P('M100 16V184M16 100H184', C.ink, 1.5) + `<circle cx="100" cy="100" r="62" fill="none" stroke="${C.soft}" stroke-width="2"/>` + P('M162 100A62 62 0 0 0 38 100', C.b, 4, 'class="sp-draw" pathLength="1"') + dot(162, 100, 6, C.a) + dot(38, 100, 7, C.b, 'class="sp-pulse"') + T(170, 122, '1', 16) + T(26, 122, '−1', 16, C.b) + T(152, 44, 'e<tspan dy="-6" font-size="11">iθ</tspan>', 17, C.ink),
+    'complex-analysis': () => { let s = ''; for (let k = -3; k <= 3; k++) { const c = k * 16; s += P(`M${100 + c} 20Q${100 + c * .3} 100 ${100 + c} 180`, C.a, 1.6, `class="sp-draw" pathLength="1" style="--i:${k + 3}"`) + P(`M20 ${100 + c}Q100 ${100 + c * .3} 180 ${100 + c}`, C.b, 1.6, `class="sp-draw" pathLength="1" style="--i:${k + 3}"`); } return s + dot(100, 100, 4, C.ink); },
+    'prime-counting': () => { let s = axis(168) + P('M26 20V172', C.ink, 1.5), d = 'M26 168', y = 168; const pr = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]; pr.forEach(p => { const x = 26 + p * 3.05; d += `H${x}`; y -= 9; d += `V${y}`; }); d += 'H176'; let g = 'M'; for (let x = 2; x <= 49; x++) g += `${26 + x * 3.05} ${168 - x / Math.log(x) * 9}${x < 49 ? 'L' : ''}`; return s + P(g, C.a, 2.5, 'stroke-dasharray="5 5"') + P(d, C.b, 3, 'class="sp-draw" pathLength="1"'); },
+    zeta: () => { let d = '', first = true; for (let t = 0; t <= 34; t += .25) { const [re, im] = NT.zeta(.5, t); d += `${first ? 'M' : 'L'}${(100 + re * 30).toFixed(1)} ${(100 - im * 30).toFixed(1)}`; first = false; } return P('M100 14V186M14 100H186', C.ink, 1.2) + P(d, C.b, 2.5, 'class="sp-draw" pathLength="1"') + dot(100, 100, 6, C.c, 'class="sp-pulse"'); },
+    riemann: () => `<rect x="62" y="14" width="76" height="172" fill="${C.soft}"/>` + P('M100 14V186', C.c, 3.5) + P('M20 150H180', C.ink, 1.5) + [14.13, 21.02, 25.01, 30.42, 32.94].map((g, i) => dot(100, 150 - g * 3.9, 5.5, C.b, `class="sp-pop" style="--i:${i * 2}"`)).join('') + T(62, 170, '0', 14) + T(100, 170, '½', 15, C.c) + T(138, 170, '1', 14)
+  };
+  const svg = (id, cls = '') => `<svg class="spec ${cls}" viewBox="0 0 200 200" aria-hidden="true" focusable="false">${(S[id] || S.natural)()}</svg>`;
+  return {svg, has: id => !!S[id]};
+})();
+/* Hero: every number from 1 to 200 gets a portrait plate. */
+function initPortrait(root) {
+  const MAX = 200, W = 320, H = 210;
+  const NOTES = {1: '1 只有一个因数，所以它既不是素数，也不是合数。', 2: '唯一的偶素数。', 3: '最小的奇素数，也是三角数。', 4: '最小的合数，也是第一个大于 1 的平方数。', 6: '第一个完全数：6 = 1 + 2 + 3，恰好等于自己真因数的和。', 7: '7 颗珠子怎么排，都排不成两行以上的长方形。', 8: '2 × 2 × 2，一个立方数。', 9: '奇数不一定是素数：9 = 3 × 3。', 10: '我们用十进制，多半因为人有十根手指。', 12: '有 6 个因数。一打、十二个月、钟面上的十二格，都因为它好分。', 17: '高斯 19 岁时证明：正十七边形可以用尺规作出。', 23: '只要 23 个人，其中两人同一天生日的概率就超过一半。', 24: '4 的阶乘：1 × 2 × 3 × 4。', 28: '第二个完全数：1 + 2 + 4 + 7 + 14 = 28。', 36: '既是平方数（6²），又是三角数（1 + 2 + … + 8）。', 42: '2 × 3 × 7。三个不同素数的乘积。', 51: '看起来像素数，其实 51 = 3 × 17。', 57: '57 = 3 × 19。数学家格罗滕迪克曾随口把它当作素数举例。', 60: '有 12 个因数。巴比伦人用六十进制，所以一小时有 60 分钟。', 64: '2⁶，也是 8²，也是 4³。国际象棋棋盘有 64 格。', 73: '第 21 个素数；倒过来的 37 是第 12 个素数。', 91: '最容易被误认作素数的数之一：91 = 7 × 13。', 97: '100 以内最大的素数。', 100: '10 × 10。百分数就是以它为分母。', 101: '最小的三位素数，也是回文数。', 120: '5 的阶乘，有 16 个因数。', 121: '11²，回文数的平方还是回文数。', 127: '梅森素数：2⁷ − 1。', 128: '2⁷。', 144: '12²，也是斐波那契数，「一罗」（十二打）。', 153: '1³ + 5³ + 3³ = 153，各位数字的立方和等于自己。', 168: '1000 以内恰好有 168 个素数。', 169: '13²。', 180: '三角形内角和的度数，有 18 个因数。', 196: '14²。', 199: '200 以内最大的素数，和 197 是一对孪生素数。', 200: '2³ × 5²。图鉴的这一卷先画到这里。'};
+  const FIB = new Set([1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144]), HCN = new Set([1, 2, 4, 6, 12, 24, 36, 48, 60, 120, 180]), MERS = new Set([3, 7, 31, 127]);
+  const TOUR = [12, 7, 36, 28, 97, 64, 91, 60, 127, 144, 1, 100];
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const dotsSvg = $('.pt-dots', root), dots = [];
+  for (let i = 0; i < MAX; i++) { const c = document.createElementNS(SVGNS, 'circle'); c.setAttribute('r', 1); dotsSvg.append(c); dots.push(c); }
+  const slider = $('.pt-range', root), el = k => $('.pt-' + k, root);
+  let n = 12, timer = 0, tourAt = 0;
+
+  function layout(n) {
+    const prime = NT.isPrime(n);
+    let rows, cols;
+    if (prime && n > 3) { cols = Math.ceil(Math.sqrt(n)); rows = Math.ceil(n / cols); }
+    else { rows = 1; for (let d = 1; d * d <= n; d++) if (n % d === 0) rows = d; cols = n / rows; }
+    const cell = Math.min(W / cols, H / rows, 34), r = cell * .36, ox = (W - cols * cell) / 2 + cell / 2, oy = (H - rows * cell) / 2 + cell / 2;
+    const full = Math.floor(n / cols) * cols;
+    return {prime, rows, cols, r, pos: i => [ox + (i % cols) * cell, oy + Math.floor(i / cols) * cell], odd: i => prime && n > 3 && i >= full};
+  }
+  function render(announce = true) {
+    const L = layout(n), sq = Number.isInteger(Math.sqrt(n)) && n > 1, fac = NT.factor(n), divs = NT.divisors(n);
+    dots.forEach((c, i) => {
+      if (i < n) { const [x, y] = L.pos(i); c.style.transform = `translate(${x}px,${y}px) scale(${L.r})`; c.style.opacity = 1; c.style.fill = n === 1 ? 'var(--ink)' : L.odd(i) ? 'var(--vermilion)' : L.prime ? 'var(--vermilion)' : sq ? 'var(--gold)' : 'var(--cobalt)'; c.style.transitionDelay = REDUCED.matches ? '0s' : Math.min(i * 4, 320) + 'ms'; }
+      else { c.style.transform = `translate(${W / 2}px,${H / 2}px) scale(0)`; c.style.opacity = 0; c.style.transitionDelay = '0s'; }
+    });
+    const kind = n === 1 ? '单位' : L.prime ? '素数' : '合数';
+    root.dataset.kind = n === 1 ? 'unit' : L.prime ? 'prime' : 'composite';
+    el('num').textContent = n; el('cn').textContent = NT.chinese(n); el('no').textContent = 'No. ' + String(n).padStart(3, '0'); el('kind').textContent = kind;
+    el('shape').textContent = n === 1 ? '一颗，独自成形' : L.prime ? (n <= 3 ? `只能排成 1 行 ${n} 颗` : `每行 ${L.cols} 颗，总是多出一截：只能排成 1 行`) : `${L.rows} 行 × ${L.cols} 列` + (sq ? '，正好是正方形' : '');
+    el('factor').textContent = n === 1 ? '1' : L.prime ? `${n}（已经不能再拆）` : NT.factorText(n);
+    el('divs').textContent = divs.join('、') + `（共 ${divs.length} 个）`;
+    el('bin').textContent = n.toString(2);
+    const tags = [];
+    if (sq) tags.push(`平方数 ${Math.sqrt(n)}²`);
+    const cb = Math.round(Math.cbrt(n)); if (cb ** 3 === n && n > 1) tags.push(`立方数 ${cb}³`);
+    const tk = (Math.sqrt(8 * n + 1) - 1) / 2; if (Number.isInteger(tk) && n > 1) tags.push(`三角数 1+…+${tk}`);
+    if (n === 6 || n === 28) tags.push('完全数');
+    if (FIB.has(n)) tags.push('斐波那契数');
+    if (n > 2 && (n & (n - 1)) === 0) tags.push('2 的幂');
+    if (MERS.has(n)) tags.push('梅森素数');
+    if (L.prime && (NT.isPrime(n - 2) || NT.isPrime(n + 2))) tags.push('孪生素数');
+    if (HCN.has(n) && n > 2) tags.push('因数特别多');
+    const s = String(n); if (n > 10 && s === [...s].reverse().join('')) tags.push('回文数');
+    if (!tags.length) tags.push(n % 2 ? '奇数' : '偶数');
+    el('tags').innerHTML = tags.map(t => `<span>${esc(t)}</span>`).join('');
+    el('note').textContent = NOTES[n] || (L.prime ? `${n} 是素数：除了 1 和它自己，没有别的因数。` : `${n} = ${NT.factorText(n)}。每个合数都只有一种素数分解。`);
+    // number line strip
+    let strip = '';
+    for (let k = n - 5; k <= n + 5; k++) strip += k < 1 ? '<i class="gap"></i>' : `<button type="button" class="${k === n ? 'now' : ''} ${NT.isPrime(k) ? 'p' : ''}" data-n="${k <= MAX ? k : ''}" ${k > MAX ? 'disabled' : ''} aria-label="数字 ${k}${NT.isPrime(k) ? '，素数' : ''}">${k}</button>`;
+    el('strip').innerHTML = strip;
+    slider.value = n; slider.setAttribute('aria-valuetext', `${n}，${kind}`);
+    if (announce) el('live').textContent = `${n}，${kind}。${el('shape').textContent}。`;
+  }
+  const set = (v, user = true) => { n = clamp(Math.round(v), 1, MAX); if (user) stopTour(); render(user); };
+  const stopTour = () => { clearInterval(timer); timer = 0; const b = el('tour'); b.setAttribute('aria-pressed', 'false'); b.querySelector('span').textContent = '自动翻页'; };
+  const startTour = () => { const b = el('tour'); b.setAttribute('aria-pressed', 'true'); b.querySelector('span').textContent = '停止翻页'; timer = setInterval(() => { tourAt = (tourAt + 1) % TOUR.length; n = TOUR[tourAt]; render(false); }, 2800); };
+  slider.addEventListener('input', () => set(+slider.value));
+  el('prev').addEventListener('click', () => set(n - 1));
+  el('next').addEventListener('click', () => set(n + 1));
+  el('rand').addEventListener('click', () => set(1 + Math.floor(Math.random() * MAX)));
+  el('tour').addEventListener('click', () => timer ? stopTour() : startTour());
+  el('strip').addEventListener('click', e => { const b = e.target.closest('button[data-n]'); if (b && b.dataset.n) set(+b.dataset.n); });
+  root.addEventListener('keydown', e => { if (e.target === slider) return; if (e.key === 'ArrowLeft') { set(n - 1); e.preventDefault(); } if (e.key === 'ArrowRight') { set(n + 1); e.preventDefault(); } });
+  render(false);
+  if (!REDUCED.matches) { const io = new IntersectionObserver(es => { if (es[0].isIntersecting) { if (!timer && el('tour').dataset.auto !== 'off') startTour(); } else if (timer) stopTour(); }, {threshold: .4}); io.observe(root); root.addEventListener('pointerdown', () => el('tour').dataset.auto = 'off'); root.addEventListener('keydown', () => el('tour').dataset.auto = 'off'); }
+  return {set, get: () => n};
+}
+/* Hands-on experiments. Each lab builds its own figure and controls and reports through `say`. */
+const LABS = (() => {
+  const INK = '#161A2B', COB = '#2B46D9', VER = '#E5482D', GOLD = '#E7A823', JADE = '#1E8F7A', SOFT = 'rgba(22,26,43,.14)', MUTE = '#8B8FA1';
+  const h = (tag, attrs = {}, html = '') => { const e = document.createElement(tag); for (const k in attrs) e.setAttribute(k, attrs[k]); e.innerHTML = html; return e; };
+  function range(side, o) {
+    const w = h('label', {class: 'lab-range'}, `<span>${o.label}<output></output></span><input type="range" id="${o.id}" min="${o.min}" max="${o.max}" step="${o.step || 1}" value="${o.value}">`);
+    side.append(w); const input = $('input', w), out = $('output', w);
+    const show = () => out.textContent = (o.show || String)(+input.value);
+    input.addEventListener('input', () => { show(); o.on(+input.value); }); show();
+    input.set = v => { input.value = v; show(); };
+    return input;
+  }
+  function chips(side, o) {
+    const w = h('div', {class: 'lab-chips', role: 'group', 'aria-label': o.label}, o.items.map(([v, t]) => `<button type="button" class="chip" data-v="${v}" aria-pressed="${v == o.value}">${t}</button>`).join(''));
+    side.append(w);
+    w.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; $$('button', w).forEach(x => x.setAttribute('aria-pressed', x === b)); o.on(b.dataset.v); });
+    return w;
+  }
+  const action = (side, text, on, cls = 'btn line small') => { const b = h('button', {type: 'button', class: cls}, text); b.addEventListener('click', on); side.append(b); return b; };
+  const svg = (vis, w, hh, label) => { const s = h('div', {class: 'lab-svg'}); vis.append(s); return inner => s.innerHTML = `<svg viewBox="0 0 ${w} ${hh}" role="img" aria-label="${esc(label)}">${inner}</svg>`; };
+  const canvas = (vis, label, ratio = .62) => { const c = h('canvas', {role: 'img', 'aria-label': label, style: `aspect-ratio:${1 / ratio}`}); vis.append(c); return c; };
+  const L = (x1, y1, x2, y2, s = INK, w = 1.5, extra = '') => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${s}" stroke-width="${w}" stroke-linecap="round" ${extra}/>`;
+  const TX = (x, y, t, size = 15, fill = INK, anchor = 'middle', extra = '') => `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" ${extra}>${t}</text>`;
+  const animate = (dur, step, done) => { if (REDUCED.matches) { step(1); done && done(); return () => {}; } let raf, t0; const f = t => { t0 = t0 || t; const p = Math.min(1, (t - t0) / dur); step(p); if (p < 1) raf = requestAnimationFrame(f); else done && done(); }; raf = requestAnimationFrame(f); return () => cancelAnimationFrame(raf); };
+  const ease = p => 1 - Math.pow(1 - p, 3);
+  /* tiny canvas plot helper */
+  function plotter(cv, xr, yr, pad = {l: 44, r: 14, t: 14, b: 30}) {
+    const {c, w, h: H} = fitCanvas(cv);
+    const X = x => pad.l + (x - xr[0]) / (xr[1] - xr[0]) * (w - pad.l - pad.r), Y = y => H - pad.b - (y - yr[0]) / (yr[1] - yr[0]) * (H - pad.t - pad.b);
+    c.clearRect(0, 0, w, H); c.font = '12px ui-monospace,Menlo,monospace'; c.lineJoin = 'round'; c.lineCap = 'round';
+    const axes = (xt, yt, xf = String, yf = String) => { c.strokeStyle = SOFT; c.fillStyle = MUTE; c.lineWidth = 1; c.textAlign = 'center'; c.textBaseline = 'top'; xt.forEach(v => { c.beginPath(); c.moveTo(X(v), pad.t); c.lineTo(X(v), H - pad.b); c.stroke(); c.fillText(xf(v), X(v), H - pad.b + 8); }); c.textAlign = 'right'; c.textBaseline = 'middle'; yt.forEach(v => { c.beginPath(); c.moveTo(pad.l, Y(v)); c.lineTo(w - pad.r, Y(v)); c.stroke(); c.fillText(yf(v), pad.l - 8, Y(v)); }); };
+    const line = (pts, color, lw = 2, dash = []) => { c.strokeStyle = color; c.lineWidth = lw; c.setLineDash(dash); c.beginPath(); pts.forEach(([x, y], i) => i ? c.lineTo(X(x), Y(y)) : c.moveTo(X(x), Y(y))); c.stroke(); c.setLineDash([]); };
+    return {c, w, h: H, X, Y, axes, line, pad};
+  }
+  const onResize = (cv, draw) => { const ro = new ResizeObserver(() => draw()); ro.observe(cv); return () => ro.disconnect(); };
+
+  const labs = [];
+  const def = o => labs.push(o);
+
+  /* 1 ─ fraction */
+  def({id: 'fraction', name: '分一分', sub: '分数', glyph: '¾', guide: 'fraction',
+    ask: '分母变大时，每一份是变大还是变小？先猜，再拖动试试。',
+    build(vis, side, say) {
+      let n = 3, d = 4, fine = 1;
+      const draw = svg(vis, 520, 400, '一个圆和一条长条，按分母等分，按分子涂色');
+      const paint = () => {
+        const D = d * fine, N = n * fine; let s = '';
+        const cx = 170, cy = 170, r = 140;
+        for (let i = 0; i < D; i++) { const a0 = -Math.PI / 2 + i * TAU / D, a1 = a0 + TAU / D; s += D === 1 ? `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${N ? COB : SOFT}"/>` : `<path d="M${cx} ${cy}L${cx + r * Math.cos(a0)} ${cy + r * Math.sin(a0)}A${r} ${r} 0 0 1 ${cx + r * Math.cos(a1)} ${cy + r * Math.sin(a1)}Z" fill="${i < N ? COB : SOFT}" stroke="#F4EFE6" stroke-width="${D > 16 ? 1.5 : 3}"/>`; }
+        const bw = 150 / D; for (let i = 0; i < D; i++) s += `<rect x="${350 + i * bw}" y="40" width="${Math.max(bw - 2, 1)}" height="60" fill="${i < N ? VER : SOFT}"/>`;
+        s += TX(425, 130, `${N} 份，共 ${D} 份`, 15, INK);
+        s += `<text x="425" y="230" font-size="76" text-anchor="middle" font-family="var(--math)" fill="${INK}">${N}<tspan fill="${MUTE}">/</tspan>${D}</text>`;
+        s += L(40, 360, 480, 360, INK, 2) + [0, .25, .5, .75, 1].map(v => L(40 + v * 440, 352, 40 + v * 440, 368, INK, 1.5) + TX(40 + v * 440, 390, v === 0 ? '0' : v === 1 ? '1' : v, 13, MUTE)).join('') + `<circle cx="${40 + n / d * 440}" cy="360" r="9" fill="${COB}" stroke="#F4EFE6" stroke-width="3"/>`;
+        draw(s);
+        const g = (a, b) => b ? g(b, a % b) : a, k = g(n, d) || 1;
+        say(`<b id="math-result">${N}/${D} ≈ ${fmt(n / d)}</b><span>也就是 ${fmt(n / d * 100, 1)}%。${n && k > 1 ? `约到最简是 ${n / k}/${d / k}。` : ''}${fine > 1 ? `每一份再切成 ${fine} 份：份数变多了，涂色的大小没有变。` : ''}</span>`);
+      };
+      const den = range(side, {id: 'denominator', label: '分母：平均分成几份', min: 1, max: 12, value: d, on: v => { d = v; if (n > d) { n = d; num.set(n); } num.max = d; paint(); }});
+      const num = range(side, {id: 'numerator', label: '分子：取其中几份', min: 0, max: 12, value: n, on: v => { n = Math.min(v, d); if (v > d) num.set(n); paint(); }});
+      num.max = d;
+      chips(side, {label: '把每一份再切细', value: 1, items: [[1, '原样'], [2, '每份切成 2 份'], [3, '每份切成 3 份']], on: v => { fine = +v; paint(); }});
+      paint();
+    }});
+
+  /* 2 ─ zoom into sqrt(2) */
+  def({id: 'zoom', name: '放大数轴', sub: '无理数', glyph: '√2', guide: 'irrational',
+    ask: '一直放大下去，√2 会不会正好落在某一个刻度上？',
+    build(vis, side, say) {
+      const DIG = '1.41421356237', R2 = Math.SQRT2; let k = 0;
+      const CF = [[1, 1], [3, 2], [7, 5], [17, 12], [41, 29], [99, 70], [239, 169], [577, 408], [1393, 985]];
+      const draw = svg(vis, 560, 330, '数轴上包含根号 2 的一小段，分成十等份');
+      const paint = () => {
+        const w = Math.pow(10, -k), lo = Math.floor(R2 / w) * w, X = v => 40 + (v - lo) / w * 480; let s = '';
+        s += L(20, 190, 540, 190, INK, 2);
+        for (let i = 0; i <= 10; i++) { const v = lo + i * w / 10, big = i === 0 || i === 10; s += L(X(v), big ? 168 : 178, X(v), big ? 212 : 202, INK, big ? 2 : 1.2) + TX(X(v), 236, v.toFixed(Math.min(k + 1, 10)).replace(/0+$/, m => i === 0 || i === 10 ? (k ? '' : m) : '').replace(/\.$/, ''), k > 5 ? 9 : 12, big ? INK : MUTE); }
+        const d1 = +DIG[k + 2] || 0; s += `<rect x="${X(lo + d1 * w / 10)}" y="150" width="48" height="80" fill="${GOLD}" opacity=".28"/>`;
+        s += L(X(R2), 96, X(R2), 190, VER, 3) + `<circle cx="${X(R2)}" cy="190" r="7" fill="${VER}"/>` + `<text x="${X(R2)}" y="80" font-size="34" text-anchor="middle" fill="${VER}" font-family="var(--math)" font-style="italic">√2</text>`;
+        CF.forEach(([a, b]) => { const v = a / b; if (v >= lo && v <= lo + w && Math.abs(v - R2) > w / 400) s += `<circle cx="${X(v)}" cy="190" r="5" fill="${COB}"/>` + TX(X(v), 286, `${a}/${b}`, 14, COB); });
+        s += TX(280, 318, `这一段的宽度：${k === 0 ? '1' : '1/' + '1' + '0'.repeat(k)}`, 13, MUTE);
+        draw(s);
+        const a = +DIG.slice(0, k + 3), b = a + w / 10;
+        say(`<b>√2 在 ${a.toFixed(k + 1)} 和 ${b.toFixed(k + 1)} 之间</b><span>${a.toFixed(k + 1)}² = ${(a * a).toFixed(Math.min(2 * k + 2, 12))}，比 2 小；${b.toFixed(k + 1)}² = ${(b * b).toFixed(Math.min(2 * k + 2, 12))}，比 2 大。蓝点是最接近 √2 的分数，它们越来越近，却永远不相等。</span>`);
+      };
+      const r = range(side, {id: 'zoom-level', label: '放大倍数', min: 0, max: 8, value: 0, show: v => '×' + (v ? '10' + NT.sup(v) : '1'), on: v => { k = v; paint(); }});
+      action(side, '再放大十倍 <span class="arr">→</span>', () => { k = (k + 1) % 9; r.set(k); paint(); });
+      paint();
+    }});
+
+  /* 3 ─ derivative: secant to tangent */
+  def({id: 'derivative', name: '靠近一点', sub: '导数', glyph: 'f′', guide: 'derivative',
+    ask: '时间间隔 h 缩到很小很小时，平均速度会走向哪个数？',
+    build(vis, side, say) {
+      let t0 = 1, hh = 1, stop = () => {};
+      const draw = svg(vis, 560, 400, '位置 s 等于 t 平方的曲线，以及过两点的割线');
+      const X = t => 50 + t * 170, Y = s => 360 - s * 38;
+      const paint = () => {
+        let s = L(50, 360, 540, 360, INK, 1.5) + L(50, 360, 50, 20, INK, 1.5), d = '';
+        for (let t = 0; t <= 2.85; t += .05) d += `${t ? 'L' : 'M'}${X(t)} ${Y(t * t)}`;
+        [1, 2].forEach(v => s += TX(X(v), 382, v, 13, MUTE)); [2, 4, 6, 8].forEach(v => s += TX(34, Y(v) + 5, v, 13, MUTE));
+        s += TX(530, 382, 't（秒）', 13, MUTE, 'end') + TX(58, 30, 's（米）', 13, MUTE, 'start');
+        const m = 2 * t0 + hh, y0 = t0 * t0, t1 = t0 + hh;
+        const seg = (m, color, w, dash = '') => { const ta = Math.max(0, t0 - 1.2), tb = Math.min(2.9, t0 + 1.6); return L(X(ta), Y(y0 + m * (ta - t0)), X(tb), Y(y0 + m * (tb - t0)), color, w, dash); };
+        s += seg(2 * t0, GOLD, 2, 'stroke-dasharray="6 6"') + `<path d="${d}" fill="none" stroke="${COB}" stroke-width="4"/>` + seg(m, VER, 3);
+        s += L(X(t0), Y(y0), X(t1), Y(y0), MUTE, 1.2, 'stroke-dasharray="3 4"') + L(X(t1), Y(y0), X(t1), Y(t1 * t1), MUTE, 1.2, 'stroke-dasharray="3 4"');
+        s += `<circle cx="${X(t0)}" cy="${Y(y0)}" r="8" fill="${COB}" stroke="#F4EFE6" stroke-width="3"/><circle cx="${X(t1)}" cy="${Y(t1 * t1)}" r="7" fill="${VER}" stroke="#F4EFE6" stroke-width="3"/>`;
+        s += TX(X(t0) + hh * 85, Y(y0) + 20, 'h', 15, MUTE, 'middle', 'font-style="italic" font-family="var(--math)"');
+        draw(s);
+        say(`<b id="math-result">平均速度 ${fmt(m, 2)} 米/秒</b><span>从 ${fmt(t0, 1)} 秒到 ${fmt(t1, 2)} 秒：(${fmt(t1 * t1, 3)} − ${fmt(y0, 2)}) ÷ ${fmt(hh, 2)} = ${fmt(2 * t0, 1)} + h。金色虚线是 h 趋近 0 时的切线，斜率 ${fmt(2 * t0, 1)}。</span>`);
+      };
+      range(side, {id: 'point', label: '观察的时刻 t', min: .2, max: 1.6, step: .1, value: 1, show: v => fmt(v, 1) + ' 秒', on: v => { t0 = v; paint(); }});
+      const hr = range(side, {id: 'step', label: '时间间隔 h', min: .01, max: 1, step: .01, value: 1, show: v => fmt(v, 2) + ' 秒', on: v => { stop(); hh = v; paint(); }});
+      action(side, '让 h 慢慢缩小 <span class="arr">→</span>', () => { stop(); const from = Math.max(hh, .3); stop = animate(2600, p => { hh = Math.max(.01, from * Math.pow(.01 / from, ease(p))); hr.set(hh.toFixed(2)); paint(); }); });
+      paint(); return () => stop();
+    }});
+
+  /* 4 ─ integral: Riemann sums */
+  def({id: 'integral', name: '加起来', sub: '积分', glyph: '∫', guide: 'integral',
+    ask: '矩形切得越细，估计出来的路程会更准吗？会准到哪个数？',
+    build(vis, side, say) {
+      let n = 6, mode = 'left', fn = 'lin';
+      const F = {lin: t => 2 * t, sq: t => 3 * t * t}, NAME = {lin: 'v = 2t', sq: 'v = 3t²'};
+      const draw = svg(vis, 560, 400, '速度曲线下方的矩形');
+      const X = t => 60 + t * 440, Y = v => 350 - v * 100;
+      const paint = () => {
+        const f = F[fn], off = {left: 0, mid: .5, right: 1}[mode]; let s = '', sum = 0;
+        for (let i = 0; i < n; i++) { const v = f((i + off) / n); sum += v / n; s += `<rect x="${X(i / n)}" y="${Y(v)}" width="${Math.max(440 / n - (n > 60 ? 0 : 1), .5)}" height="${350 - Y(v)}" fill="${COB}" opacity="${.55 + .35 * (i % 2)}"/>`; }
+        let d = ''; for (let t = 0; t <= 1.001; t += .02) d += `${t ? 'L' : 'M'}${X(t)} ${Y(f(t))}`;
+        s += `<path d="${d}" fill="none" stroke="${VER}" stroke-width="3.5"/>` + L(60, 350, 530, 350, INK, 1.5) + L(60, 350, 60, 30, INK, 1.5);
+        [0, .5, 1].forEach(v => s += TX(X(v), 374, v, 13, MUTE)); [1, 2, 3].forEach(v => s += TX(44, Y(v) + 5, v, 13, MUTE));
+        s += TX(530, 392, 't（秒）', 13, MUTE, 'end') + TX(68, 40, 'v（米/秒）', 13, MUTE, 'start') + TX(X(.72), Y(f(.72)) - 16, NAME[fn], 18, VER, 'end', 'font-family="var(--math)" font-style="italic"');
+        draw(s);
+        say(`<b id="math-result">估计路程 ${fmt(sum)} 米</b><span>${n} 个矩形，取每段${{left: '左端', mid: '中点', right: '右端'}[mode]}的速度。准确值是 1 米，现在相差 ${fmt(Math.abs(sum - 1))} 米。${fn === 'lin' && mode === 'mid' ? '对直线来说，中点矩形多出与缺少的部分正好抵消。' : ''}</span>`);
+      };
+      range(side, {id: 'slices', label: '把 1 秒切成几段', min: 1, max: 100, value: n, show: v => v + ' 段', on: v => { n = v; paint(); }});
+      chips(side, {label: '取哪一刻的速度', value: 'left', items: [['left', '左端'], ['mid', '中点'], ['right', '右端']], on: v => { mode = v; paint(); }});
+      chips(side, {label: '速度规律', value: 'lin', items: [['lin', 'v = 2t'], ['sq', 'v = 3t²']], on: v => { fn = v; paint(); }});
+      paint();
+    }});
+
+  /* 5 ─ series: partial sums */
+  def({id: 'series', name: '一直加下去', sub: '无穷级数', glyph: 'Σ', guide: 'series',
+    ask: '三个级数每一项都越来越小。它们的总和都会停在某个数上吗？',
+    build(vis, side, say) {
+      const S = {geo: {term: k => Math.pow(.5, k), lim: 1, name: '1/2 + 1/4 + 1/8 + …', ymax: 1.2}, basel: {term: k => 1 / (k * k), lim: Math.PI * Math.PI / 6, name: '1 + 1/4 + 1/9 + …', ymax: 1.9}, harm: {term: k => 1 / k, lim: null, name: '1 + 1/2 + 1/3 + …', ymax: 7}};
+      let kind = 'geo', N = 8; const cv = canvas(vis, '部分和随项数变化的折线图');
+      const paint = () => {
+        const s = S[kind], pts = []; let sum = 0; for (let k = 1; k <= N; k++) { sum += s.term(k); pts.push([k, sum]); }
+        const p = plotter(cv, [0, Math.max(N, 10)], [0, s.ymax]);
+        p.axes([0, Math.round(Math.max(N, 10) / 2), Math.max(N, 10)], kind === 'harm' ? [0, 2, 4, 6] : [0, .5, 1, 1.5].filter(v => v <= s.ymax));
+        if (s.lim) { p.line([[0, s.lim], [Math.max(N, 10), s.lim]], GOLD, 2, [6, 6]); p.c.fillStyle = '#9a6d00'; p.c.textAlign = 'right'; p.c.textBaseline = 'bottom'; p.c.fillText(kind === 'geo' ? '极限 1' : '极限 π²/6 ≈ 1.6449', p.w - 18, p.Y(s.lim) - 4); }
+        p.line([[0, 0], ...pts], kind === 'harm' ? VER : COB, 2.5);
+        if (N <= 40) pts.forEach(([x, y]) => { p.c.fillStyle = kind === 'harm' ? VER : COB; p.c.beginPath(); p.c.arc(p.X(x), p.Y(y), 3.5, 0, TAU); p.c.fill(); });
+        say(`<b>前 ${N} 项的和 = ${fmt(sum, 6)}</b><span>${s.name}。${kind === 'geo' ? `离 1 还差 ${Math.pow(.5, N).toExponential(2)}，每多加一项，差距减半。` : kind === 'basel' ? `离 π²/6 还差 ${fmt(s.lim - sum, 6)}。欧拉 1734 年求出了这个极限。` : '它没有上限，但涨得极慢：要超过 10，需要加到第 12367 项。'}</span>`);
+      };
+      chips(side, {label: '选择级数', value: 'geo', items: [['geo', '每项减半'], ['basel', '平方的倒数'], ['harm', '调和级数']], on: v => { kind = v; paint(); }});
+      range(side, {id: 'terms', label: '加到第几项', min: 1, max: 400, value: N, show: v => '第 ' + v + ' 项', on: v => { N = v; paint(); }});
+      paint(); return onResize(cv, paint);
+    }});
+
+  /* 6 ─ sieve of Eratosthenes */
+  def({id: 'sieve', name: '筛出素数', sub: '素数', glyph: '2·3·5', guide: 'prime',
+    ask: '划掉 2、3、5、7 的倍数以后，100 以内剩下的都是素数。为什么不用再划 11 的倍数？',
+    build(vis, side, say) {
+      let N = 100, spiral = false, token = 0;
+      const board = h('div', {id: 'prime-board', class: 'sieve'}); vis.append(board);
+      const COLORS = [COB, VER, GOLD, JADE, '#7A3FC4', '#C2410C', '#0E7490', '#9D174D'];
+      const ulam = n => { let x = 0, y = 0, dx = 1, dy = 0, seg = 1, step = 0, turns = 0; const pos = [[0, 0]]; for (let i = 2; i <= n; i++) { x += dx; y += dy; pos.push([x, y]); if (++step === seg) { step = 0; [dx, dy] = [dy, -dx]; if (++turns % 2 === 0) seg++; } } return pos; };
+      const layout = () => {
+        const narrow = vis.clientWidth < 520, cols = spiral ? Math.ceil(Math.sqrt(N)) : N <= 100 ? 10 : 20; board.classList.toggle('tiny', narrow && (N > 100 || spiral && N > 64)); /* phone: cells too small for digits, the pattern is the point */ board.style.setProperty('--cols', cols); board.classList.toggle('spiral', spiral); board.classList.toggle('dense', N > 100);
+        const pos = spiral ? ulam(N) : null, minX = spiral ? Math.min(...pos.map(p => p[0])) : 0, minY = spiral ? Math.min(...pos.map(p => p[1])) : 0;
+        board.innerHTML = Array.from({length: N}, (_, i) => `<span data-n="${i + 1}" ${spiral ? `style="grid-column:${pos[i][0] - minX + 1};grid-row:${pos[i][1] - minY + 1}"` : ''}>${i + 1}</span>`).join('');
+      };
+      const finish = () => { const s = NT.sieve(N); let c = 0; $$('span', board).forEach(el => { const n = +el.dataset.n, p = s[n]; el.classList.toggle('is-prime', !!p); if (p) c++; else if (n > 1 && !el.classList.contains('out')) { el.classList.add('out'); } if (n === 1) el.classList.add('one'); }); say(`<b id="math-result">${N} 以内有 ${c} 个素数</b><span>只需要筛到 √${N} ≈ ${fmt(Math.sqrt(N), 1)}：一个合数一定有一个不超过自己平方根的素因数。${spiral ? '螺旋排列里，素数常常连成斜线，这叫乌拉姆螺旋（1963）。' : ''}</span>`); };
+      const reset = (instant = true) => { token++; layout(); if (instant) finish(); };
+      const play = async () => {
+        const my = ++token; layout(); const cells = $$('span', board); cells[0].classList.add('one'); let ci = 0;
+        const wait = ms => new Promise(r => setTimeout(r, REDUCED.matches ? 0 : ms));
+        for (let p = 2; p * p <= N; p++) {
+          if (cells[p - 1].classList.contains('out')) continue;
+          cells[p - 1].classList.add('is-prime', 'lead'); say(`<b>划掉 ${p} 的倍数</b><span>${p} 自己留下，${p * p} 开始的倍数都不是素数。</span>`);
+          await wait(420); if (my !== token) return;
+          for (let m = p * p; m <= N; m += p) { const el = cells[m - 1]; if (!el.classList.contains('out')) { el.classList.add('out'); el.style.setProperty('--x', COLORS[ci % COLORS.length]); } if ((m / p) % 4 === 0) { await wait(N > 100 ? 12 : 34); if (my !== token) return; } }
+          cells[p - 1].classList.remove('lead'); ci++; await wait(260); if (my !== token) return;
+        }
+        finish();
+      };
+      range(side, {id: 'prime-limit', label: '查找的范围', min: 10, max: 400, step: 10, value: N, show: v => '1 到 ' + v, on: v => { N = v; reset(); }});
+      chips(side, {label: '排列方式', value: 'grid', items: [['grid', '方阵'], ['spiral', '乌拉姆螺旋']], on: v => { spiral = v === 'spiral'; reset(); }});
+      action(side, '一步一步筛 <span class="arr">→</span>', play);
+      reset(); return () => token++;
+    }});
+
+  /* 7 ─ counting primes */
+  def({id: 'count', name: '数素数', sub: '素数定理', glyph: 'π(x)', guide: 'prime-counting',
+    ask: '素数越往后越稀。「到 x 为止的素数个数」这条阶梯，会贴着哪条曲线走？',
+    build(vis, side, say) {
+      const STEPS = [50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000], sv = NT.sieve(100000), cum = new Uint32Array(100001); for (let i = 1; i <= 100000; i++) cum[i] = cum[i - 1] + sv[i];
+      let xi = 1; const cv = canvas(vis, '素数个数的阶梯，与两条估计曲线');
+      const paint = () => {
+        const Xm = STEPS[xi], ym = cum[Xm] * 1.12, p = plotter(cv, [0, Xm], [0, ym]);
+        p.axes([0, Xm / 2, Xm], [0, Math.round(ym / 2.2), Math.round(ym / 1.1)], v => v >= 1000 ? v / 1000 + 'k' : v);
+        const n = 300, a = [], b = [], st = []; for (let i = 1; i <= n; i++) { const x = 2 + (Xm - 2) * i / n; a.push([x, x / Math.log(x)]); b.push([x, NT.Li(x)]); }
+        if (Xm <= 2000) { st.push([0, 0]); for (let x = 2; x <= Xm; x++) if (sv[x]) { st.push([x, cum[x - 1]]); st.push([x, cum[x]]); } st.push([Xm, cum[Xm]]); } else for (let i = 0; i <= n; i++) { const x = Math.round(Xm * i / n); st.push([x, cum[x]]); }
+        p.line(a, COB, 2, [6, 5]); p.line(b, GOLD, 2.5); p.line(st, VER, 2.5);
+        const c = p.c; c.textAlign = 'left'; c.textBaseline = 'middle'; [[VER, 'π(x) 真实个数'], [GOLD, 'Li(x)'], [COB, 'x / ln x']].forEach(([col, t], i) => { c.fillStyle = col; c.fillRect(p.pad.l + 12, 22 + i * 20, 16, 3); c.fillStyle = INK; c.fillText(t, p.pad.l + 36, 23 + i * 20); });
+        const pi = cum[Xm], e1 = Xm / Math.log(Xm), e2 = NT.Li(Xm);
+        say(`<b>${Xm.toLocaleString('en')} 以内有 ${pi.toLocaleString('en')} 个素数</b><span>x / ln x 给出 ${fmt(e1, 0)}（差 ${fmt(pi - e1, 0)}），Li(x) 给出 ${fmt(e2, 0)}（差 ${fmt(pi - e2, 0)}）。比值 π(x) ÷ (x/ln x) = ${fmt(pi / e1, 4)}，随 x 增大趋于 1。</span>`);
+      };
+      range(side, {id: 'count-x', label: '数到多大', min: 0, max: STEPS.length - 1, value: xi, show: v => STEPS[v].toLocaleString('en'), on: v => { xi = v; paint(); }});
+      paint(); return onResize(cv, paint);
+    }});
+
+  /* 8 ─ complex multiplication */
+  def({id: 'complex', name: '乘出旋转', sub: '复数', glyph: 'i', guide: 'complex',
+    ask: '把一个复数乘以 i，它在平面上会怎样移动？乘两次呢？',
+    build(vis, side, say) {
+      let z = [2, 1], w = [0, 1], drag = null;
+      const host = h('div', {class: 'lab-svg'}); vis.append(host);
+      const U = 62, X = x => 260 + x * U, Y = y => 220 - y * U;
+      const arc = (a, r, col) => { if (Math.abs(a) < .02) return ''; const x = 260 + r * Math.cos(a), y = 220 - r * Math.sin(a); return `<path d="M${260 + r} 220A${r} ${r} 0 ${Math.abs(a) > Math.PI ? 1 : 0} ${a > 0 ? 0 : 1} ${x} ${y}" fill="none" stroke="${col}" stroke-width="2.5" opacity=".8"/>`; };
+      const ang = v => { let a = Math.atan2(v[1], v[0]); return a < 0 ? a + TAU : a; }, mod = v => Math.hypot(v[0], v[1]), deg = a => Math.round(a * 180 / Math.PI);
+      const cx = v => { const r = Math.round(v[0] * 100) / 100, i = Math.round(v[1] * 100) / 100; return `${r}${i < 0 ? ' − ' : ' + '}${Math.abs(i)}i`; };
+      const paint = () => {
+        const p = [z[0] * w[0] - z[1] * w[1], z[0] * w[1] + z[1] * w[0]]; let s = '';
+        for (let i = -4; i <= 4; i++) s += L(X(i), 10, X(i), 430, SOFT, 1) + (Math.abs(i) <= 3 ? L(12, Y(i), 508, Y(i), SOFT, 1) : '');
+        s += L(12, 220, 508, 220, INK, 1.5) + L(260, 10, 260, 430, INK, 1.5) + `<circle cx="260" cy="220" r="${U}" fill="none" stroke="${MUTE}" stroke-width="1.2" stroke-dasharray="3 5"/>` + TX(500, 240, '实轴', 12, MUTE, 'end') + TX(268, 24, '虚轴', 12, MUTE, 'start');
+        s += arc(ang(z), 26, COB) + arc(ang(w), 36, VER) + arc(ang(z) + ang(w) > TAU ? ang(z) + ang(w) - TAU : ang(z) + ang(w), 48, GOLD);
+        const clampP = v => [clamp(X(v[0]), 16, 504), clamp(Y(v[1]), 14, 426)];
+        [[p, GOLD, 'z·w', 0], [z, COB, 'z', 1], [w, VER, 'w', 2]].forEach(([v, col, name, idx]) => { const [px, py] = clampP(v); s += L(260, 220, px, py, col, 3.5); s += idx ? `<circle class="handle" data-h="${idx}" tabindex="0" role="slider" aria-label="复数 ${name}，可拖动，也可以用方向键移动" aria-valuetext="${cx(v)}" cx="${px}" cy="${py}" r="13" fill="${col}" stroke="#F4EFE6" stroke-width="3"/>` : `<circle cx="${px}" cy="${py}" r="9" fill="${col}" stroke="#F4EFE6" stroke-width="3"/>`; s += `<text x="${px + 16}" y="${py - 12}" font-size="19" fill="${col === GOLD ? '#9a6d00' : col}" font-family="var(--math)" font-style="italic">${name}</text>`; });
+        const focus = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.h : null;
+        host.innerHTML = `<svg viewBox="0 0 520 440" role="group" aria-label="复平面：蓝色 z、红色 w 与金色乘积">${s}</svg>`;
+        if (focus) { const el = $(`[data-h="${focus}"]`, host); el && el.focus(); }
+        say(`<b>z·w = ${cx(p)}</b><span>长度：${fmt(mod(z), 2)} × ${fmt(mod(w), 2)} = ${fmt(mod(p), 2)}。角度：${deg(ang(z))}° + ${deg(ang(w))}° = ${deg(ang(z)) + deg(ang(w))}°${deg(ang(z)) + deg(ang(w)) >= 360 ? '（转过一整圈）' : ''}。相乘就是：长度相乘，角度相加。</span>`);
+      };
+      const toPlane = e => { const r = $('svg', host).getBoundingClientRect(); return [clamp(((e.clientX - r.left) / r.width * 520 - 260) / U, -3.9, 3.9), clamp((220 - (e.clientY - r.top) / r.height * 440) / U, -3.3, 3.3)].map(v => Math.round(v * 4) / 4); };
+      host.addEventListener('pointerdown', e => { const hd = e.target.closest('.handle'); if (!hd) return; drag = hd.dataset.h; host.setPointerCapture(e.pointerId); e.preventDefault(); });
+      host.addEventListener('pointermove', e => { if (!drag) return; const v = toPlane(e); if (drag === '1') z = v; else w = v; paint(); });
+      host.addEventListener('pointerup', () => drag = null); host.addEventListener('pointercancel', () => drag = null);
+      host.addEventListener('keydown', e => { const hd = e.target.closest('.handle'); const d = {ArrowLeft: [-.25, 0], ArrowRight: [.25, 0], ArrowUp: [0, .25], ArrowDown: [0, -.25]}[e.key]; if (!hd || !d) return; e.preventDefault(); const v = hd.dataset.h === '1' ? z : w; v[0] = clamp(v[0] + d[0], -3.75, 3.75); v[1] = clamp(v[1] + d[1], -3.25, 3.25); paint(); });
+      chips(side, {label: '把 w 设为', value: 'i', items: [['i', 'w = i'], ['-1', 'w = −1'], ['1+i', 'w = 1 + i'], ['half', 'w = ½']], on: v => { w = {i: [0, 1], '-1': [-1, 0], '1+i': [1, 1], half: [.5, 0]}[v]; paint(); }});
+      action(side, '再乘一次 w <span class="arr">→</span>', () => { z = [z[0] * w[0] - z[1] * w[1], z[0] * w[1] + z[1] * w[0]].map(v => clamp(Math.round(v * 100) / 100, -3.9, 3.9)); paint(); });
+      side.append(h('p', {class: 'lab-hint'}, '拖动蓝点和红点；键盘可用 Tab 选中后按方向键。'));
+      paint();
+    }});
+
+  /* 9 ─ Euler: compound growth in the imaginary direction */
+  def({id: 'euler', name: '转半圈', sub: '欧拉公式', glyph: 'eⁱᶿ', guide: 'euler-formula',
+    ask: '把「每一步向垂直方向走一点」重复 n 次。n 越大，终点会落在哪里？',
+    build(vis, side, say) {
+      let n = 6, th = Math.PI;
+      const draw = svg(vis, 520, 440, '单位圆与一条由 n 段折线组成的路径');
+      const U = 150, X = x => 280 + x * U, Y = y => 250 - y * U;
+      const paint = () => {
+        let s = L(20, 250, 510, 250, INK, 1.5) + L(280, 14, 280, 430, INK, 1.5) + `<circle cx="280" cy="250" r="${U}" fill="none" stroke="${SOFT}" stroke-width="2.5"/>`;
+        let re = 1, im = 0, d = `M${X(1)} ${Y(0)}`; const a = th / n;
+        for (let k = 0; k < n; k++) { const nr = re - im * a, ni = im + re * a; if (n <= 40) s += `<path d="M280 250L${X(re)} ${Y(im)}L${X(nr)} ${Y(ni)}Z" fill="${COB}" opacity="${.07 + .1 * (k % 2)}"/>`; re = nr; im = ni; d += `L${X(re)} ${Y(im)}`; }
+        const tx = Math.cos(th), ty = Math.sin(th);
+        s += `<path d="${d}" fill="none" stroke="${COB}" stroke-width="3" stroke-linejoin="round"/>` + `<circle cx="${X(1)}" cy="${Y(0)}" r="6" fill="${INK}"/>` + `<circle cx="${X(tx)}" cy="${Y(ty)}" r="11" fill="none" stroke="${GOLD}" stroke-width="3"/>` + `<circle cx="${clamp(X(re), 10, 510)}" cy="${clamp(Y(im), 10, 430)}" r="7" fill="${VER}" stroke="#F4EFE6" stroke-width="3"/>`;
+        s += TX(X(1) + 14, 272, '1', 15, INK) + TX(X(-1) - 18, 272, '−1', 15, INK) + TX(292, Y(1) - 8, 'i', 17, INK, 'start', 'font-family="var(--math)" font-style="italic"');
+        draw(s);
+        say(`<b>(1 + iθ/${n})${NT.sup(n)} ≈ ${fmt(re, 4)} ${im < 0 ? '−' : '+'} ${fmt(Math.abs(im), 4)}i</b><span>金色圆圈是目标 e<sup>iθ</sup> = cos θ + i·sin θ = ${fmt(tx, 4)} ${ty < 0 ? '−' : '+'} ${fmt(Math.abs(ty), 4)}i。${Math.abs(th - Math.PI) < .01 ? 'θ = π 时目标正是 −1：这就是 e<sup>iπ</sup> + 1 = 0。' : ''}步子越多，折线越贴近圆弧。</span>`);
+      };
+      const nr = range(side, {id: 'euler-n', label: '分成多少步 n', min: 1, max: 200, value: n, show: v => v + ' 步', on: v => { n = v; paint(); }});
+      range(side, {id: 'euler-theta', label: '总共转过的角度 θ', min: .1, max: 6.28, step: .01, value: 3.14, show: v => Math.abs(v - 3.14) < .006 ? 'π（半圈）' : fmt(v / Math.PI, 2) + 'π', on: v => { th = Math.abs(v - 3.14) < .006 ? Math.PI : v; paint(); }});
+      let stop = () => {}; action(side, '让 n 越来越大 <span class="arr">→</span>', () => { stop(); stop = animate(3200, p => { n = Math.max(1, Math.round(Math.pow(200, ease(p)))); nr.set(n); paint(); }); });
+      paint(); return () => stop();
+    }});
+
+  /* 10 ─ zeta on and off the critical line */
+  def({id: 'zeta', name: '沿着临界线走', sub: 'ζ 函数', glyph: 'ζ', guide: 'zeta',
+    ask: '让 s 沿着实部为 1/2 的直线向上走，ζ(s) 的轨迹会不会穿过原点？换一条直线呢？',
+    build(vis, side, say) {
+      const DT = .04, TMAX = 60, cache = {}; let sigma = .5, T = 16, stop = () => {};
+      const cv = canvas(vis, '左边是 ζ(s) 在复平面上的轨迹，右边是它的大小随高度 t 的变化', .56);
+      const pts = s => cache[s] || (cache[s] = Array.from({length: Math.round(TMAX / DT) + 1}, (_, i) => NT.zeta(s, i * DT)));
+      const paint = () => {
+        const {c, w, h: H} = fitCanvas(cv), P = pts(sigma), n = Math.round(T / DT), tall = w < 560;
+        const A = tall ? {x: 0, y: 0, w, h: H * .58} : {x: 0, y: 0, w: w * .56, h: H}, B = tall ? {x: 0, y: H * .6, w, h: H * .4} : {x: w * .58, y: 0, w: w * .42, h: H};
+        c.clearRect(0, 0, w, H); c.lineJoin = c.lineCap = 'round'; c.font = '12px ui-monospace,Menlo,monospace';
+        // complex plane
+        const U = Math.min(A.w / 6.4, A.h / 5.2), ox = A.x + A.w * .36, oy = A.y + A.h * .5, X = v => ox + v * U, Y = v => oy - v * U;
+        c.strokeStyle = SOFT; c.lineWidth = 1; for (let i = -2; i <= 4; i++) { c.beginPath(); c.moveTo(X(i), A.y + 6); c.lineTo(X(i), A.y + A.h - 6); c.stroke(); } for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(A.x + 6, Y(i)); c.lineTo(A.x + A.w - 6, Y(i)); c.stroke(); }
+        c.strokeStyle = INK; c.lineWidth = 1.3; c.beginPath(); c.moveTo(A.x + 6, oy); c.lineTo(A.x + A.w - 6, oy); c.moveTo(ox, A.y + 6); c.lineTo(ox, A.y + A.h - 6); c.stroke();
+        c.save(); c.beginPath(); c.rect(A.x, A.y, A.w, A.h); c.clip();
+        for (let i = 1; i <= n; i++) { c.strokeStyle = `rgba(43,70,217,${.18 + .82 * Math.pow(i / n, 3)})`; c.lineWidth = 1 + 2 * Math.pow(i / n, 3); c.beginPath(); c.moveTo(X(P[i - 1][0]), Y(P[i - 1][1])); c.lineTo(X(P[i][0]), Y(P[i][1])); c.stroke(); }
+        const [re, im] = P[n]; c.fillStyle = VER; c.beginPath(); c.arc(X(re), Y(im), 6, 0, TAU); c.fill(); c.restore();
+        c.fillStyle = GOLD; c.strokeStyle = INK; c.lineWidth = 1.5; c.beginPath(); c.arc(ox, oy, 5.5, 0, TAU); c.fill(); c.stroke();
+        c.fillStyle = MUTE; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillText('ζ(s) 的值', A.x + 10, A.y + 8); c.textAlign = 'center'; c.fillText('0', ox - 10, oy + 6);
+        // modulus plot
+        const pl = 34, pb = 26, bx = t => B.x + pl + t / TMAX * (B.w - pl - 10), by = v => B.y + B.h - pb - Math.min(v, 4.2) / 4.2 * (B.h - pb - 22);
+        c.strokeStyle = SOFT; c.lineWidth = 1; [0, 1, 2, 3, 4].forEach(v => { c.beginPath(); c.moveTo(bx(0), by(v)); c.lineTo(bx(TMAX), by(v)); c.stroke(); }); c.fillStyle = MUTE; c.textAlign = 'center'; c.textBaseline = 'top'; [0, 20, 40, 60].forEach(v => c.fillText(v, bx(v), B.y + B.h - pb + 6)); c.textAlign = 'left'; c.fillText('|ζ(s)| 随 t 的变化', B.x + pl, B.y + 6);
+        c.strokeStyle = 'rgba(22,26,43,.22)'; c.lineWidth = 1.5; c.beginPath(); P.forEach((p, i) => { const v = Math.hypot(p[0], p[1]); i ? c.lineTo(bx(i * DT), by(v)) : c.moveTo(bx(0), by(v)); }); c.stroke();
+        c.strokeStyle = COB; c.lineWidth = 2.5; c.beginPath(); for (let i = 0; i <= n; i++) { const v = Math.hypot(P[i][0], P[i][1]); i ? c.lineTo(bx(i * DT), by(v)) : c.moveTo(bx(0), by(v)); } c.stroke();
+        if (sigma === .5) ZEROS.filter(g => g <= TMAX).forEach(g => { c.fillStyle = g <= T ? GOLD : 'rgba(231,168,35,.3)'; c.beginPath(); c.arc(bx(g), by(0), 4.5, 0, TAU); c.fill(); });
+        c.fillStyle = VER; c.beginPath(); c.arc(bx(T), by(Math.hypot(re, im)), 5, 0, TAU); c.fill();
+        const passed = ZEROS.filter(g => g <= T);
+        say(`<b>s = ${sigma === .5 ? '½' : sigma} + ${fmt(T, 2)}i，|ζ(s)| = ${fmt(Math.hypot(re, im), 4)}</b><span>${sigma === .5 ? (passed.length ? `轨迹已经 ${passed.length} 次穿过原点，对应零点的高度：${passed.map(g => fmt(g, 3)).join('、')}。` : '继续向上走。第一个零点在 t ≈ 14.135。') + '这些零点都是按公式实时算出来的。' : `在实部为 ${sigma} 的直线上，这一段轨迹绕着原点走，却没有穿过它。猜想说：永远不会。但「这一段没有」不是证明。`}</span>`);
+      };
+      chips(side, {label: 's 的实部', value: '0.5', items: [['0.5', '实部 ½（临界线）'], ['0.7', '实部 0.7'], ['1', '实部 1']], on: v => { sigma = +v; paint(); }});
+      const tr = range(side, {id: 'zeta-t', label: 's 的虚部 t（高度）', min: 0, max: TMAX, step: .04, value: T, show: v => fmt(v, 2), on: v => { stop(); T = v; paint(); }});
+      action(side, '从 0 走到 60 <span class="arr">→</span>', () => { stop(); stop = animate(14000, p => { T = Math.round(p * TMAX / DT) * DT; tr.set(T); paint(); }); });
+      paint(); const off = onResize(cv, paint); return () => { stop(); off(); };
+    }});
+
+  /* 11 ─ music of the primes: explicit formula */
+  def({id: 'music', name: '用零点拼出素数', sub: '黎曼猜想', glyph: 'ρ', guide: 'riemann',
+    ask: '每个零点贡献一道波。把越来越多的波叠起来，会出现什么形状？',
+    build(vis, side, say) {
+      let K = 0, stop = () => {}; const XM = 62, xs = Array.from({length: 601}, (_, i) => 2 + (XM - 2) * i / 600), exact = NT.psiExact(xs);
+      const cv = canvas(vis, '台阶是按素数幂跳动的 ψ(x)，曲线是用前 K 个零点算出的近似');
+      const paint = () => {
+        const p = plotter(cv, [0, XM], [0, XM + 4]), c = p.c;
+        p.axes([10, 20, 30, 40, 50, 60], [0, 20, 40, 60]);
+        const s = NT.sieve(XM); c.fillStyle = VER; for (let q = 2; q <= XM; q++) if (s[q]) { c.globalAlpha = .5; c.fillRect(p.X(q) - .75, p.Y(0) - 7, 1.5, 7); } c.globalAlpha = 1;
+        const st = []; xs.forEach((x, i) => { if (i && exact[i] !== exact[i - 1]) st.push([x, exact[i - 1]]); st.push([x, exact[i]]); });
+        p.line(st, INK, 2);
+        if (K > 0) { const g = ZEROS[K - 1], wave = xs.map(x => [x, 8 - 2 * Math.sqrt(x) * (0.5 * Math.cos(g * Math.log(x)) + g * Math.sin(g * Math.log(x))) / (0.25 + g * g) * 3]); p.line(wave, 'rgba(231,168,35,.9)', 1.5); }
+        p.line(xs.map(x => [x, NT.psiZeros(x, K)]), VER, 2.5);
+        c.textAlign = 'left'; c.textBaseline = 'middle'; [[INK, 'ψ(x)：在素数幂处跳一下'], [VER, K ? `x − 前 ${K} 个零点的波` : '只用 x（一个零点也不用）']].concat(K ? [[GOLD, `第 ${K} 个零点的波（放大 3 倍）`]] : []).forEach(([col, t], i) => { c.fillStyle = col; c.fillRect(p.pad.l + 12, 22 + i * 20, 16, 3); c.fillStyle = INK; c.fillText(t, p.pad.l + 36, 23 + i * 20); });
+        say(`<b>用了前 ${K} 个零点</b><span>${K === 0 ? '红线只是一条直线 y = x：它给出了素数的「平均密度」，但看不出素数在哪里。' : K < 12 ? '台阶开始出现了。每个零点 ½ + iγ 贡献一道频率为 γ 的波。' : '红线已经在每个素数和素数幂的位置上「转弯」。素数的位置，就这样被编码在零点里。'}如果有零点偏离临界线，它的波会随 x 增长得更快，素数的分布就会更不均匀。</span>`);
+      };
+      const kr = range(side, {id: 'music-k', label: '使用的零点个数 K', min: 0, max: ZEROS.length, value: 0, show: v => v + ' 个', on: v => { stop(); K = v; paint(); }});
+      action(side, '一个一个加进去 <span class="arr">→</span>', () => { stop(); stop = animate(9000, p => { K = Math.round(p * ZEROS.length); kr.set(K); paint(); }); });
+      side.append(h('p', {class: 'lab-hint'}, '这里的 ψ(x) 是切比雪夫函数：对每个不超过 x 的素数幂 pᵏ 累加 ln p。公式出自冯·曼戈尔特（1895）。'));
+      paint(); const off = onResize(cv, paint); return () => { stop(); off(); };
+    }});
+
+  /* 12 ─ coin: law of large numbers */
+  def({id: 'coin', name: '抛硬币', sub: '概率', glyph: '½', guide: 'probability',
+    ask: '抛 10 次，正面一定是 5 次吗？抛 1000 次，正面的比例会怎样？',
+    build(vis, side, say) {
+      let flips = [], heads = 0; const cv = canvas(vis, '正面比例随抛掷次数变化的折线图'), coin = h('div', {class: 'coin', 'aria-hidden': 'true'}, '<i>正</i><i>反</i>'); vis.prepend(coin);
+      const paint = () => {
+        const n = flips.length, xm = Math.max(20, n), p = plotter(cv, [0, xm], [0, 1]);
+        p.axes([0, Math.round(xm / 2), xm], [0, .25, .5, .75, 1]); p.line([[0, .5], [xm, .5]], GOLD, 2, [6, 6]);
+        let hsum = 0, run = 0, best = 0, last = -1; const pts = []; flips.forEach((f, i) => { hsum += f; pts.push([i + 1, hsum / (i + 1)]); run = f === last ? run + 1 : 1; last = f; best = Math.max(best, run); });
+        if (pts.length) p.line(pts, COB, 2.2);
+        say(n ? `<b>抛了 ${n} 次，正面 ${heads} 次，占 ${fmt(heads / n * 100, 1)}%</b><span>最长连续相同的一段有 ${best} 次。次数少时比例摇摆得厉害；次数多了，它会稳定在 50% 附近。这叫大数定律。注意：稳定的是「比例」，正反面的「次数之差」反而可能越来越大。</span>` : '<b>还没有抛</b><span>先猜一猜：抛 10 次，正面会出现几次？</span>');
+      };
+      const toss = k => { for (let i = 0; i < k; i++) { const f = Math.random() < .5 ? 1 : 0; flips.push(f); heads += f; } if (flips.length > 20000) { flips = []; heads = 0; } coin.classList.remove('flip'); void coin.offsetWidth; coin.dataset.face = flips[flips.length - 1] ? 'h' : 't'; coin.classList.add('flip'); paint(); };
+      const row = h('div', {class: 'lab-actions'}); side.append(row);
+      action(row, '抛 1 次', () => toss(1)); action(row, '抛 10 次', () => toss(10)); action(row, '抛 1000 次', () => toss(1000)); action(row, '重来', () => { flips = []; heads = 0; paint(); }, 'btn ghost small');
+      paint(); return onResize(cv, paint);
+    }});
+
+  /* 13 ─ Pythagoras by rearrangement */
+  def({id: 'pythagoras', name: '挪一挪', sub: '勾股定理', glyph: 'a²+b²', guide: 'pythagoras',
+    ask: '同一个大正方形里放四个同样的三角形。挪动它们，剩下的空白面积会变吗？',
+    build(vis, side, say) {
+      let a = 3, b = 4, t = 0, stop = () => {};
+      const draw = svg(vis, 520, 440, '大正方形中四个全等直角三角形的两种摆法');
+      const paint = () => {
+        const S = a + b, u = 380 / S, ox = 70, oy = 30, P = ([x, y]) => `${ox + x * u},${oy + y * u}`;
+        const A = [[[0, 0], [a, 0], [0, b]], [[S, 0], [a, 0], [S, a]], [[S, S], [b, S], [S, a]], [[0, S], [b, S], [0, b]]];
+        const B = [[[0, a], [a, a], [0, S]], [[S, 0], [a, 0], [S, a]], [[a, S], [0, S], [a, a]], [[a, a], [S, a], [a, 0]]];
+        const e = ease(t), mix = (p, q) => [lerp(p[0], q[0], e), lerp(p[1], q[1], e)];
+        let s = `<rect x="${ox}" y="${oy}" width="${S * u}" height="${S * u}" fill="#fff" stroke="${INK}" stroke-width="2.5"/>`;
+        s += `<polygon points="${[[a, 0], [S, a], [b, S], [0, b]].map(P).join(' ')}" fill="${VER}" opacity="${.9 * (1 - e)}"/>`;
+        s += `<rect x="${ox}" y="${oy}" width="${a * u}" height="${a * u}" fill="${COB}" opacity="${.9 * e}"/><rect x="${ox + a * u}" y="${oy + a * u}" width="${b * u}" height="${b * u}" fill="${GOLD}" opacity="${.95 * e}"/>`;
+        A.forEach((tri, i) => s += `<polygon points="${tri.map((p, j) => P(mix(p, B[i][j]))).join(' ')}" fill="#EAE3D4" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`);
+        s += `<text x="${ox + S * u / 2}" y="${oy + S * u / 2 + 10}" font-size="30" text-anchor="middle" fill="#fff" opacity="${1 - e}" font-family="var(--math)" font-style="italic">c²</text>`;
+        s += `<text x="${ox + a * u / 2}" y="${oy + a * u / 2 + 9}" font-size="26" text-anchor="middle" fill="#fff" opacity="${e}" font-family="var(--math)" font-style="italic">a²</text><text x="${ox + a * u + b * u / 2}" y="${oy + a * u + b * u / 2 + 9}" font-size="26" text-anchor="middle" fill="${INK}" opacity="${e}" font-family="var(--math)" font-style="italic">b²</text>`;
+        draw(s);
+        const c2 = a * a + b * b, c = Math.sqrt(c2);
+        say(`<b>${a}² + ${b}² = ${c2}，c = ${Number.isInteger(c) ? c : '√' + c2 + ' ≈ ' + fmt(c)}</b><span>大正方形和四个三角形都没有变，所以空白部分的面积也没有变：${t < .5 ? '现在空白是一个斜放的正方形 c²。' : '现在空白是 a² 和 b² 两个正方形。'}${Number.isInteger(c) ? `（${a}, ${b}, ${c}）是一组勾股数。` : ''}</span>`);
+      };
+      range(side, {id: 'leg-a', label: '直角边 a', min: 1, max: 8, value: a, on: v => { a = v; paint(); }});
+      range(side, {id: 'leg-b', label: '直角边 b', min: 1, max: 8, value: b, on: v => { b = v; paint(); }});
+      action(side, '挪动三角形 <span class="arr">→</span>', () => { stop(); const from = t, to = t < .5 ? 1 : 0; stop = animate(1300, p => { t = lerp(from, to, p); paint(); }); });
+      paint(); return () => stop();
+    }});
+
+  return labs;
+})();
+/* Home page wiring: plates, guide sheet, lab stage, route map, horizon. */
+(() => {
+  const G = DATA.guides, GROUPS = DATA.groups, TOPICS = DATA.topics, byId = Object.fromEntries(G.map(g => [g.id, g]));
+  const LAB = Object.fromEntries(LABS.map(l => [l.id, l]));
+  initPortrait($('#portrait'));
+  barScroll($('#bar'), '.night,.teaser,.foot');
+
+  /* ticker */
+  const FACTS = ['0.999… = 1', '1 不是素数', '√2 写不成分数', 'e^{iπ} + 1 = 0', '1 + ¼ + ⅑ + … = π²/6', '素数有无穷多个', '6 = 1 + 2 + 3', '3² + 4² = 5²', '1 + 2 + … + 100 = 5050', 'ζ(s) = Σ n⁻ˢ', '1000 以内有 168 个素数', '23 人中两人同生日的概率 > ½', 'Re(ρ) = ½ ？'];
+  $('#ticker').innerHTML = [...FACTS, ...FACTS].map(f => `<span>${esc(f)}</span>`).join('');
+
+  /* count-up */
+  const cio = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) return; cio.unobserve(e.target); const to = +e.target.dataset.count; if (REDUCED.matches) return; const t0 = performance.now(); const f = t => { const p = Math.min(1, (t - t0) / 1200); e.target.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }));
+  $$('[data-count]').forEach(el => cio.observe(el));
+
+  /* ── atlas grid ── */
+  const grid = $('#grid'), filters = $('#filters'), search = $('#search'); let filter = 'all';
+  filters.innerHTML = `<button type="button" class="chip" data-filter="all" aria-pressed="true">全部 ${G.length}</button>` + Object.entries(GROUPS).map(([k, v]) => `<button type="button" class="chip" data-filter="${k}" aria-pressed="false">${esc(v)}</button>`).join('');
+  grid.innerHTML = G.map((g, i) => `<button type="button" class="concept rv" style="--d:${(i % 4) * .06}s" data-concept="${g.id}" data-group="${g.group}" aria-label="${esc(g.name)}：${esc(g.short)}"><span class="c-top mono"><span>No. ${String(i + 1).padStart(2, '0')}</span><i></i></span>${g.lab ? '<span class="c-lab">可动手</span>' : ''}${SPEC.svg(g.id)}<span class="c-name"><b>${esc(g.name)}</b><span>${mx(g.symbol)}</span></span><p>${esc(g.short)}</p></button>`).join('') + '<p class="no-results" hidden>没有找到这张图版。换个词试试，或者去星图里找。</p>';
+  const apply = () => { const q = search.value.trim().toLowerCase(); let n = 0; $$('.concept', grid).forEach(el => { const g = byId[el.dataset.concept]; const ok = (filter === 'all' || g.group === filter) && (!q || [g.name, g.symbol, g.short, g.plain, GROUPS[g.group]].join(' ').toLowerCase().includes(q)); el.hidden = !ok; if (ok) { n++; el.classList.add('in'); } }); $('.no-results', grid).hidden = n > 0; };
+  filters.addEventListener('click', e => { const b = e.target.closest('[data-filter]'); if (!b) return; filter = b.dataset.filter; $$('button', filters).forEach(x => x.setAttribute('aria-pressed', x === b)); apply(); });
+  search.addEventListener('input', apply);
+
+  /* ── guide sheet ── */
+  const sheet = $('#guide'), content = $('#concept-content'); wireSheet(sheet);
+  const chip = id => byId[id] ? `<button type="button" class="chip" data-concept="${id}">${esc(byId[id].name)}</button>` : TOPICS[id] ? `<a class="chip out" href="knowledge.html#${id}">${esc(TOPICS[id].name)} ✦</a>` : '';
+  function openGuide(id, opener) {
+    const g = byId[id]; if (!g) return; const i = G.indexOf(g), t = TOPICS[id] || {pre: []};
+    $('#guide-crumb').textContent = `图版 No. ${String(i + 1).padStart(2, '0')} · ${GROUPS[g.group]}`;
+    const sec = (n, title, body, cls = '') => `<section class="${cls}"><h3><i>${n}</i>${title}</h3><p>${mx(body)}</p></section>`;
+    content.innerHTML = `<div class="g-hero">${SPEC.svg(id, 'play')}<div><span class="sym">${mx(g.symbol)}</span><h2 id="concept-title">${esc(g.name)}</h2><p>${esc(g.short)}</p></div></div>
+      <div class="g-body">
+        <p class="g-plain">${mx(g.plain)}</p>
+        <div class="g-grid">${sec('i', '在生活里', g.life)}${sec('ii', '准确地说', g.precise)}${sec('iii', '容易弄错', g.mistake, 'warn')}${sec('iv', '它的来历', g.history)}</div>
+        <details class="g-quiz"><summary><small>先猜，再看</small><b>${mx(g.question)}</b><span>想好了，看看答案 ↓</span></summary><p>${mx(g.answer)}</p></details>
+        ${t.fact ? `<p class="g-fact"><b>再多知道一点　</b>${esc(t.fact)}</p>` : ''}
+        <div class="g-links">${t.pre.length ? `<h3>先认识</h3><div>${t.pre.map(chip).join('')}</div>` : ''}${g.next.length ? `<h3>接下来</h3><div>${g.next.map(chip).join('')}</div>` : ''}</div>
+        <div class="g-actions">${g.lab ? `<button type="button" class="btn solid" data-open-lab="${g.lab}">去做实验：${esc(LAB[g.lab].name)} <span class="arr">→</span></button>` : ''}<a class="btn line" href="knowledge.html#${id}">在星图上找到它 ✦</a></div>
+        ${g.source ? `<p class="g-src">依据：<a class="concept-source" href="${esc(g.source)}" target="_blank" rel="noopener noreferrer">克雷数学研究所的官方说明</a>。黎曼猜想仍是未解问题。</p>` : ''}
+      </div>`;
+    openSheet(sheet, sheet.open ? sheet._opener : opener);
+    history.replaceState(null, '', '#concept-' + id);
+  }
+  sheet.addEventListener('sheetclosed', () => { if (location.hash.startsWith('#concept-')) history.replaceState(null, '', location.pathname + location.search); });
+  document.addEventListener('click', e => {
+    const lab = e.target.closest('[data-open-lab]');
+    if (lab) { const go = () => { selectLab(lab.dataset.openLab); $('#lab').scrollIntoView({behavior: REDUCED.matches ? 'auto' : 'smooth'}); $(`#lab-tabs [data-lab="${lab.dataset.openLab}"]`).focus({preventScroll: true}); }; if (sheet.open) { sheet.addEventListener('sheetclosed', go, {once: true}); closeSheet(sheet); } else go(); return; }
+    const c = e.target.closest('[data-concept]'); if (c) openGuide(c.dataset.concept, c);
+  });
+  const fromHash = () => { const m = location.hash.match(/^#concept-(.+)$/); if (m && byId[m[1]]) openGuide(m[1], $(`.concept[data-concept="${m[1]}"]`)); };
+  addEventListener('hashchange', fromHash);
+
+  /* ── lab stage ── */
+  const tabs = $('#lab-tabs'), vis = $('#lab-vis'), side = $('#lab-side'), panel = $('#experiment'); let cleanup = null, current = null;
+  tabs.innerHTML = LABS.map((l, i) => `<button type="button" role="tab" id="tab-${l.id}" data-lab="${l.id}" aria-controls="experiment" aria-selected="${!i}" tabindex="${i ? -1 : 0}"><i aria-hidden="true">${esc(l.glyph)}</i><b>${esc(l.name)}</b><small>${esc(l.sub)}</small></button>`).join('');
+  function selectLab(id) {
+    if (id === current) return; const l = LAB[id]; if (!l) return; current = id;
+    if (typeof cleanup === 'function') cleanup(); cleanup = null;
+    $$('[role=tab]', tabs).forEach(b => { const on = b.dataset.lab === id; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; if (on) tabs.scrollTo({left: b.offsetLeft - tabs.clientWidth / 2 + b.offsetWidth / 2, behavior: REDUCED.matches ? 'auto' : 'smooth'}); });
+    panel.setAttribute('aria-labelledby', 'tab-' + id);
+    vis.innerHTML = ''; vis.style.animation = 'none'; void vis.offsetWidth; vis.style.animation = '';
+    side.innerHTML = `<p class="mono" style="color:var(--ink-3)">实验 ${String(LABS.indexOf(l) + 1).padStart(2, '0')} / ${LABS.length} · ${esc(l.sub)}</p><h3>${esc(l.name)}</h3><p class="lab-ask"><b>先猜一猜</b>${esc(l.ask)}</p>`;
+    const out = document.createElement('div'); out.className = 'lab-out'; out.setAttribute('aria-live', 'polite');
+    cleanup = l.build(vis, side, html => out.innerHTML = html);
+    side.append(out);
+    const read = document.createElement('button'); read.type = 'button'; read.className = 'lab-read'; read.dataset.concept = l.guide; read.innerHTML = `读「${esc(byId[l.guide].name)}」这张图版 →`; side.append(read);
+  }
+  tabs.addEventListener('click', e => { const b = e.target.closest('[data-lab]'); if (b) selectLab(b.dataset.lab); });
+  tabs.addEventListener('keydown', e => { const list = $$('[role=tab]', tabs), i = list.indexOf(document.activeElement); if (i < 0) return; const j = e.key === 'ArrowRight' ? (i + 1) % list.length : e.key === 'ArrowLeft' ? (i - 1 + list.length) % list.length : e.key === 'Home' ? 0 : e.key === 'End' ? list.length - 1 : -1; if (j < 0) return; e.preventDefault(); list[j].focus(); selectLab(list[j].dataset.lab); });
+  selectLab(LABS[0].id);
+
+  /* ── teaser mini chart ── */
+  starfield($('#teaser-stars'), .8); starfield($('#horizon-stars'), 1.1);
+  { const m = DATA.mini, pos = m.nodes; let s = '<g class="mini-rot">';
+    [25, 50, 75, 100].forEach(r => s += `<circle r="${r}" fill="none" stroke="rgba(174,182,218,.14)" stroke-width=".5" stroke-dasharray="1 3"/>`);
+    m.edges.forEach(([a, b]) => s += `<line class="lnk" x1="${pos[a][0]}" y1="${pos[a][1]}" x2="${pos[b][0]}" y2="${pos[b][1]}"/>`);
+    pos.forEach(([x, y, c, big]) => s += `<circle cx="${x}" cy="${y}" r="${big ? 2.2 : 1.1}" fill="${m.colors[c]}" opacity="${big ? 1 : .8}"/>`);
+    $('#mini').innerHTML = s + '</g>'; }
+
+  /* ── route map ── */
+  const ST = [
+    {id: 'natural', line: 'm', row: 0, t: '数一数', s: '自然数、零、整数'},
+    {id: 'fraction', line: 'b', row: 1, t: '分与比', s: '分数、小数、有理数'},
+    {id: 'prime', line: 'a', row: 1.5, t: '素数', s: '整数的乘法积木'},
+    {id: 'irrational', line: 'b', row: 2, t: '数轴上的空隙', s: '无理数与实数'},
+    {id: 'function', line: 'b', row: 3, t: '变量与函数', s: '一个量跟着另一个量变'},
+    {id: 'infinite-primes', line: 'a', row: 3.5, t: '证明', s: '素数有无穷多个'},
+    {id: 'limit', line: 'b', row: 4, t: '极限', s: '越来越近，走向哪里'},
+    {id: 'derivative', line: 'b', row: 5, t: '导数与积分', s: '瞬时的变化，一点点的累积', badge: '里程碑 · 14 岁理解微积分'},
+    {id: 'series', line: 'b', row: 6, t: '无穷级数', s: '一直加下去'},
+    {id: 'prime-counting', line: 'a', row: 6, t: '素数定理', s: '素数有多密'},
+    {id: 'euler-formula', line: 'b', row: 7, t: '复数与欧拉公式', s: '给数加一个方向'},
+    {id: 'complex-analysis', line: 'b', row: 8, t: '复分析', s: '解析延拓'},
+    {id: 'zeta', line: 'm', row: 9.2, t: 'ζ 函数', s: '两条线在这里汇合'},
+    {id: 'riemann', line: 'm', row: 10.4, t: '黎曼猜想', s: '远方'}
+  ];
+  const rmap = $('#rmap'); let rails = [], stations = [], maxRow = 10.4;
+  function buildMap() {
+    const narrow = rmap.clientWidth < 720, W = narrow ? 400 : 1100, RH = narrow ? 80 : 92;
+    // phone: both lines share one label column, so every station gets a row of its own
+    const NR = [0, 1, 2, 3, 4, 5, 6, 7, 8.6, 9.6, 10.6, 11.6, 12.8, 14], AN = [[0, 0], [1, 1], [1.5, 2], [2, 3], [3, 4], [3.5, 5], [4, 6], [5, 7], [6, 9.1], [7, 10.6], [8, 11.6], [9.2, 12.8], [10.4, 14]];
+    const nrow = r => { for (let i = 1; i < AN.length; i++) if (r <= AN[i][0]) return lerp(AN[i - 1][1], AN[i][1], (r - AN[i - 1][0]) / (AN[i][0] - AN[i - 1][0])); return AN[AN.length - 1][1]; };
+    const y = r => narrow ? 50 + nrow(r) * RH : 104 + r * RH, H = y(maxRow) + 60;
+    const xa = narrow ? 34 : 330, xb = narrow ? 86 : 770, xm = narrow ? 60 : 550, col = {a: 'var(--vermilion)', b: 'var(--cobalt)', m: 'var(--gold)'}, X = {a: xa, b: xb, m: xm};
+    const pa = `M${xm} ${y(0)}C${xm} ${y(.7)} ${xa} ${y(.6)} ${xa} ${y(1.5)}V${y(8)}C${xa} ${y(8.8)} ${xm} ${y(8.5)} ${xm} ${y(9.2)}`;
+    const pb = `M${xm} ${y(0)}C${xm} ${y(.5)} ${xb} ${y(.4)} ${xb} ${y(1)}V${y(8)}C${xb} ${y(8.8)} ${xm} ${y(8.5)} ${xm} ${y(9.2)}`;
+    const pm = `M${xm} ${y(9.2)}V${y(maxRow)}`;
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="group" aria-label="推荐路线图：素数线与分析线在 ζ 函数汇合，通向黎曼猜想">`;
+    [[pa, 'a'], [pb, 'b'], [pm, 'm']].forEach(([d]) => s += `<path class="rail bg" d="${d}"/>`);
+    [[pa, 'a', 0, .885], [pb, 'b', 0, .885], [pm, 'm', .885, 1]].forEach(([d, k, f0, f1]) => s += `<path class="rail fg" d="${d}" stroke="${col[k]}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" data-f0="${f0}" data-f1="${f1}"/>`);
+    if (!narrow) s += `<g class="legend"><circle cx="${xa}" cy="${y(.55)}" r="0"/><text x="${xa - 22}" y="${y(.95)}" text-anchor="end" fill="var(--vermilion)">素数与证明</text><text x="${xb + 22}" y="${y(.55)}">变化与分析</text></g>`;
+    ST.forEach((st, si) => {
+      const x = X[st.line], left = !narrow && st.line === 'a', tx = narrow ? 118 : left ? x - 26 : x + 26, anchor = left ? 'end' : 'start', yy = narrow ? 50 + NR[si] * RH : y(st.row), top = !narrow && st.row === 0;
+      s += `<g class="st" data-concept="${st.id}" data-f="${(yy - y(0)) / (y(maxRow) - y(0))}" tabindex="0" role="button" aria-label="${st.t}：${st.s}。打开图版" style="--c:${col[st.line]}"><circle cx="${x}" cy="${yy}" r="${st.line === 'm' ? 13 : 10}"/><text class="t1" x="${top ? x : tx}" y="${top ? yy - 54 : yy + 2}" text-anchor="${top ? 'middle' : anchor}">${st.t}</text><text class="t2" x="${top ? x : tx}" y="${top ? yy - 28 : yy + 26}" text-anchor="${top ? 'middle' : anchor}">${st.s}</text>`;
+      if (st.badge) { const bw = 228, bx = narrow ? tx : tx; s += `<g class="badge"><rect x="${bx}" y="${yy + 36}" width="${bw}" height="26" rx="13"/><text x="${bx + bw / 2}" y="${yy + 54}" text-anchor="middle">${st.badge}</text></g>`; }
+      s += '</g>';
+    });
+    rmap.innerHTML = s + '</svg>'; rmap.dataset.narrow = narrow; rails = $$('.rail.fg', rmap); stations = $$('.st', rmap); progress();
+  }
+  function progress() {
+    const r = rmap.getBoundingClientRect(), p = REDUCED.matches ? 1 : clamp((innerHeight * .72 - r.top) / r.height, 0, 1);
+    rails.forEach(el => { const f0 = +el.dataset.f0, f1 = +el.dataset.f1; el.style.strokeDashoffset = 1 - clamp((p - f0) / (f1 - f0), 0, 1); });
+    stations.forEach(el => el.classList.toggle('on', p >= +el.dataset.f - .01));
+  }
+  buildMap(); addEventListener('scroll', progress, {passive: true});
+  let rw = rmap.clientWidth; addEventListener('resize', () => { if ((rmap.clientWidth < 720) !== (rw < 720)) buildMap(); rw = rmap.clientWidth; progress(); });
+  rmap.addEventListener('keydown', e => { const st = e.target.closest('.st'); if (st && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openGuide(st.dataset.concept, st); } });
+
+  /* horizon zero tooltips are native <title>; strip animates via .in */
+  initReveal(); apply(); fromHash();
+})();
+</script>
+</body>
+</html>
